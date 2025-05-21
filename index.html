@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>2次元クイズアプリ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      display: flex;
+    }
+    .quiz-container {
+      flex: 2;
+    }
+    .question-area, .answer-area {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      min-height: 50px;
+    }
+    .button-group {
+      margin: 10px 0;
+    }
+    .button-group button {
+      margin-right: 10px;
+    }
+    .status-table {
+      flex: 1;
+      margin-left: 40px;
+      border-collapse: collapse;
+    }
+    .status-table td {
+      padding: 10px;
+      border: 1px solid #000;
+      text-align: center;
+      width: 40px;
+      height: 40px;
+    }
+    .blue {
+      background-color: #add8e6;
+    }
+    .green {
+      background-color: #90ee90;
+    }
+    .red {
+      background-color: #f08080;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <button id="nextBtn">出題</button>
+    <div class="question-area" id="questionArea">ここに問題文が表示されます</div>
+    <button id="showAnswerBtn">答えを見る</button>
+    <div class="answer-area" id="answerArea">ここに答えが表示されます</div>
+    <div class="button-group">
+      <button id="correctBtn">正解した</button>
+      <button id="wrongBtn">不正解だった</button>
+    </div>
+  </div>
+  <table class="status-table" id="statusTable"></table>
+
+  <script>
+    const quizData = [
+      [
+        { question: "日本の首都は？", answer: "東京" },
+        { question: "日本の最高峰は？", answer: "富士山" },
+        { question: "日本の国旗の色は？", answer: "赤と白" }
+      ],
+      [
+        { question: "寿司に使われる魚は？", answer: "マグロ" },
+        { question: "奈良の大仏がある寺は？", answer: "東大寺" },
+        { question: "日本の通貨単位は？", answer: "円" }
+      ],
+      [
+        { question: "桜の季節はいつ？", answer: "春" },
+        { question: "北海道の県庁所在地は？", answer: "札幌" },
+        { question: "新幹線の最高速度は？", answer: "約320km/h" }
+      ]
+    ];
+
+    const numRows = quizData.length;
+    const numCols = quizData[0].length;
+
+    let remainingPositions = [];
+    let currentPos = null;
+
+    const questionArea = document.getElementById('questionArea');
+    const answerArea = document.getElementById('answerArea');
+    const nextBtn = document.getElementById('nextBtn');
+    const showAnswerBtn = document.getElementById('showAnswerBtn');
+    const correctBtn = document.getElementById('correctBtn');
+    const wrongBtn = document.getElementById('wrongBtn');
+    const statusTable = document.getElementById('statusTable');
+
+    // テーブル初期化
+    function createTable() {
+      statusTable.innerHTML = '';
+      for (let row = 0; row < numRows; row++) {
+        const tr = statusTable.insertRow();
+        for (let col = 0; col < numCols; col++) {
+          const td = tr.insertCell();
+          td.textContent = `${row + 1}-${col + 1}`;
+        }
+      }
+    }
+
+    function resetState() {
+      remainingPositions = [];
+      for (let r = 0; r < numRows; r++) {
+        for (let c = 0; c < numCols; c++) {
+          remainingPositions.push([r, c]);
+          statusTable.rows[r].cells[c].classList.remove('blue', 'green', 'red');
+        }
+      }
+      currentPos = null;
+      questionArea.textContent = "ここに問題文が表示されます";
+      answerArea.textContent = "ここに答えが表示されます";
+      setButtonsEnabled(false);
+    }
+
+    function setButtonsEnabled(enabled) {
+      showAnswerBtn.disabled = !enabled;
+      correctBtn.disabled = !enabled;
+      wrongBtn.disabled = !enabled;
+    }
+
+    function highlightCell(row, col, className) {
+      const cell = statusTable.rows[row].cells[col];
+      cell.classList.remove('blue', 'green', 'red');
+      if (className) {
+        cell.classList.add(className);
+      }
+    }
+
+    function pickRandomQuestion() {
+      if (remainingPositions.length === 0) {
+        questionArea.textContent = "おわり！";
+        answerArea.textContent = "";
+        setButtonsEnabled(false);
+        return;
+      }
+
+      const randomIndex = Math.floor(Math.random() * remainingPositions.length);
+      currentPos = remainingPositions[randomIndex];
+      remainingPositions.splice(randomIndex, 1);
+
+      const [row, col] = currentPos;
+      const quiz = quizData[row][col];
+
+      questionArea.textContent = quiz.question;
+      answerArea.textContent = "ここに答えが表示されます";
+
+      highlightCell(row, col, 'blue');
+      setButtonsEnabled(true);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (remainingPositions.length === 0 && questionArea.textContent === "おわり！") {
+        resetState();
+      }
+      pickRandomQuestion();
+    });
+
+    showAnswerBtn.addEventListener('click', () => {
+      if (currentPos) {
+        const [row, col] = currentPos;
+        answerArea.textContent = quizData[row][col].answer;
+      }
+    });
+
+    correctBtn.addEventListener('click', () => {
+      if (currentPos) {
+        const [row, col] = currentPos;
+        highlightCell(row, col, 'green');
+        pickRandomQuestion();
+      }
+    });
+
+    wrongBtn.addEventListener('click', () => {
+      if (currentPos) {
+        const [row, col] = currentPos;
+        highlightCell(row, col, 'red');
+        pickRandomQuestion();
+      }
+    });
+
+    // 初期化
+    createTable();
+    resetState();
+  </script>
+</body>
+</html>
