@@ -2,12 +2,19 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>2次元クイズアプリ</title>
+  <title>クイズアプリ（複数対応）</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+    .quiz-block {
+      display: flex;
+      border: 1px solid #aaa;
+      padding: 20px;
     }
     .quiz-container {
       flex: 2;
@@ -28,13 +35,23 @@
       flex: 1;
       margin-left: 40px;
       border-collapse: collapse;
+      table-layout: fixed;
+      height: 500px;
+      overflow: hidden;
     }
     .status-table td {
-      padding: 10px;
+      padding: 5px;
       border: 1px solid #000;
       text-align: center;
-      width: 40px;
-      height: 40px;
+      font-size: 14px;
+      position: relative;
+    }
+    .status-table .wrong-count {
+      position: absolute;
+      right: 4px;
+      top: 2px;
+      font-size: 12px;
+      color: red;
     }
     .blue {
       background-color: #add8e6;
@@ -48,146 +65,226 @@
   </style>
 </head>
 <body>
+
+<!-- クイズブロック 1 -->
+<div class="quiz-block" id="quizBlock-0">
   <div class="quiz-container">
-    <button id="nextBtn">出題</button>
-    <div class="question-area" id="questionArea">ここに問題文が表示されます</div>
-    <button id="showAnswerBtn">答えを見る</button>
-    <div class="answer-area" id="answerArea">ここに答えが表示されます</div>
+    <label>出題範囲:
+      <select id="startSelect-0"></select> 〜
+      <select id="endSelect-0"></select>
+    </label><br><br>
+    <button id="nextBtn-0">出題</button>
+    <div class="question-area" id="questionArea-0">ここに問題文が表示されます</div>
+    <button id="showAnswerBtn-0">答えを見る</button>
+    <div class="answer-area" id="answerArea-0">ここに答えが表示されます</div>
     <div class="button-group">
-      <button id="correctBtn">正解した</button>
-      <button id="wrongBtn">不正解だった</button>
+      <button id="correctBtn-0">正解した</button>
+      <button id="wrongBtn-0">不正解だった</button>
     </div>
   </div>
-  <table class="status-table" id="statusTable"></table>
+  <table class="status-table" id="statusTable-0"></table>
+</div>
 
-  <script>
-    const quizData = [
-      [
-        { question: "日本の首都は？", answer: "東京" },
-        { question: "日本の最高峰は？", answer: "富士山" },
-        { question: "日本の国旗の色は？", answer: "赤と白" }
-      ],
-      [
-        { question: "寿司に使われる魚は？", answer: "マグロ" },
-        { question: "奈良の大仏がある寺は？", answer: "東大寺" },
-        { question: "日本の通貨単位は？", answer: "円" }
-      ],
-      [
-        { question: "桜の季節はいつ？", answer: "春" },
-        { question: "北海道の県庁所在地は？", answer: "札幌" },
-        { question: "新幹線の最高速度は？", answer: "約320km/h" }
-      ]
-    ];
+<!-- クイズブロック 2 -->
+<div class="quiz-block" id="quizBlock-1">
+  <div class="quiz-container">
+    <label>出題範囲:
+      <select id="startSelect-1"></select> 〜
+      <select id="endSelect-1"></select>
+    </label><br><br>
+    <button id="nextBtn-1">出題</button>
+    <div class="question-area" id="questionArea-1">ここに問題文が表示されます</div>
+    <button id="showAnswerBtn-1">答えを見る</button>
+    <div class="answer-area" id="answerArea-1">ここに答えが表示されます</div>
+    <div class="button-group">
+      <button id="correctBtn-1">正解した</button>
+      <button id="wrongBtn-1">不正解だった</button>
+    </div>
+  </div>
+  <table class="status-table" id="statusTable-1"></table>
+</div>
 
-    const numRows = quizData.length;
-    const numCols = quizData[0].length;
+<script>
+const quizData1 = [
+  { id: 1, label: "Q1", question: "日本の首都は？", answer: "東京" },
+  { id: 2, label: "Q2", question: "日本一高い山は？", answer: "富士山" },
+  { id: 3, label: "Q3", question: "日本一長い川は？", answer: "信濃川" },
+  { id: 4, label: "Q4", question: "国民の祝日は何日？", answer: "16日" },
+  { id: 5, label: "Q5", question: "国鳥は？", answer: "キジ" },
+  { id: 6, label: "Q6", question: "日本の人口は？", answer: "約1億2千万人" }
+];
 
-    let remainingPositions = [];
-    let currentPos = null;
+const quizData2 = [
+  { id: 101, label: "A1", question: "地球の衛星は？", answer: "月" },
+  { id: 102, label: "A2", question: "太陽の色は？", answer: "白" },
+  { id: 103, label: "A3", question: "1年は何日？", answer: "365日" },
+  { id: 104, label: "A4", question: "火星は英語で？", answer: "Mars" },
+  { id: 105, label: "A5", question: "木星の最大の衛星は？", answer: "ガニメデ" }
+];
 
-    const questionArea = document.getElementById('questionArea');
-    const answerArea = document.getElementById('answerArea');
-    const nextBtn = document.getElementById('nextBtn');
-    const showAnswerBtn = document.getElementById('showAnswerBtn');
-    const correctBtn = document.getElementById('correctBtn');
-    const wrongBtn = document.getElementById('wrongBtn');
-    const statusTable = document.getElementById('statusTable');
+function createQuiz(blockId, data) {
+  const questionArea = document.getElementById(`questionArea-${blockId}`);
+  const answerArea = document.getElementById(`answerArea-${blockId}`);
+  const nextBtn = document.getElementById(`nextBtn-${blockId}`);
+  const showAnswerBtn = document.getElementById(`showAnswerBtn-${blockId}`);
+  const correctBtn = document.getElementById(`correctBtn-${blockId}`);
+  const wrongBtn = document.getElementById(`wrongBtn-${blockId}`);
+  const statusTable = document.getElementById(`statusTable-${blockId}`);
+  const startSelect = document.getElementById(`startSelect-${blockId}`);
+  const endSelect = document.getElementById(`endSelect-${blockId}`);
 
-    // テーブル初期化
-    function createTable() {
-      statusTable.innerHTML = '';
-      for (let row = 0; row < numRows; row++) {
-        const tr = statusTable.insertRow();
-        for (let col = 0; col < numCols; col++) {
-          const td = tr.insertCell();
-          td.textContent = `${row + 1}-${col + 1}`;
-        }
-      }
-    }
+  let currentId = null;
+  let remaining = [];
+  const statusMap = new Map();
+  const wrongCounts = new Map();
 
-    function resetState() {
-      remainingPositions = [];
-      for (let r = 0; r < numRows; r++) {
-        for (let c = 0; c < numCols; c++) {
-          remainingPositions.push([r, c]);
-          statusTable.rows[r].cells[c].classList.remove('blue', 'green', 'red');
-        }
-      }
-      currentPos = null;
-      questionArea.textContent = "ここに問題文が表示されます";
-      answerArea.textContent = "ここに答えが表示されます";
-      setButtonsEnabled(false);
-    }
-
-    function setButtonsEnabled(enabled) {
-      showAnswerBtn.disabled = !enabled;
-      correctBtn.disabled = !enabled;
-      wrongBtn.disabled = !enabled;
-    }
-
-    function highlightCell(row, col, className) {
-      const cell = statusTable.rows[row].cells[col];
-      cell.classList.remove('blue', 'green', 'red');
-      if (className) {
-        cell.classList.add(className);
-      }
-    }
-
-    function pickRandomQuestion() {
-      if (remainingPositions.length === 0) {
-        questionArea.textContent = "おわり！";
-        answerArea.textContent = "";
-        setButtonsEnabled(false);
-        return;
-      }
-
-      const randomIndex = Math.floor(Math.random() * remainingPositions.length);
-      currentPos = remainingPositions[randomIndex];
-      remainingPositions.splice(randomIndex, 1);
-
-      const [row, col] = currentPos;
-      const quiz = quizData[row][col];
-
-      questionArea.textContent = quiz.question;
-      answerArea.textContent = "ここに答えが表示されます";
-
-      highlightCell(row, col, 'blue');
-      setButtonsEnabled(true);
-    }
-
-    nextBtn.addEventListener('click', () => {
-      if (remainingPositions.length === 0 && questionArea.textContent === "おわり！") {
-        resetState();
-      }
-      pickRandomQuestion();
+  function init() {
+    startSelect.innerHTML = '';
+    endSelect.innerHTML = '';
+    data.forEach(d => {
+      const opt1 = document.createElement("option");
+      opt1.value = d.id;
+      opt1.textContent = d.id;
+      const opt2 = opt1.cloneNode(true);
+      startSelect.appendChild(opt1);
+      endSelect.appendChild(opt2);
     });
-
-    showAnswerBtn.addEventListener('click', () => {
-      if (currentPos) {
-        const [row, col] = currentPos;
-        answerArea.textContent = quizData[row][col].answer;
-      }
-    });
-
-    correctBtn.addEventListener('click', () => {
-      if (currentPos) {
-        const [row, col] = currentPos;
-        highlightCell(row, col, 'green');
-        pickRandomQuestion();
-      }
-    });
-
-    wrongBtn.addEventListener('click', () => {
-      if (currentPos) {
-        const [row, col] = currentPos;
-        highlightCell(row, col, 'red');
-        pickRandomQuestion();
-      }
-    });
-
-    // 初期化
-    createTable();
+    startSelect.value = data[0].id;
+    endSelect.value = data[data.length - 1].id;
+    buildTable();
+    loadWrongCounts();  // ← 追加
     resetState();
-  </script>
+  }
+
+  function buildTable() {
+    statusTable.innerHTML = '';
+    const rowHeight = 500 / data.length + 'px';
+    data.forEach(d => {
+      const row = statusTable.insertRow();
+      const cell = row.insertCell();
+      cell.textContent = d.label;
+      row.style.height = rowHeight;
+
+      const countSpan = document.createElement("span");
+      countSpan.className = "wrong-count";
+      countSpan.textContent = "×0";
+      cell.appendChild(countSpan);
+
+      statusMap.set(d.id, { cell, countSpan });
+      wrongCounts.set(d.id, 0);
+    });
+  }
+
+  function resetState() {
+    remaining = [];
+    currentId = null;
+    questionArea.textContent = "ここに問題文が表示されます";
+    answerArea.textContent = "ここに答えが表示されます";
+    data.forEach(d => {
+      const entry = statusMap.get(d.id);
+      entry.cell.className = '';
+    });
+    setButtonsEnabled(false);
+  }
+
+  function setButtonsEnabled(enabled) {
+    showAnswerBtn.disabled = !enabled;
+    correctBtn.disabled = !enabled;
+    wrongBtn.disabled = !enabled;
+  }
+
+  function getRangeData() {
+    const start = parseInt(startSelect.value);
+    const end = parseInt(endSelect.value);
+    return data.filter(d => d.id >= start && d.id <= end);
+  }
+
+  function pickQuestion() {
+    if (remaining.length === 0) {
+      questionArea.textContent = "おわり！";
+      answerArea.textContent = "";
+      setButtonsEnabled(false);
+      return;
+    }
+    const index = Math.floor(Math.random() * remaining.length);
+    const item = remaining.splice(index, 1)[0];
+    currentId = item.id;
+    questionArea.textContent = item.question;
+    answerArea.textContent = "ここに答えが表示されます";
+    highlightCell(item.id, 'blue');
+    setButtonsEnabled(true);
+  }
+
+  function highlightCell(id, className) {
+    const entry = statusMap.get(id);
+    entry.cell.className = '';
+    if (className) {
+      entry.cell.classList.add(className);
+    }
+  }
+
+  function loadWrongCounts() {
+    const saved = localStorage.getItem(`wrongCounts-${blockId}`);
+    if (saved) {
+      const obj = JSON.parse(saved);
+      for (const [idStr, count] of Object.entries(obj)) {
+        const id = parseInt(idStr);
+        if (statusMap.has(id)) {
+          wrongCounts.set(id, count);
+          statusMap.get(id).countSpan.textContent = `×${count}`;
+        }
+      }
+    }
+  }
+
+  function saveWrongCounts() {
+    const obj = {};
+    for (const [id, count] of wrongCounts.entries()) {
+      obj[id] = count;
+    }
+    localStorage.setItem(`wrongCounts-${blockId}`, JSON.stringify(obj));
+  }
+
+  nextBtn.addEventListener('click', () => {
+    const rangeData = getRangeData();
+    if (remaining.length === 0 && questionArea.textContent === "おわり！") {
+      resetState();
+    }
+    remaining = rangeData.slice();
+    pickQuestion();
+  });
+
+  showAnswerBtn.addEventListener('click', () => {
+    if (currentId !== null) {
+      const item = data.find(d => d.id === currentId);
+      answerArea.textContent = item.answer;
+    }
+  });
+
+  correctBtn.addEventListener('click', () => {
+    if (currentId !== null) {
+      highlightCell(currentId, 'green');
+      pickQuestion();
+    }
+  });
+
+  wrongBtn.addEventListener('click', () => {
+    if (currentId !== null) {
+      const entry = statusMap.get(currentId);
+      const newCount = wrongCounts.get(currentId) + 1;
+      wrongCounts.set(currentId, newCount);
+      entry.countSpan.textContent = `×${newCount}`;
+      highlightCell(currentId, 'red');
+      saveWrongCounts(); // ← 追加
+      pickQuestion();
+    }
+  });
+
+  init();
+}
+
+createQuiz(0, quizData1);
+createQuiz(1, quizData2);
+</script>
 </body>
 </html>
