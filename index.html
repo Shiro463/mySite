@@ -11,10 +11,17 @@
       flex-direction: column;
       gap: 40px;
     }
+    .localstorage-block {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #aaa;
+        white-space: pre-wrap;
+        padding: 10px;
+    }
     .quiz-block {
       display: flex;
       border: 1px solid #aaa;
-      padding: 20px;
+      padding: 10px;
     }
     .quiz-container {
       flex: 2;
@@ -29,12 +36,63 @@
         background: repeating-linear-gradient(-45deg, #f0f8ff, #f0f8ff 3px,#e9f4ff 3px, #e9f4ff 7px);
     }
     .question-area, .answer-area {
-      margin: 10px 0;
-      padding: 10px;
-      border: 1px solid #ccc;
-      min-height: 50px;
-      white-space: pre-line;
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px solid #ccc;
+        min-height: 50px;
+        white-space: pre-line;
     }
+    .myButtonBlue {
+        display: inline-block;
+        padding: 0.3em 1em;
+        text-decoration: none;
+        color: #67c5ff;
+        border: solid 2px #67c5ff;
+        border-radius: 3px;
+        transition: .4s;
+    }
+
+    .myButtonBlue:hover {
+        background: #67c5ff;
+        color: white;
+    }
+    
+    .myButtonGreen {
+        display: inline-block;
+        padding: 0.3em 1em;
+        text-decoration: none;
+        color: #76ff67;
+        border: solid 2px #76ff67;
+        border-radius: 3px;
+        transition: .4s;
+    }
+
+    .myButtonGreen:hover {
+        background: #76ff67;
+        color: white;
+    }
+
+    .myButtonRed {
+        display: inline-block;
+        padding: 0.3em 1em;
+        text-decoration: none;
+        color: #ff6767;
+        border: solid 2px #ff6767;
+        border-radius: 3px;
+        transition: .4s;
+    }
+
+    .myButtonRed:hover {
+        background: #ff6767;
+        color: white;
+    }
+
+    
+    select {
+        font-size: 24px;
+        padding: 4px 8px; /* オプション：見た目を少し良くする */
+    }
+
     .button-group {
       margin: 10px 0;
     }
@@ -83,6 +141,7 @@
       background-color: #f08080;
     }
   </style>
+
 <!-- MathJax を読み込む -->
 <script>
 window.MathJax = {
@@ -93,6 +152,15 @@ window.MathJax = {
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </head>
 <body>
+
+<!-- localstrage表示ブロック-->
+<div class="localstorage-block">
+  <div class="button-group">
+    <button id="showStorageBtn" type="button">LocalStorageの内容を表示</button>
+    <button id="clearStorageBtn" type="button">LocalStorageの内容を消す</button>
+  </div>
+  <p id="storageInfo"></p>
+</div>
 
 <!-- クイズブロック 1 -->
 <div class="quiz-block" id="quizBlock-0">
@@ -107,15 +175,15 @@ window.MathJax = {
     </label><br><br>
     <label>除外する正解数:
     <select id="excludeCorrectSelect-0"></select>
-    <button id="resetCountsBtn-0">正解・不正解数をリセット</button><br><br>
+    <button class="myButtonBlue" id="resetCountsBtn-0">正解・不正解数をリセット</button><br><br>
     </label>
-    <button id="nextBtn-0">出題</button>
+    <button class="myButtonBlue" id="nextBtn-0">出題</button>
     <div class="question-area" id="questionArea-0">ここに問題文が表示されます</div>
-    <button id="showAnswerBtn-0">答えを見る</button>
+    <button class="myButtonBlue" id="showAnswerBtn-0">答えを見る</button>
     <div class="answer-area" id="answerArea-0">ここに答えが表示されます</div>
     <div class="button-group">
-      <button id="correctBtn-0">正解した</button>
-      <button id="wrongBtn-0">不正解だった</button>
+      <button class="myButtonGreen" id="correctBtn-0">正解した</button>
+      <button class="myButtonRed" id="wrongBtn-0">不正解だった</button>
     </div>
   </div>
   <table class="status-table" id="statusTable-0"></table>
@@ -967,67 +1035,67 @@ const quizData3 = [ /*イタリア語 40001～*/
   
   { id: 40045, label: "albero",
   question:
-  "albero \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "albero \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "本 \n l'albero \n gli alberi" },
   
   { id: 40046, label: "matita",
   question:
-  "matita \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "matita \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "鉛筆 \n la matita \n le matite" },
   
   { id: 40047, label: "piazza",
   question:
-  "piazza \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "piazza \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "広場 \n la piazza \n le piazze" },
   
   { id: 40048, label: "gonna",
   question:
-  "gonna \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "gonna \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "スカート \n la gonna \n le gonne" },
   
   { id: 40049, label: "spettacolo",
   question:
-  "spettacolo \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "spettacolo \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "ショー \n lo spettacolo \n gli spettacoli" },
   
   { id: 40050, label: "giornale",
   question:
-  "giornale(m.) \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "giornale(m.) \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "新聞 \n il giornare \n i giornali" },
   
   { id: 40051, label: "errore",
   question:
-  "errore(m.) \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "errore(m.) \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "誤り \n l'errore \n gli errori" },
   
   { id: 40052, label: "cane",
   question:
-  "cane(m.) \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "cane(m.) \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "犬 \n il cane \n i cani" },
   
   { id: 40053, label: "unghia",
   question:
-  "unghia \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "unghia \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "爪 \n l'unghia \n le unghie" },
   
   { id: 40054, label: "sciarpa",
   question:
-  "sciarpa \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "sciarpa \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "マフラー \n la sciarpa \n le sciarpe" },
   
   { id: 40055, label: "strumento",
   question:
-  "strumento \n 定冠詞単数形は？ \n 定冠詞単数形は？",
+  "strumento \n 定冠詞単数形は？ \n 定冠詞複数形は？",
   answer:
   "道具 \n lo strumento \n gli strumenti" },
   
@@ -1105,18 +1173,43 @@ const quizData3 = [ /*イタリア語 40001～*/
 ];
 
 const quizData4 = [ /*放射線 50001～*/
-    {
-    id: 50001,
+    { id: 50001,
     label: "電子が電極(+)に引きつけられる力$F$",
     question: "電子が電極(+)に引きつけられる力$F$",
     answer: "$F=eE$"
     },
     
-    {
-    id: 50002,
-    label: "F=eE ",
+    { id: 50002,
+    label: "加速度$a$で時間$t$後の移動距離$x$",
     question: "加速度$a$で時間$t$後の移動距離$x$",
     answer: "$x=\\frac{1}{2} at^2$"
+    },
+
+    { id: 50003,
+    label: "電子の運動エネルギー$T$",
+    question: "電子の運動エネルギー$T$(電子の全エネルギー$E$、電子の静止質量m、光速c)",
+    answer: "$T=E-mc^2$"
+    },
+
+    { id: 50004,
+    label: "電子の全エネルギー$E$",
+    question: "電子の全エネルギー$E$(電子の静止質量m、光速c、電子の速度$v$)",
+    answer: "$E=\\frac {mc^2}{\\sqrt{1- ( \\frac{v}{c} )^2 }}$"
+    },
+
+    { id: 50005,
+    label: "電子の静止エネルギー$mc^2$",
+    question: "電子の静止エネルギー$mc^2$",
+    answer: "$mc^2 = 0.511 \\mathrm{\, MeV}$"
+    },
+
+    { id: 50006,
+    label: "電子、陽子、中性子の質量",
+    question: "電子、陽子、中性子の質量",
+    answer:
+    "陽子の質量 $1.673 \\times 10^-27 \\mathrm {\\, kg}$ \n"+
+    "中性子の質量 $1.675 \\times 10^-27 \\mathrm {\\, kg}$ \n"+
+    "電子の質量 $9.109 \\times 10^-31 \\mathrm {\\, kg}$"
     },
 ];
 
@@ -1168,6 +1261,7 @@ const quizData5 = [ /*音読み 20001～*/
 ];
 
 
+// クイズブロック作成
 const titles = ["憲法", "意匠法", "イタリア語", "放射線主任技術者", "音読み"]; // 任意の科目名リスト
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
 const container = document.createElement('div'); // 全体を包む要素（任意）
@@ -1196,130 +1290,133 @@ document.body.appendChild(container); // あるいは適切な場所へ追加
 
 
 
-
+// クイズ作成
 function createQuiz(blockId, data) {
-  const questionArea = document.getElementById(`questionArea-${blockId}`);
-  const answerArea = document.getElementById(`answerArea-${blockId}`);
-  const nextBtn = document.getElementById(`nextBtn-${blockId}`);
-  const showAnswerBtn = document.getElementById(`showAnswerBtn-${blockId}`);
-  const correctBtn = document.getElementById(`correctBtn-${blockId}`);
-  const wrongBtn = document.getElementById(`wrongBtn-${blockId}`);
-  const statusTable = document.getElementById(`statusTable-${blockId}`);
-  const startSelect = document.getElementById(`startSelect-${blockId}`);
-  const endSelect = document.getElementById(`endSelect-${blockId}`);
-  const excludeCorrectSelect = document.getElementById(`excludeCorrectSelect-${blockId}`);
-  const sortSelect = document.getElementById(`sortSelect-${blockId}`);
-  const resetCountsBtn = document.getElementById(`resetCountsBtn-${blockId}`);
+    const questionArea = document.getElementById(`questionArea-${blockId}`);
+    const answerArea = document.getElementById(`answerArea-${blockId}`);
+    const nextBtn = document.getElementById(`nextBtn-${blockId}`);
+    const showAnswerBtn = document.getElementById(`showAnswerBtn-${blockId}`);
+    const correctBtn = document.getElementById(`correctBtn-${blockId}`);
+    const wrongBtn = document.getElementById(`wrongBtn-${blockId}`);
+    const statusTable = document.getElementById(`statusTable-${blockId}`);
+    const startSelect = document.getElementById(`startSelect-${blockId}`);
+    const endSelect = document.getElementById(`endSelect-${blockId}`);
+    const excludeCorrectSelect = document.getElementById(`excludeCorrectSelect-${blockId}`);
+    const sortSelect = document.getElementById(`sortSelect-${blockId}`);
+    const resetCountsBtn = document.getElementById(`resetCountsBtn-${blockId}`);
 
 
-  let currentId = null;
-  let remaining = [];
-  const statusMap = new Map();
-  const wrongCounts = new Map();
-  const correctCounts = new Map(); // 正解数
+    let currentId = null;
+    let remaining = [];
+    const statusMap = new Map();
+    const wrongCounts = new Map();
+    const correctCounts = new Map();
 
-  function init() {
-    startSelect.innerHTML = '';
-    endSelect.innerHTML = '';
-    excludeCorrectSelect.innerHTML = '';
+    // 状態初期化
+    function init() {
+        startSelect.innerHTML = '';
+        endSelect.innerHTML = '';
+        excludeCorrectSelect.innerHTML = '';
 
-    data.forEach(d => {
-        const opt1 = document.createElement("option");
-        opt1.value = d.id;
-        opt1.textContent = d.id;
-        const opt2 = opt1.cloneNode(true);
-        startSelect.appendChild(opt1);
-        endSelect.appendChild(opt2);
-    });
-    startSelect.value = data[0].id;
-    endSelect.value = data[data.length - 1].id;
+        data.forEach(d => {
+            const opt1 = document.createElement("option");
+            opt1.value = d.id;
+            opt1.textContent = d.id;
+            const opt2 = opt1.cloneNode(true);
+            startSelect.appendChild(opt1);
+            endSelect.appendChild(opt2);
+        });
+        startSelect.value = data[0].id;
+        endSelect.value = data[data.length - 1].id;
 
-    for (let i = 1; i <= 5; i++) {
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = i;
-        excludeCorrectSelect.appendChild(opt);
-    }
-    excludeCorrectSelect.value = 5;
-
-
-    for (const [value, label] of [
-    ['label-asc', 'label昇順'],
-    ['label-desc', 'label降順'],
-    ['id-asc', 'id昇順'],
-    ['id-desc', 'id降順']
-    ]) {
-    const opt = document.createElement("option");
-    opt.value = value;
-    opt.textContent = label;
-    sortSelect.appendChild(opt);
-    }
-    sortSelect.value = 'label-asc';
-
-    startSelect.value = localStorage.getItem(`startSelect-${blockId}`) ?? data[0].id;
-    endSelect.value = localStorage.getItem(`endSelect-${blockId}`) ?? data[data.length - 1].id;
-    excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 5;
-    sortSelect.value = localStorage.getItem(`sortSelect-${blockId}`) ?? 'label-asc';
+        for (let i = 1; i <= 5; i++) {
+            const opt = document.createElement("option");
+            opt.value = i;
+            opt.textContent = i;
+            excludeCorrectSelect.appendChild(opt);
+        }
+        excludeCorrectSelect.value = 5;
 
 
-    buildTable();
-    loadWrongCounts();
-    loadCorrectCounts();
-    resetState();
-    loadCellColors(); // ← 最後に追加
+        for (const [value, label] of [
+        ['label-asc', 'label昇順'],
+        ['label-desc', 'label降順'],
+        ['id-asc', 'id昇順'],
+        ['id-desc', 'id降順']
+        ]) {
+            const opt = document.createElement("option");
+            opt.value = value;
+            opt.textContent = label;
+            sortSelect.appendChild(opt);
+        }
+        sortSelect.value = 'label-asc';
+
+        startSelect.value = localStorage.getItem(`startSelect-${blockId}`) ?? data[0].id;
+        endSelect.value = localStorage.getItem(`endSelect-${blockId}`) ?? data[data.length - 1].id;
+        excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 5;
+        sortSelect.value = localStorage.getItem(`sortSelect-${blockId}`) ?? 'label-asc';
+
+
+        buildTable();
+        loadWrongCounts();
+        loadCorrectCounts();
+        resetState();
+        loadCellColors(); // ← 最後に追加
     }
   
+    // テーブル作成
+    function buildTable() {
+        statusTable.innerHTML = '';
+        statusMap.clear();  // ← 重要。古い参照をクリア
+        const sortedData = getSortedData();
+        const rowHeight = 500 / data.length + 'px';
+        sortedData.forEach(d => {
+            const row = statusTable.insertRow();
+            const cell = row.insertCell();
+            cell.textContent = d.label;
+            row.style.height = rowHeight;
+            
+            const wrongCount = wrongCounts.get(d.id) ?? 0;
+            const correctCount = correctCounts.get(d.id) ?? 0;
+
+            // --- 正解・不正解カウント表示スパン ---
+            const wrongSpan = document.createElement("span");
+            wrongSpan.className = "wrong-count";
+            wrongSpan.textContent = `×${wrongCount}`;
+            cell.appendChild(wrongSpan);
+
+            const correctSpan = document.createElement("span");
+            correctSpan.className = "correct-count";
+            correctSpan.style.position = "absolute";
+            correctSpan.style.left = "4px";
+            correctSpan.style.top = "2px";
+            correctSpan.style.fontSize = "12px";
+            correctSpan.style.color = "green";
+            correctSpan.textContent = `○${correctCount}`;
+            cell.appendChild(correctSpan);
+
+            statusMap.set(d.id, { cell, wrongSpan, correctSpan });
+        });
+
+    loadCellColors();
+    }
+
+    // 問題文・答えリセット
+    function resetState() {
+        remaining = [];
+        currentId = null;
+        questionArea.textContent = "ここに問題文が表示されます";
+        answerArea.textContent = "ここに答えが表示されます";
+        data.forEach(d => {
+            const entry = statusMap.get(d.id);
+            entry.cell.className = '';
+        });
+        setButtonsEnabled(false);
+        buildTable();
+    }
 
 
-  function buildTable() {
-    statusTable.innerHTML = '';
-    statusMap.clear();  // ← 重要。古い参照をクリア
-    const sortedData = getSortedData();
-    const rowHeight = 500 / data.length + 'px';
-    sortedData.forEach(d => {
-      const row = statusTable.insertRow();
-      const cell = row.insertCell();
-      cell.textContent = d.label;
-      row.style.height = rowHeight;
-      
-      const wrongCount = wrongCounts.get(d.id) ?? 0;
-      const correctCount = correctCounts.get(d.id) ?? 0;
-
-      // --- 正解・不正解カウント表示スパン ---
-      const wrongSpan = document.createElement("span");
-      wrongSpan.className = "wrong-count";
-      wrongSpan.textContent = `×${wrongCount}`;
-      cell.appendChild(wrongSpan);
-
-      const correctSpan = document.createElement("span");
-      correctSpan.className = "correct-count";
-      correctSpan.style.position = "absolute";
-      correctSpan.style.left = "4px";
-      correctSpan.style.top = "2px";
-      correctSpan.style.fontSize = "12px";
-      correctSpan.style.color = "green";
-      correctSpan.textContent = `○${correctCount}`;
-      cell.appendChild(correctSpan);
-
-      statusMap.set(d.id, { cell, wrongSpan, correctSpan });
-    });
-    
-    loadCellColors(); // ← 最後に追加
-  }
-
-  function resetState() {
-    remaining = [];
-    currentId = null;
-    questionArea.textContent = "ここに問題文が表示されます";
-    answerArea.textContent = "ここに答えが表示されます";
-    data.forEach(d => {
-      const entry = statusMap.get(d.id);
-      entry.cell.className = '';
-    });
-    setButtonsEnabled(false);
-    buildTable();
-  }
-
+    // 正解・不正解数をリセットボタンを押したとき
     resetCountsBtn.addEventListener('click', () => {
         if (!confirm('正解・不正解数をリセットしますか？')) return;
 
@@ -1338,51 +1435,55 @@ function createQuiz(blockId, data) {
     });
 
 
-  function setButtonsEnabled(enabled) {
-    showAnswerBtn.disabled = !enabled;
-    correctBtn.disabled = !enabled;
-    wrongBtn.disabled = !enabled;
-  }
+    // ボタンを使えないようにする
+    function setButtonsEnabled(enabled) {
+        showAnswerBtn.disabled = !enabled;
+        correctBtn.disabled = !enabled;
+        wrongBtn.disabled = !enabled;
+    }
 
 
-  function getRangeData() {
-    const start = parseInt(startSelect.value);
-    const end = parseInt(endSelect.value);
-    const excludeThreshold = parseInt(excludeCorrectSelect.value);
-    return data.filter(d =>
-        d.id >= start &&
-        d.id <= end &&
-        (correctCounts.get(d.id) ?? 0) < excludeThreshold
-    );
-  }
-
+    // 出題範囲の取得
+    function getRangeData() {
+        const start = parseInt(startSelect.value);
+        const end = parseInt(endSelect.value);
+        const excludeThreshold = parseInt(excludeCorrectSelect.value);
+        return data.filter(d =>
+            d.id >= start &&
+            d.id <= end &&
+            (correctCounts.get(d.id) ?? 0) < excludeThreshold
+        );
+    }
+    // 並び順の取得
     function getSortedData() {
-    const sortType = sortSelect.value;
-    const sorted = [...data];
-    switch (sortType) {
-        case 'label-asc':
-        sorted.sort((a, b) => a.label.localeCompare(b.label));
-        break;
-        case 'label-desc':
-        sorted.sort((a, b) => b.label.localeCompare(a.label));
-        break;
-        case 'id-asc':
-        sorted.sort((a, b) => a.id - b.id);
-        break;
-        case 'id-desc':
-        sorted.sort((a, b) => b.id - a.id);
-        break;
+        const sortType = sortSelect.value;
+        const sorted = [...data];
+        switch (sortType) {
+            case 'label-asc':
+            sorted.sort((a, b) => a.label.localeCompare(b.label));
+            break;
+            case 'label-desc':
+            sorted.sort((a, b) => b.label.localeCompare(a.label));
+            break;
+            case 'id-asc':
+            sorted.sort((a, b) => a.id - b.id);
+            break;
+            case 'id-desc':
+            sorted.sort((a, b) => b.id - a.id);
+            break;
+        }
+        return sorted;
     }
-    return sorted;
-    }
-
-
+ 
+ 
+    // 出題
     function pickQuestion() {
+        // 出題する問題が無くなったらおわり！
         if (remaining.length === 0) {
-        questionArea.textContent = "おわり！";
-        answerArea.textContent = "";
-        setButtonsEnabled(false);
-        return;
+            questionArea.textContent = "おわり！";
+            answerArea.textContent = "";
+            setButtonsEnabled(false);
+            return;
         }
         const index = Math.floor(Math.random() * remaining.length);
         const item = remaining.splice(index, 1)[0];
@@ -1404,37 +1505,39 @@ function createQuiz(blockId, data) {
     }
 
 
-    function highlightCell(id, className) {
-    const entry = statusMap.get(id);
-    entry.cell.className = '';
-    if (className) {
-        entry.cell.classList.add(className);
-        saveCellColor(id, className); // ← 追加
-    } else {
-        removeCellColor(id); // ← 追加：色を消したときにも反映
-    }
-    }
 
+    // セル色を付ける
+    function highlightCell(id, className) {
+        const entry = statusMap.get(id);
+        entry.cell.className = '';
+        if (className) {
+                entry.cell.classList.add(className);
+                saveCellColor(id, className); // ← 追加
+        } else {
+                removeCellColor(id); // ← 追加：色を消したときにも反映
+        }
+    }
+    // セル色を保存
     function saveCellColor(id, className) {
-    if (className !== "blue"){
+        if (className !== "blue"){
+            const key = `cellColors-${blockId}`;
+            const saved = localStorage.getItem(key);
+            const colors = saved ? JSON.parse(saved) : {};
+            colors[id] = className;
+            localStorage.setItem(key, JSON.stringify(colors));
+        }
+    }
+    // セル色を削除
+    function removeCellColor(id) {
         const key = `cellColors-${blockId}`;
         const saved = localStorage.getItem(key);
-        const colors = saved ? JSON.parse(saved) : {};
-        colors[id] = className;
-        localStorage.setItem(key, JSON.stringify(colors));
+        if (saved) {
+            const colors = JSON.parse(saved);
+            delete colors[id];
+            localStorage.setItem(key, JSON.stringify(colors));
+        }
     }
-    }
-
-    function removeCellColor(id) {
-    const key = `cellColors-${blockId}`;
-    const saved = localStorage.getItem(key);
-    if (saved) {
-        const colors = JSON.parse(saved);
-        delete colors[id];
-        localStorage.setItem(key, JSON.stringify(colors));
-    }
-    }
-
+    // セル色をロード
     function loadCellColors() {
     const key = `cellColors-${blockId}`;
     const saved = localStorage.getItem(key);
@@ -1452,7 +1555,15 @@ function createQuiz(blockId, data) {
 
 
 
-
+    // 間違い数を保存
+    function saveWrongCounts() {
+        const obj = {};
+        for (const [id, count] of wrongCounts.entries()) {
+            obj[id] = count;
+        }
+        localStorage.setItem(`wrongCounts-${blockId}`, JSON.stringify(obj));
+    }
+    // 間違い数をロード
     function loadWrongCounts() {
         const saved = localStorage.getItem(`wrongCounts-${blockId}`);
         if (saved) {
@@ -1469,13 +1580,17 @@ function createQuiz(blockId, data) {
             }
         }
     }
-
-
-
-
-
-
-
+ 
+ 
+    // 正解数を保存
+    function saveCorrectCounts() {
+        const obj = {};
+        for (const [id, count] of correctCounts.entries()) {
+            obj[id] = count;
+        }
+        localStorage.setItem(`correctCounts-${blockId}`, JSON.stringify(obj));
+    }
+    // 正解数をロード
     function loadCorrectCounts() {
         const saved = localStorage.getItem(`correctCounts-${blockId}`);
         if (saved) {
@@ -1493,51 +1608,38 @@ function createQuiz(blockId, data) {
         }
     }
 
-    function saveWrongCounts() {
-    const obj = {};
-    for (const [id, count] of wrongCounts.entries()) {
-        obj[id] = count;
-    }
-    localStorage.setItem(`wrongCounts-${blockId}`, JSON.stringify(obj));
-    }
-
-    function saveCorrectCounts() {
-    const obj = {};
-    for (const [id, count] of correctCounts.entries()) {
-        obj[id] = count;
-    }
-    localStorage.setItem(`correctCounts-${blockId}`, JSON.stringify(obj));
-    }
 
 
+
+    // 出題範囲の値が変わったら保存
     startSelect.addEventListener('change', () => {
         localStorage.setItem(`startSelect-${blockId}`, startSelect.value);
     });
-
     endSelect.addEventListener('change', () => {
         localStorage.setItem(`endSelect-${blockId}`, endSelect.value);
     });
-
+    // 正解数による出題範囲が変わったら保存
     excludeCorrectSelect.addEventListener('change', () => {
         localStorage.setItem(`excludeCorrectSelect-${blockId}`, excludeCorrectSelect.value);
     });
 
+
+    // 正解数による出題範囲が変わったら保存
     sortSelect.addEventListener('change', () => {
         localStorage.setItem(`sortSelect-${blockId}`, sortSelect.value);
-        buildTable(); // ← もともとある処理
+        buildTable();
     });
-
-
+    // 出題ボタンを押したとき
     nextBtn.addEventListener('click', () => {
         const rangeData = getRangeData();
+        // 出題する問題が無くなったらおわり！
         if (remaining.length === 0 && questionArea.textContent === "おわり！") {
-            console.log("nextBtn if内のresetState")
             resetState();
         }
         remaining = rangeData.slice();
         pickQuestion();
     });
-
+    // 答えを見るボタンを押したとき
     showAnswerBtn.addEventListener('click', () => {
         if (currentId !== null) {
             const item = data.find(d => d.id === currentId);
@@ -1549,28 +1651,7 @@ function createQuiz(blockId, data) {
             MathJax.typesetPromise([answerArea]);
         }
     });
-
-
-    
-
-
-    wrongBtn.addEventListener('click', () => {
-        if (currentId !== null) {
-            const entry = statusMap.get(currentId);
-            const newCount = (wrongCounts.get(currentId) ?? 0) + 1;
-            wrongCounts.set(currentId, newCount);
-
-            if (entry && entry.wrongSpan) {
-            entry.wrongSpan.textContent = `○${newCount}`;
-            }
-
-            highlightCell(currentId, 'red');
-            saveWrongCounts(); // ← 保存
-            pickQuestion();
-        }
-    });
-
-
+    // 正解したボタンを押したとき
     correctBtn.addEventListener('click', () => {
         if (currentId !== null) {
             const entry = statusMap.get(currentId);
@@ -1582,12 +1663,30 @@ function createQuiz(blockId, data) {
             }
 
             highlightCell(currentId, 'green');
-            saveCorrectCounts(); // ← 保存
+            saveCorrectCounts();
+            pickQuestion();
+        }
+    });
+    // 不正解だったボタンを押したとき
+    wrongBtn.addEventListener('click', () => {
+        if (currentId !== null) {
+            const entry = statusMap.get(currentId);
+            const newCount = (wrongCounts.get(currentId) ?? 0) + 1;
+            wrongCounts.set(currentId, newCount);
+
+            if (entry && entry.wrongSpan) {
+            entry.wrongSpan.textContent = `○${newCount}`;
+            }
+
+            highlightCell(currentId, 'red');
+            saveWrongCounts();
             pickQuestion();
         }
     });
 
-  init();
+
+
+    init();
 }
 
 createQuiz(0, quizData1);
@@ -1595,6 +1694,30 @@ createQuiz(1, quizData2);
 createQuiz(2, quizData3);
 createQuiz(3, quizData4);
 createQuiz(4, quizData5);
+
+// localstrageの内容を表示ボタンを押したとき
+document.getElementById('showStorageBtn').addEventListener('click', function() {
+    let totalSize = 0;
+    let output = '📦 LocalStorage の内容:\n\n';
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        const size = new Blob([key + value]).size;
+        totalSize += size;
+
+        output += `🔑 ${key} = ${value} (${size} bytes)\n`;
+    }
+
+    output += `\n💾 合計使用量: ${totalSize} bytes (${(totalSize / 1024).toFixed(2)} KB)`;
+
+    document.getElementById('storageInfo').textContent = output;
+});
+document.getElementById('clearStorageBtn').addEventListener('click', function() {
+    document.getElementById('storageInfo').textContent = ''; // 表示内容をクリア
+});
+
+
 </script>
 </body>
 </html>
