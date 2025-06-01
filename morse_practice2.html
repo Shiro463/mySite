@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>モールス信号クイズ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #eef2f3, #dfe9f3);
+      margin: 0;
+      padding: 30px 20px;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      color: #2c3e50;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .controls {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #3498db;
+    }
+
+    button#start {
+      font-size: 18px;
+      padding: 12px 25px;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: auto;
+      display: block;
+    }
+
+    button#start:hover {
+      background: linear-gradient(to right, #2980b9, #3498db);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #user-input, .result {
+      min-height: 60px;
+      font-size: 1.3em;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    #answer-buttons {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 12px;
+      margin: 30px auto;
+      max-width: 600px;
+    }
+
+    #answer-buttons button {
+      padding: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      background: white;
+      border: 2px solid #3498db;
+      color: #3498db;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    #answer-buttons button:hover {
+      background: #3498db;
+      color: white;
+    }
+
+    .signal {
+      font-size: 24px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .morse-wrapper {
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    #morse-table {
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(10, auto);
+      gap: 10px;
+      white-space: normal;
+    }
+
+    #morse-table div {
+      background: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    #morse-table div:hover {
+      transform: scale(1.05);
+      background-color: #eaf4fc;
+    }
+
+    @media (max-width: 600px) {
+      #answer-buttons {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      #morse-table {
+        grid-template-rows: repeat(10, auto);
+        grid-auto-flow: row;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>モールス信号クイズ</h1>
+
+    <div class="controls">
+      <div class="slider-group">
+        <label>出題文字数: <span id="lengthDisplay">1</span></label>
+        <input type="range" id="lengthSlider" min="1" max="10" value="1" step="1" />
+      </div>
+
+      <div class="slider-group">
+        <label>トンとツーの間隔 (ms): <span id="intervalDisplay">50</span></label>
+        <input type="range" id="intervalSlider" min="10" max="1000" value="50" step="10" />
+      </div>
+
+      <div class="slider-group">
+        <label>ツーの長さ (ms): <span id="dashDisplay">200</span></label>
+        <input type="range" id="dashSlider" min="10" max="1000" value="200" step="10" />
+      </div>
+
+      <div class="slider-group">
+        <label>文字間の間隔 (ms): <span id="letterPauseDisplay">10</span></label>
+        <input type="range" id="letterPauseSlider" min="10" max="1000" value="10" step="10" />
+      </div>
+
+      <div class="slider-group">
+        <label>音量: <span id="volumeDisplay">0.5</span></label>
+        <input type="range" id="volumeSlider" min="0" max="1" value="0.5" step="0.1" />
+      </div>
+    </div>
+
+    <button id="start">出題</button>
+
+    <div id="user-input"></div>
+    <div class="result" id="result"></div>
+    <div class="signal" id="signal"></div>
+    <div id="answer-buttons"></div>
+
+    <div class="morse-wrapper">
+      <div id="morse-table"></div>
+    </div>
+  </div>
+
+  <!-- <script src="script.js"></script> -->
+</body>
+</html>
+
+
+
+
+<script>
+const morseCodeMap = {
+  A: ".-",   B: "-...", C: "-.-.", D: "-..",  E: ".",
+  F: "..-.", G: "--.",  H: "....", I: "..",   J: ".---",
+  K: "-.-",  L: ".-..", M: "--",   N: "-.",   O: "---",
+  P: ".--.", Q: "--.-", R: ".-.",  S: "...",  T: "-",
+  U: "..-",  V: "...-", W: ".--",  X: "-..-", Y: "-.--",
+  Z: "--..",
+  0: "-----", 1: ".----", 2: "..---", 3: "...--", 4: "....-",
+  5: ".....", 6: "-....", 7: "--...", 8: "---..", 9: "----."
+};
+
+const chars = Object.keys(morseCodeMap);
+let currentAnswer = "";
+let userInput = "";
+
+const startButton = document.getElementById("start");
+const answerButtons = document.getElementById("answer-buttons");
+const resultDiv = document.getElementById("result");
+const userInputDiv = document.getElementById("user-input");
+const signalDiv = document.getElementById("signal");
+
+const lengthSlider = document.getElementById("lengthSlider");
+const intervalSlider = document.getElementById("intervalSlider");
+const dashSlider = document.getElementById("dashSlider");
+const letterPauseSlider = document.getElementById("letterPauseSlider");
+const volumeSlider = document.getElementById("volumeSlider");
+
+// スライダー表示更新
+[lengthSlider, intervalSlider, dashSlider, letterPauseSlider, volumeSlider].forEach(slider => {
+  const display = document.getElementById(slider.id.replace("Slider", "Display"));
+  slider.addEventListener("input", () => {
+    display.textContent = slider.value;
+  });
+});
+
+function generateQuestion(length) {
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
+function playMorse(text) {
+  const context = new (window.AudioContext || window.webkitAudioContext)();
+  const interval = parseInt(intervalSlider.value);
+  const dashTime = parseInt(dashSlider.value);
+  const letterPause = parseInt(letterPauseSlider.value);
+  const volume = parseFloat(volumeSlider.value);
+
+  let time = context.currentTime;
+
+  text.split("").forEach(char => {
+    const morse = morseCodeMap[char];
+    if (!morse) return;
+
+    morse.split("").forEach(symbol => {
+      const osc = context.createOscillator();
+      const gainNode = context.createGain();
+      osc.frequency.value = 700;
+      gainNode.gain.value = volume;
+
+      osc.connect(gainNode).connect(context.destination);
+
+      const duration = symbol === "." ? interval / 1000 : dashTime / 1000;
+
+      osc.start(time);
+      osc.stop(time + duration);
+      time += duration + interval / 1000;
+    });
+
+    time += letterPause / 1000;
+  });
+}
+
+function createAnswerButtons() {
+  answerButtons.innerHTML = "";
+  chars.forEach(char => {
+    const btn = document.createElement("button");
+    btn.textContent = char;
+    btn.onclick = () => handleUserInput(char);
+    answerButtons.appendChild(btn);
+  });
+}
+
+function handleUserInput(char) {
+  if (currentAnswer === "") return;
+
+  userInput += char;
+  userInputDiv.textContent = userInput;
+
+  if (!currentAnswer.startsWith(userInput)) {
+    resultDiv.textContent = `不正解！ 答えは: ${currentAnswer}`;
+    currentAnswer = "";
+    return;
+  }
+
+  if (userInput === currentAnswer) {
+    resultDiv.textContent = `正解！ 答えは: ${currentAnswer}`;
+    currentAnswer = "";
+  }
+}
+
+function populateMorseTable() {
+  const table = document.getElementById("morse-table");
+  table.innerHTML = "";
+  chars.forEach(char => {
+    const div = document.createElement("div");
+    div.textContent = `${char}: ${morseCodeMap[char]}`;
+    table.appendChild(div);
+  });
+}
+
+startButton.addEventListener("click", () => {
+  const length = parseInt(lengthSlider.value);
+  currentAnswer = generateQuestion(length);
+  userInput = "";
+  userInputDiv.textContent = "";
+  resultDiv.textContent = "";
+  playMorse(currentAnswer);
+});
+
+createAnswerButtons();
+populateMorseTable();
+
+
+</script>
