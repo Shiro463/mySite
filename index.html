@@ -18,13 +18,17 @@
     }
 
     .floating-buttons {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 1000;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.9); /* 視認性向上のため背景を半透明に */
+        padding: 8px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
 
     .floating-buttons button {
@@ -225,13 +229,13 @@ window.MathJax = {
 
 <!-- フローティングボタン -->
 <div class="floating-buttons">
-<button data-target="quizBlock-0">海事代理士：憲法</button>
-<button data-target="quizBlock-1">海事代理士：国土交通省設置法</button>
-<button data-target="quizBlock-2">弁理士：意匠法</button>
-<button data-target="quizBlock-3">弁理士：PCT</button>
-<button data-target="quizBlock-4">イタリア語</button>
-<button data-target="quizBlock-5">放射線取扱主任技術者：物理</button>
-<button data-target="quizBlock-6">漢検：音読み</button>
+    <button data-target="quizBlock-0">海事代理士：憲法</button>
+    <button data-target="quizBlock-1">海事代理士：国土交通省設置法</button>
+    <button data-target="quizBlock-2">弁理士：意匠法</button>
+    <button data-target="quizBlock-3">弁理士：PCT</button>
+    <button data-target="quizBlock-4">イタリア語</button>
+    <button data-target="quizBlock-5">放射線取扱主任技術者：物理</button>
+    <button data-target="quizBlock-6">漢検：音読み</button>
 </div>
 
 <!-- クイズブロック 2 -->
