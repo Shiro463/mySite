@@ -3,27 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>クイズアプリ（スマホタッチフレンドリー版）</title>
+<title>クイズアプリ（スマホ最適化フルスクリーン版）</title>
 <style>
-  /* ---------------- 基本レイアウト ---------------- */
   body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    padding: 0;
     scroll-behavior: smooth;
-    overflow-x: hidden;
   }
 
   /* ---------------- LocalStorage UI ---------------- */
   .localstorage-block {
     border: 1px solid #aaa;
     padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
   }
 
   .localstorage-block .button-group {
@@ -42,13 +34,23 @@
     cursor: pointer;
   }
 
+  #storageInfo {
+    display: none;
+    margin-top: 10px;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f0f0f0;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
   /* ---------------- クイズブロック ---------------- */
   .quiz-block {
     display: flex;
-    flex-direction: column; /* PCでも縦並びに統一 */
-    border: 1px solid #aaa;
+    flex-direction: column;
     padding: 10px;
-    gap: 20px;
+    gap: 10px;
   }
 
   .quiz-container {
@@ -67,14 +69,16 @@
     font-size: 22px;
   }
 
+  /* ---------------- 問題フルスクリーン風 ---------------- */
   .question-area, .answer-area {
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 15px;
     font-size: 20px;
-    min-height: 120px;
+    min-height: 300px;
     line-height: 1.5;
     background: #fafafa;
+    overflow-y: auto;
   }
 
   select {
@@ -105,9 +109,14 @@
   .myButtonRed:hover { background: #ff6767; color: white; }
 
   /* ---------------- ステータステーブル ---------------- */
+  .status-table-container {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+  }
+
   .status-table {
-    display: block;
-    overflow-x: auto;
     border-collapse: collapse;
     width: 100%;
     font-size: 14px;
@@ -121,29 +130,9 @@
     min-width: 70px;
   }
 
-  .status-table .wrong-count {
-    position: absolute;
-    right: 4px;
-    top: 2px;
-    font-size: 12px;
-    color: red;
-  }
-
-  .correct-count {
-    position: absolute;
-    left: 4px;
-    top: 2px;
-    font-size: 12px;
-    color: green;
-  }
-
-  .weight-display {
-    position: absolute;
-    left: 4px;
-    bottom: 0;
-    font-size: 12px;
-    color: gray;
-  }
+  .status-table .wrong-count { position: absolute; right: 4px; top: 2px; font-size: 12px; color: red; }
+  .correct-count { position: absolute; left: 4px; top: 2px; font-size: 12px; color: green; }
+  .weight-display { position: absolute; left: 4px; bottom: 0; font-size: 12px; color: gray; }
 
   .blue { background-color: #add8e6; }
   .green { background-color: #90ee90; }
@@ -176,38 +165,25 @@
 
   .floating-buttons button:hover { background: #555; }
 
-  /* ---------------- レスポンシブ＆タッチフレンドリー ---------------- */
+  /* ---------------- レスポンシブ ---------------- */
   @media (max-width: 768px) {
-    .quiz-block { padding: 8px; gap: 15px; }
-    .title { font-size: 20px; padding: 0.4em; }
-    .question-area, .answer-area { font-size: 18px; min-height: 100px; padding: 12px; }
+    .question-area, .answer-area { font-size: 18px; min-height: 250px; }
     select { font-size: 16px; padding: 4px 6px; }
     .myButtonBlue, .myButtonGreen, .myButtonRed { font-size: 18px; padding: 0.4em 0.8em; }
-    .floating-buttons {
-      right: 50%;
-      transform: translateX(50%);
-      flex-direction: row;
-      gap: 8px;
-    }
+    .floating-buttons { right: 50%; transform: translateX(50%); flex-direction: row; gap: 8px; }
     .status-table td { font-size: 12px; min-width: 60px; padding: 6px; }
   }
 </style>
-
-<!-- MathJax -->
-<script>
-window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
-
+</head>
 <body>
 
 <!-- LocalStorage表示ブロック -->
 <div class="localstorage-block">
   <div class="button-group">
-    <button id="showStorageBtn" type="button">LocalStorage表示</button>
+    <button id="toggleStorageBtn" type="button">LocalStorage表示/非表示</button>
     <button id="clearStorageBtn" type="button">LocalStorageリセット</button>
   </div>
-  <p id="storageInfo"></p>
+  <pre id="storageInfo"></pre>
 </div>
 
 <!-- クイズブロック -->
@@ -235,13 +211,16 @@ window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fon
     </div>
   </div>
 
-  <table class="status-table" id="statusTable-0"></table>
+  <div class="status-table-container">
+    <table class="status-table" id="statusTable-0"></table>
+  </div>
 </div>
 
+
 <!-- フローティングボタン -->
-<div class="floating-buttons">
+<!-- <div class="floating-buttons">
   <button data-target="quizBlock-0">イタリア語</button>
-</div>
+</div> -->
 
 <script>
 const quizData0 = [ /*イタリア語 40001～*/
@@ -913,26 +892,30 @@ createQuiz(0, quizData0);
 // createQuiz(2, quizData3);
 // createQuiz(3, quizData4);
 
-// localstrageの内容を表示ボタンを押したとき
-document.getElementById('showStorageBtn').addEventListener('click', function() {
-    let totalSize = 0;
-    let output = '📦 LocalStorage の内容:\n\n';
-
+// ---------------- LocalStorage表示トグル ----------------
+const toggleBtn = document.getElementById('toggleStorageBtn');
+const storageInfo = document.getElementById('storageInfo');
+toggleBtn.addEventListener('click', () => {
+  if (storageInfo.style.display === 'none' || storageInfo.style.display === '') {
+    let output = '';
     for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key);
-        const size = new Blob([key + value]).size;
-        totalSize += size;
-
-        output += `🔑 ${key} = ${value} (${size} bytes)\n`;
+      const key = localStorage.key(i);
+      const value = localStorage.getItem(key);
+      output += `${key} = ${value}\n`;
     }
-
-    output += `\n💾 合計使用量: ${totalSize} bytes (${(totalSize / 1024).toFixed(2)} KB)`;
-
-    document.getElementById('storageInfo').textContent = output;
+    storageInfo.textContent = output;
+    storageInfo.style.display = 'block';
+  } else {
+    storageInfo.style.display = 'none';
+  }
 });
-document.getElementById('clearStorageBtn').addEventListener('click', function() {
-    document.getElementById('storageInfo').textContent = ''; // 表示内容をクリア
+
+// LocalStorageリセット
+document.getElementById('clearStorageBtn').addEventListener('click', () => {
+  if (confirm('LocalStorageをすべて消しますか？')) {
+    localStorage.clear();
+    storageInfo.textContent = '';
+  }
 });
 
 document.querySelectorAll('.floating-buttons button').forEach(button => {
