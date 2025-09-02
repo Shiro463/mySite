@@ -202,11 +202,14 @@
       <button class="myButtonGreen" id="correctBtn-0">正解</button>
       <button class="myButtonRed" id="wrongBtn-0">不正解</button>
     </div>
-
-    <!-- テーブル表示/非表示ボタン -->
+    <!-- ステータステーブル表示/非表示ボタン -->
     <div class="button-group">
       <button id="toggleTableBtn">ステータステーブル表示/非表示</button>
+      <button id="toggleIdSortBtn">ID順ソート</button>
+      <button id="toggleWeightSortBtn">Weight順ソート</button>
     </div>
+
+
 
   </div>
 
@@ -1311,6 +1314,8 @@ const quizData0 = [ /*イタリア語 40001～*/
 
 
 
+
+
 ];
 
 // クイズブロック作成
@@ -1440,7 +1445,15 @@ function createQuiz(blockId, data) {
             const correctCount = correctCounts.get(d.id) ?? 0;
 
             // weight計算 (不正解+1)/(正解+1)
-            const weight = ((wrongCount + 1) / (correctCount + 1)).toFixed(2);
+            // const weight = ((wrongCount + 1) / (correctCount + 1)).toFixed(2);
+            const now = new Date();
+            const days = d.lastReview ? Math.floor((now - new Date(d.lastReview)) / (1000 * 60 * 60 * 24)) : 365;
+            const base = (wrongCount + 1) / (correctCount + 1);
+            const timeFactor = 1 - Math.exp(-days / (5 * (correctCount + 1)));
+            const timeScale = 2.0;
+            const jitter = 1 + (Math.random() - 0.5) * 0;
+            const lowCorrectBoost = 0.12 * (1 / (correctCount + 1));
+            const weight = (base * (1 + timeFactor * timeScale) * jitter * (1 + lowCorrectBoost)).toFixed(2);
 
             // weight表示
             const weightSpan = document.createElement("span");
@@ -1459,9 +1472,17 @@ function createQuiz(blockId, data) {
             cell.appendChild(correctSpan);
 
             statusMap.set(d.id, { cell, wrongSpan, correctSpan, weightSpan });
+
+            // ← ここで lastBlueId と一致すれば blue を復元（青は保存しない一時状態なので上書き）
+            if (lastBlueId !== null && lastBlueId === d.id) {
+                cell.className = ''; // 保存されている色（green/red）があれば一旦消して青を優先
+                cell.classList.add('blue');
+            }
         });
 
         loadCellColors();
+
+        
     }
 
 
@@ -1720,6 +1741,14 @@ function createQuiz(blockId, data) {
             }
             }
         }
+        // 追加：lastBlueId があれば青を優先して復元（青は保存されない一時表示）
+        if (lastBlueId !== null) {
+            const entry = statusMap.get(lastBlueId);
+            if (entry) {
+                entry.cell.className = '';
+                entry.cell.classList.add('blue');
+            }
+        }
     }
 
     function getSavedCellColor(id) {
@@ -1899,6 +1928,85 @@ function createQuiz(blockId, data) {
             pickQuestion();
         }
     });
+
+  // ▼ ソート用状態を追加
+  let currentSortMode = 'default'; // 'id-asc', 'id-desc', 'weight-asc', 'weight-desc'
+
+  // ▼ ID順ソートトグルボタンのイベント
+  document.getElementById('toggleIdSortBtn').addEventListener('click', () => {
+      if (currentSortMode === 'id-asc') {
+          currentSortMode = 'id-desc';
+      } else {
+          currentSortMode = 'id-asc';
+      }
+      buildTable();
+  });
+
+  // ▼ Weight順ソートトグルボタンのイベント
+  document.getElementById('toggleWeightSortBtn').addEventListener('click', () => {
+      if (currentSortMode === 'weight-asc') {
+          currentSortMode = 'weight-desc';
+      } else {
+          currentSortMode = 'weight-asc';
+      }
+      buildTable();
+  });
+
+  // ▼ getSortedData()を書き換え or 拡張
+  function getSortedData() {
+      const sorted = [...data];
+
+      if (currentSortMode === 'id-asc') {
+          sorted.sort((a, b) => a.id - b.id);
+      } else if (currentSortMode === 'id-desc') {
+          sorted.sort((a, b) => b.id - a.id);
+      } else if (currentSortMode === 'weight-asc' || currentSortMode === 'weight-desc') {
+          sorted.sort((a, b) => {
+              const weightA = ((wrongCounts.get(a.id) ?? 0) + 1) / ((correctCounts.get(a.id) ?? 0) + 1);
+              const weightB = ((wrongCounts.get(b.id) ?? 0) + 1) / ((correctCounts.get(b.id) ?? 0) + 1);
+              return currentSortMode === 'weight-asc' ? weightA - weightB : weightB - weightA;
+          });
+      } else {
+          // デフォルトは label-asc
+          sorted.sort((a, b) => a.label.localeCompare(b.label));
+      }
+
+      return sorted;
+  }
+
+  // 有効重み（表示用・選択用の基準値）を計算するヘルパー
+  function computeEffectiveWeight(item) {
+      const wrong = wrongCounts.get(item.id) ?? 0;
+      const correct = correctCounts.get(item.id) ?? 0;
+      const now = new Date();
+
+      // lastReview が未設定なら高優先にする（未学習は出したい）
+      let days;
+      if (item.lastReview) {
+          days = Math.floor((now - new Date(item.lastReview)) / (1000 * 60 * 60 * 24));
+      } else {
+          days = 365; // 未レビューは「長く忘れている」とみなす（任意で調整可）
+      }
+
+      // 基本重み（既存ロジック）
+      const base = (wrong + 1) / (correct + 1);
+
+      // 忘却曲線的な時間要素（0..1に収まる）
+      // correct が多いほど緩やかに忘れる（分母に correct+1 を使用）
+      const timeScale = 2.0; // timeFactor が 1 のとき multiplier は (1 + timeScale)
+      const decayBase = 5 * (correct + 1); // 半減スケール設定（好みで調整可）
+      const timeFactor = 1 - Math.exp(-days / decayBase);
+
+      // 有効重み（ここまでが決定的な重み）
+      const effective = base * (1 + timeFactor * timeScale);
+
+      // 戻り値（数値）
+      return effective;
+  }
+
+
+
+
 
     init();
 }
