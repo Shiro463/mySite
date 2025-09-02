@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>クイズアプリ（スマホ最適化フルスクリーン版）</title>
+<title>クイズアプリ（スマホ最適化版）</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -69,32 +69,33 @@
     font-size: 22px;
   }
 
-  /* ---------------- 問題フルスクリーン風 ---------------- */
+  /* ---------------- 問題・答えエリア ---------------- */
   .question-area, .answer-area {
     border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 15px;
-    font-size: 20px;
-    min-height: 300px;
+    padding: 12px;
+    font-size: 18px;
+    min-height: 90px; /* 少し小さめに調整 */
     line-height: 1.5;
     background: #fafafa;
     overflow-y: auto;
   }
 
   select {
-    font-size: 18px;
-    padding: 6px 8px;
+    font-size: 16px;
+    padding: 5px 6px;
   }
 
   .button-group {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    justify-content: flex-end; /* 右寄せ */
   }
 
   .myButtonBlue, .myButtonGreen, .myButtonRed {
-    font-size: 20px;
-    padding: 0.5em 1em;
+    font-size: 18px;
+    padding: 0.4em 0.8em;
     border-radius: 5px;
     border: 2px solid;
     cursor: pointer;
@@ -110,7 +111,7 @@
 
   /* ---------------- ステータステーブル ---------------- */
   .status-table-container {
-    max-height: 250px;
+    max-height: 200px;
     overflow-y: auto;
     border: 1px solid #aaa;
     border-radius: 8px;
@@ -123,16 +124,16 @@
   }
 
   .status-table td {
-    padding: 8px;
+    padding: 6px;
     border: 1px solid #000;
     text-align: center;
     position: relative;
-    min-width: 70px;
+    min-width: 60px;
   }
 
   .status-table .wrong-count { position: absolute; right: 4px; top: 2px; font-size: 12px; color: red; }
   .correct-count { position: absolute; left: 4px; top: 2px; font-size: 12px; color: green; }
-  .weight-display { position: absolute; left: 4px; bottom: 0; font-size: 12px; color: gray; }
+  .weight-display { position: absolute; left: 5%; top: 2px; font-size: 12px; color: gray; }
 
   .blue { background-color: #add8e6; }
   .green { background-color: #90ee90; }
@@ -167,24 +168,16 @@
 
   /* ---------------- レスポンシブ ---------------- */
   @media (max-width: 768px) {
-    .question-area, .answer-area { font-size: 18px; min-height: 250px; }
-    select { font-size: 16px; padding: 4px 6px; }
-    .myButtonBlue, .myButtonGreen, .myButtonRed { font-size: 18px; padding: 0.4em 0.8em; }
+    .question-area, .answer-area { font-size: 16px; min-height: 150px; }
+    select { font-size: 14px; padding: 4px 5px; }
+    .myButtonBlue, .myButtonGreen, .myButtonRed { font-size: 16px; padding: 0.35em 0.7em; }
     .floating-buttons { right: 50%; transform: translateX(50%); flex-direction: row; gap: 8px; }
-    .status-table td { font-size: 12px; min-width: 60px; padding: 6px; }
+    .status-table td { font-size: 12px; min-width: 50px; padding: 5px; }
   }
 </style>
 </head>
 <body>
 
-<!-- LocalStorage表示ブロック -->
-<div class="localstorage-block">
-  <div class="button-group">
-    <button id="toggleStorageBtn" type="button">LocalStorage表示/非表示</button>
-    <button id="clearStorageBtn" type="button">LocalStorageリセット</button>
-  </div>
-  <pre id="storageInfo"></pre>
-</div>
 
 <!-- クイズブロック -->
 <div class="quiz-block" id="quizBlock-0">
@@ -209,12 +202,27 @@
       <button class="myButtonGreen" id="correctBtn-0">正解</button>
       <button class="myButtonRed" id="wrongBtn-0">不正解</button>
     </div>
+
+    <!-- テーブル表示/非表示ボタン -->
+    <div class="button-group">
+      <button id="toggleTableBtn">ステータステーブル表示/非表示</button>
+    </div>
+
   </div>
 
-  <div class="status-table-container">
+  <div class="status-table-container" id="statusTableContainer">
     <table class="status-table" id="statusTable-0"></table>
   </div>
+  <!-- LocalStorage表示ブロック -->
+  <div class="localstorage-block">
+    <div class="button-group">
+      <button id="toggleStorageBtn" type="button">LocalStorage表示/非表示</button>
+      <button id="clearStorageBtn" type="button">LocalStorageリセット</button>
+    </div>
+    <pre id="storageInfo"></pre>
+  </div>
 </div>
+
 
 
 <!-- フローティングボタン -->
@@ -254,6 +262,799 @@ const quizData0 = [ /*イタリア語 40001～*/
   answer:
   "ネクタイ" },
 
+  { id: 40006, label: "telefono",
+  question:
+  "telefono",
+  answer:
+  "電話" },
+
+  { id: 40007, label: "dolce",
+  question:
+  "dolce (m.)",
+  answer:
+  "菓子" },
+
+  { id: 40008, label: "borsa",
+  question:
+  "borsa",
+  answer:
+  "かばん" },
+
+  { id: 40009, label: "canzone",
+  question:
+  "canzone",
+  answer:
+  "歌" },
+
+  { id: 40010, label: "gatto",
+  question:
+  "gatto",
+  answer:
+  "猫" },
+
+  { id: 40011, label: "penna",
+  question:
+  "penna",
+  answer:
+  "ペン" },
+
+  { id: 40012, label: "melone",
+  question:
+  "melone (m.)",
+  answer:
+  "メロン" },
+
+  { id: 40013, label: "volpe",
+  question:
+  "volpe (f.)",
+  answer:
+  "キツネ" },
+
+  { id: 40014, label: "albergo",
+  question:
+  "albergo",
+  answer:
+  "ホテル" },
+
+  { id: 40015, label: "1軒のホテル",
+  question:
+  "1軒のホテル",
+  answer:
+  "un albergo" },
+
+  { id: 40016, label: "ombrello",
+  question:
+  "ombrello",
+  answer:
+  "傘" },
+
+  { id: 40017, label: "1つの傘",
+  question:
+  "1つの傘",
+  answer:
+  "un ombrello" },
+
+  { id: 40018, label: "studente",
+  question:
+  "studente",
+  answer:
+  "男子学生" },
+
+  { id: 40019, label: "1人の男子学生",
+  question:
+  "1人の男子学生",
+  answer:
+  "uno studente" },
+
+  { id: 40020, label: "scherzo",
+  question:
+  "scherzo",
+  answer:
+  "冗談" },
+
+  { id: 40021, label: "1つの冗談",
+  question:
+  "1つの冗談",
+  answer:
+  "uno scherzo" },
+
+  { id: 40022, label: "zaino",
+  question:
+  "zaino",
+  answer:
+  "リュック" },
+
+  { id: 40023, label: "1つのリュック",
+  question:
+  "1つのリュック",
+  answer:
+  "uno zaino" },
+
+  { id: 40024, label: "stella",
+  question:
+  "stella",
+  answer:
+  "星" },
+
+  { id: 40025, label: "nave",
+  question:
+  "nave (f.)",
+  answer:
+  "船" },
+
+  { id: 40026, label: "1隻の船",
+  question:
+  "1隻の船",
+  answer:
+  "una nave" },
+
+  { id: 40027, label: "1個の鍵",
+  question:
+  "1個の鍵",
+  answer:
+  "una chiave" },
+
+  { id: 40028, label: "aula",
+  question:
+  "aula",
+  answer:
+  "教室" },
+
+  { id: 40029, label: "1つの教室",
+  question:
+  "1つの教室",
+  answer:
+  "un'aula" },
+
+  { id: 40030, label: "isola",
+  question:
+  "isola",
+  answer:
+  "島" },
+
+  { id: 40031, label: "1つの島",
+  question:
+  "1つの島",
+  answer:
+  "un'isola" },
+
+  { id: 40032, label: "agenda",
+  question:
+  "agenda",
+  answer:
+  "手帳" },
+
+  { id: 40033, label: "1つの手帳",
+  question:
+  "1つの手帳",
+  answer:
+  "un'agenda" },
+
+  { id: 40034, label: "camera",
+  question:
+  "camera \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "部屋 \n una camera \n camere" },
+
+  { id: 40035, label: "erba",
+  question:
+  "erba \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "草 \n un'erba \n erbe" },
+
+  { id: 40036, label: "ora",
+  question:
+  "ora \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "時間 \n un'ora \n ore" },
+
+  { id: 40037, label: "scaffale",
+  question:
+  "scaffale(m.) \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "棚 \n uno scaffale \n scaffali" },
+
+  { id: 40038, label: "arte",
+  question:
+  "arte(f.) \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "芸術 \n un'arte \n arti" },
+
+  { id: 40039, label: "quaderno",
+  question:
+  "quaderno \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "ノート \n un quaderno \n quaderni" },
+  
+  { id: 40040, label: "macchina",
+  question:
+  "macchina \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "自動車 \n una macchina \n macchine" },
+  
+  { id: 40041, label: "anello",
+  question:
+  "anello \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "指輪 \n un anello \n anelli" },
+  
+  { id: 40042, label: "limone",
+  question:
+  "limone(m.) \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "レモン \n un limone \n limoni" },
+  
+  { id: 40043, label: "stazione",
+  question:
+  "stazione(f.) \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "駅 \n una stazione \n stazioni" },
+  
+  { id: 40044, label: "stivale",
+  question:
+  "stivale(m.) \n 不定冠詞単数形は？ \n 複数形は？",
+  answer:
+  "ブーツ \n uno stivale \n stivali" },
+  
+  { id: 40045, label: "albero",
+  question:
+  "albero \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "本 \n l'albero \n gli alberi" },
+  
+  { id: 40046, label: "matita",
+  question:
+  "matita \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "鉛筆 \n la matita \n le matite" },
+  
+  { id: 40047, label: "piazza",
+  question:
+  "piazza \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "広場 \n la piazza \n le piazze" },
+  
+  { id: 40048, label: "gonna",
+  question:
+  "gonna \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "スカート \n la gonna \n le gonne" },
+  
+  { id: 40049, label: "spettacolo",
+  question:
+  "spettacolo \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "ショー \n lo spettacolo \n gli spettacoli" },
+  
+  { id: 40050, label: "giornale",
+  question:
+  "giornale(m.) \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "新聞 \n il giornare \n i giornali" },
+  
+  { id: 40051, label: "errore",
+  question:
+  "errore(m.) \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "誤り \n l'errore \n gli errori" },
+  
+  { id: 40052, label: "cane",
+  question:
+  "cane(m.) \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "犬 \n il cane \n i cani" },
+  
+  { id: 40053, label: "unghia",
+  question:
+  "unghia \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "爪 \n l'unghia \n le unghie" },
+  
+  { id: 40054, label: "sciarpa",
+  question:
+  "sciarpa \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "マフラー \n la sciarpa \n le sciarpe" },
+  
+  { id: 40055, label: "strumento",
+  question:
+  "strumento \n 定冠詞単数形は？ \n 定冠詞複数形は？",
+  answer:
+  "道具 \n lo strumento \n gli strumenti" },
+  
+  { id: 40056, label: "un divano comodo",
+  question:
+  "un divano comodo",
+  answer:
+  "快適なソファー" },
+  
+  { id: 40057, label: "快適なソファー",
+  question:
+  "快適なソファー(不定冠詞複数形)",
+  answer:
+  "divani comodi" },
+  
+  { id: 40058, label: "una casa comoda",
+  question:
+  "una casa comoda",
+  answer:
+  "快適な家" },
+  
+  { id: 40059, label: "快適な家",
+  question:
+  "快適な家(不定冠詞複数形)",
+  answer:
+  "case comode" },
+  
+  { id: 40060, label: "un libro pesante",
+  question:
+  "un libro pesante",
+  answer:
+  "重い本" },
+  
+  { id: 40061, label: "重い本",
+  question:
+  "重い本(不定冠詞複数形)",
+  answer:
+  "libri pesanti" },
+  
+  { id: 40062, label: "una borsa pesante",
+  question:
+  "una borsa pesante",
+  answer:
+  "重い鞄" },
+  
+  { id: 40063, label: "重い鞄",
+  question:
+  "重い鞄(不定冠詞複数形)",
+  answer:
+  "borse pesanti" },
+  
+  { id: 40064, label: "un giornale giapponese",
+  question:
+  "un giornale giapponese",
+  answer:
+  "日本の新聞" },
+  
+  { id: 40065, label: "日本の新聞",
+  question:
+  "日本の新聞(不定冠詞複数形)",
+  answer:
+  "giornali giapponesi" },
+  
+  { id: 40066, label: "una macchina giapponese",
+  question:
+  "una macchina giapponese",
+  answer:
+  "日本車" },
+  
+  { id: 40067, label: "日本車",
+  question:
+  "日本車(不定冠詞複数形)",
+  answer:
+  "macchine giapponesi" },
+
+  { id: 40068, label: "caro",
+  question:
+  "caro",
+  answer:
+  "親愛なる" },
+
+  { id: 40069, label: "cattivo",
+  question:
+  "cattivo",
+  answer:
+  "悪い" },
+
+  { id: 40070, label: "giovane",
+  question:
+  "giovane",
+  answer:
+  "若い" },
+
+  { id: 40071, label: "vero",
+  question:
+  "vero",
+  answer:
+  "本当の" },
+
+  { id: 40072, label: "alto",
+  question:
+  "palazzo alto \n alta società",
+  answer:
+  "高いビル \n 上流社会" },
+
+  { id: 40073, label: "cetra",
+  question:
+  "notizia certa \n certa notizia",
+  answer:
+  "確かなニュース \n ある知らせ" },
+
+  { id: 40074, label: "cane",
+  question:
+  "cane grande \n grande uomo",
+  answer:
+  "大きな犬 \n 偉大な人" },
+
+  { id: 40075, label: "povero",
+  question:
+  "studente povero \n povero anziano",
+  answer:
+  "貧乏な学生 \n 哀れな老人" },
+
+  { id: 40076, label: "studentessa italiana",
+  question:
+  "studentessa italianaの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "イタリア人の女学生 \n una studentessa italiana \n studentesse italiane" },
+
+  { id: 40077, label: "libro leggero",
+  question:
+  "libro leggeroの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "軽い本 \n un libro leggero \n libli leggeri" },
+
+  { id: 40078, label: "ombrello verde",
+  question:
+  "ombrello verdeの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "緑色の傘 \n un ombrello verde \n ombrelli verdi" },
+
+  { id: 40079, label: "unghia rossa",
+  question:
+  "unghia rossaの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "赤い爪 \n un'unghia rossa \n unghie rosse" },
+
+  { id: 40080, label: "spettacolo interessante",
+  question:
+  "spettacolo interessanteの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "おもしろいショー \n uno spettacolo interessante \n spettacoli interessanti" },
+
+  { id: 40081, label: "cane pericoloso",
+  question:
+  "cane pericolosoの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "危険な犬 \n un cane pericoloso \n cani pericolosi" },
+
+  { id: 40082, label: "sedia semplice",
+  question:
+  "sedia sempliceの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "シンプルな椅子 \n una sedia semplice \n sedie semplici" },
+
+  { id: 40083, label: "zingaro povero",
+  question:
+  "zingaro poveroの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "貧しいジプシー \n uno zingaro povero \n zingari poveri" },
+
+  { id: 40084, label: "treno veloce",
+  question:
+  "treno veloceの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "速い列車 \n un treno veloce \n treni veloci" },
+
+  { id: 40085, label: "albero alto",
+  question:
+  "albero altoの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "背の高い木 \n un albero alto \n alberi alti" },
+
+  { id: 40086, label: "opera elegante",
+  question:
+  "opera eleganteの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "上品な作品 \n un'opera elegante \n opere eleganti" },
+
+  { id: 40087, label: "piccola camera",
+  question:
+  "piccola cameraの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "小さい部屋 \n una piccola camera \n piccole camere" },
+
+  { id: 40088, label: "giovane medico",
+  question:
+  "giovane medicoの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "若い医者 \n un giovane medico \n giovani medici" },
+
+  { id: 40089, label: "infermiera onesta",
+  question:
+  "infermiera onestaの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "誠実な女性看護師 \n un'infermiera onesta \n infermiere oneste" },
+
+  { id: 40090, label: "scrittore popolare",
+  question:
+  "scrittore popolareの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "人気の男性作家 \n uno scrittore popolare \n scrittori popolari" },
+
+  { id: 40091, label: "famiglia felice",
+  question:
+  "famiglia feliceの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "幸せな家族 \n una famiglia felice \n famiglie felici" },
+
+  { id: 40092, label: "leone grande",
+  question:
+  "leone grandeの意味？ \n 不定冠詞を付けると？ \n 複数形は？",
+  answer:
+  "大きなライオン \n un leone grande \n leoni grandi" },
+
+  { id: 40093, label: "Tu ( ) onesto.",
+  question:
+  "Tu ( ) onesto. \n essereの活用形",
+  answer:
+  "Tu sei onesto. \n 君は誠実です。" },
+
+  { id: 40094, label: "Lui ( ) italiano.",
+  question:
+  "Lui ( ) italiano. \n essereの活用形",
+  answer:
+  "Lui è italiano. \n 彼はイタリア人です。" },
+
+  { id: 40095, label: "Loro ( ) studentesse italiane.",
+  question:
+  "Loro ( ) studentesse italiane. \n essereの活用形",
+  answer:
+  "Loro sono studentesse italiane. \n 彼女たちはイタリア人の女子学生です。" },
+
+  { id: 40096, label: "Io ( ) medico.",
+  question:
+  "Io ( ) medico. \n essereの活用形",
+  answer:
+  "Io sono medico. \n 私は医者です。" },
+
+  { id: 40097, label: "Lei ( ) Maria.",
+  question:
+  "Lei ( ) Maria. \n essereの活用形",
+  answer:
+  "Lei è Maria. \n 彼女はマリーアです。" },
+
+  { id: 40098, label: "Noi ( ) giapponesi.",
+  question:
+  "Noi ( ) giapponesi. \n essereの活用形",
+  answer:
+  "Noi siamo giapponesi. \n 私たちは日本人です。" },
+
+  { id: 40099, label: "Voi ( ) brave.",
+  question:
+  "Voi ( ) brave. \n essereの活用形",
+  answer:
+  "Voi siete brave. \n あなたたちは優秀です。" },
+
+  { id: 40100, label: "Lei ( ) il signor Dini?",
+  question:
+  "Lei ( ) il signor Dini? \n essereの活用形",
+  answer:
+  "Lei è il signor Dini? \n あなたはディーニさんですか？" },
+
+  { id: 40101, label: "Io non ( ) tedesco.",
+  question:
+  "Io non ( ) tedesco. \n essereの活用形",
+  answer:
+  "Io non sono tedesco. \n 私はドイツ人ではありません。" },
+
+  { id: 40102, label: "Lui ( ) bello.",
+  question:
+  "Lui ( ) bello. \n essereの活用形",
+  answer:
+  "Lui è bello. \n 彼はハンサムだ。" },
+
+  { id: 40103, label: "Paola ( ) una ragazza alta.",
+  question:
+  "Paola ( ) una ragazza alta. \n essereの活用形",
+  answer:
+  "Paola è una ragazza alta. \n パオラは背の高い女の子だ。" },
+
+  { id: 40104, label: "( ) Suzuki.",
+  question:
+  "( ) Suzuki.\n 私は鈴木です。 \n essereの活用形",
+  answer:
+  "Sono Suzuki." },
+
+  { id: 40105, label: "( ) spagnoli.",
+  question:
+  "( ) spagnoli. \n 私たちはスペイン人です。 \n essereの活用形",
+  answer:
+  "Siamo spagnoli." },
+
+  { id: 40106, label: "( ) la signora Albano.",
+  question:
+  "( ) la signora Albano. \n 彼女はアルバーノ夫人です。 \n essereの活用形",
+  answer:
+  "È la signora Albano." },
+
+  { id: 40106, label: "Rosa, ( ) molto gentile.",
+  question:
+  "Rosa, ( ) molto gentile. \n ローザ、君はとても親切です。 \n essereの活用形",
+  answer:
+  "Rosa, sei molto gentile." },
+
+  { id: 40107, label: "( ) libri giapponesi.",
+  question:
+  "( ) libri giapponesi. \n それらは日本の本です。 \n essereの活用形",
+  answer:
+  "Sono libri giapponesi." },
+
+  { id: 40108, label: "( ) americana?. - Si, ( ) americana.",
+  question:
+  "( ) americana?. - Si, ( ) americana. \n あなたはアメリカ人ですか？ - はい、アメリカ人です。 \n essereの活用形",
+  answer:
+  "Sei americana?. - Si, sono americana." },
+
+  { id: 40109, label: "Ragazze, ( ) francesi?. - No, ( ) inglesi.",
+  question:
+  "Ragazze, ( ) francesi?. - No, ( ) inglesi. \n 娘さん方、あなたたちはフランス人ですか？ - いいえ、イギリス人です。 \n essereの活用形",
+  answer:
+  "Ragazze, siete francesi?. - No, siamo inglesi." },
+
+  { id: 40110, label: "( ) tre studenti.",
+  question:
+  "( ) tre studenti. \n 彼らは3人の男子学生です。 \n essereの活用形",
+  answer:
+  "Sono tre studenti." },
+
+  { id: 40111, label: "私(男性)は日本人です。",
+  question:
+  "私(男性)は日本人です。",
+  answer:
+  "Sono giapponese." },
+
+  { id: 40112, label: "私(女性)は日本人です。",
+  question:
+  "私(女性)は日本人です。",
+  answer:
+  "Sono giapponese." },
+
+  { id: 40113, label: "君(男性)はイタリア人です。",
+  question:
+  "君(男性)はイタリア人です。",
+  answer:
+  "Sei italiano." },
+
+  { id: 40114, label: "君(女性)はイタリア人です。",
+  question:
+  "君(女性)はイタリア人です。",
+  answer:
+  "Sei italiana." },
+
+  { id: 40115, label: "彼はFrancoです。",
+  question:
+  "彼はFrancoです。",
+  answer:
+  "È Franco." },
+
+  { id: 40116, label: "彼女は教師です。",
+  question:
+  "彼女は教師です。",
+  answer:
+  "È insegnante. \n essereを使って職業を言う場合、名詞の前に冠詞をつけない" },
+
+  { id: 40117, label: "あなた(男性・敬称)は医師ですか？",
+  question:
+  "あなた(男性・敬称)は医師ですか？",
+  answer:
+  "È medico?" },
+
+  { id: 40118, label: "私は弁護士です。",
+  question:
+  "私は弁護士です。",
+  answer:
+  "Sono avvocato." },
+
+  { id: 40119, label: "彼は会社員です。",
+  question:
+  "彼は会社員です。",
+  answer:
+  "È impiegato." },
+
+  { id: 40120, label: "彼らは日本人です。",
+  question:
+  "彼らは日本人です。",
+  answer:
+  "Sono giapponesi." },
+
+  { id: 40121, label: "彼女たちはイタリア人です。",
+  question:
+  "彼女たちはイタリア人です。",
+  answer:
+  "Sono italiane." },
+
+  { id: 40122, label: "君たち(男女混合)は頭が良い。",
+  question:
+  "君たち（男女混合）は頭が良い。",
+  answer:
+  "Siete intelligenti." },
+
+  { id: 40123, label: "Marcoは背が高い。",
+  question:
+  "君マルコは背が高い。",
+  answer:
+  "Marco è alto." },
+
+  { id: 40124, label: "Lauraは背が高くない。",
+  question:
+  "Lauraは背が高くない。",
+  answer:
+  "Laura non è alta." },
+
+  { id: 40125, label: "Lucioは内気です。",
+  question:
+  "Lucioは内気です。",
+  answer:
+  "Lucio è timido." },
+
+  { id: 40126, label: "Luciaはとてもきれいです。",
+  question:
+  "Luciaはとてもきれいです。",
+  answer:
+  "Lucia è molto bella."+
+  "\n moltoは「たくさんの」という形容詞、「とても」という副詞の意味がある。副詞のときは語尾変化しない。" },
+
+  { id: 40127, label: "AnnaとMariaは幸せです。",
+  question:
+  "AnnaとMariaは幸せです。",
+  answer:
+  "Anna e Maria sono felici." },
+
+  { id: 40128, label: "僕とGianniは陽気です。",
+  question:
+  "僕とGianniは陽気です。",
+  answer:
+  "Io e Gianni siamo allegri." },
+
+  { id: 40129, label: "君とPaolaはエレガントです。",
+  question:
+  "君とPaolaはエレガントです。",
+  answer:
+  "Tu e Paola siete eleganti." },
+
+  { id: 40130, label: "私たち(男女混合)はスペインの学生です。",
+  question:
+  "私たち(男女混合)はスペインの学生です。",
+  answer:
+  "Siamo studenti spagnoli." },
+
+  { id: 40131, label: "彼女はずる賢い女性だ。",
+  question:
+  "彼女はずる賢い女性だ。",
+  answer:
+  "È una donna furba." },
+
+  { id: 40132, label: "彼女はずる賢い女性ではない。",
+  question:
+  "彼女はずる賢い女性ではない。",
+  answer:
+  "Non è una donna furba." },
+
+  { id: 40133, label: "彼はとても忙しい弁護士です。",
+  question:
+  "彼はとても忙しい弁護士です。",
+  answer:
+  "È un avvocato molto occupato." },
+
+  { id: 40134, label: "君は優秀な会社員だ。",
+  question:
+  "君は優秀な会社員だ。",
+  answer:
+  "Sei un bravo impiegato." },
+
+  { id: 40135, label: "Giovanniは哀れな老人です。",
+  question:
+  "Giovanniは哀れな老人です。",
+  answer:
+  "Giovanni è un povero anziano." },
+
+  { id: 40136, label: "彼は偉大な医者です。",
+  question:
+  "彼は偉大な医者です。",
+  answer:
+  "È un grande medico." },
+
 
 
 // ===========================================
@@ -291,6 +1092,221 @@ const quizData0 = [ /*イタリア語 40001～*/
   answer:
   "cornetto" },
 
+  { id: 45002, label: "Thank you.",
+  question:
+  "ありがとう Thank you.",
+  answer:
+  "Grazie." },
+
+  { id: 45003, label: "milk",
+  question:
+  "牛乳 milk",
+  answer:
+  "latte" },
+
+  { id: 45004, label: "tea",
+  question:
+  "茶 tea",
+  answer:
+  "tè" },
+
+  { id: 45005, label: "Hello.",
+  question:
+  "こんにちは Hello",
+  answer:
+  "Salve." },
+
+  { id: 45006, label: "Please.",
+  question:
+  "ください Please.",
+  answer:
+  "Per favore." },
+
+  { id: 45007, label: "Goodbye.",
+  question:
+  "さようなら Goodbye.",
+  answer:
+  "Arrivederci.", },
+
+  { id: 45008, label: "sugar",
+  question:
+  "砂糖 sugar",
+  answer:
+  "zucchero", },
+
+  { id: 45009, label: "Philadelphia",
+  question:
+  "Philadelphia",
+  answer:
+  "Filadelfia", },
+
+  { id: 45010, label: "Nice to meet you.",
+  question:
+  "Nice to meet you.",
+  answer:
+  "Piacere.", },
+
+  { id: 45011, label: "Milan",
+  question:
+  "Milan",
+  answer:
+  "Milano", },
+
+  { id: 45012, label: "Where are you from?",
+  question:
+  "Where are you from?",
+  answer:
+  "Di dove sei?", },
+
+  { id: 45013, label: "I'm from Philadelphia.",
+  question:
+  "I'm from Philadelphia.",
+  answer:
+  "Io sono di Filadelfia.", },
+
+  { id: 45014, label: "London",
+  question:
+  "London",
+  answer:
+  "Londra", },
+
+  { id: 45015, label: "Rome",
+  question:
+  "Rome",
+  answer:
+  "Roma", },
+
+  { id: 45016, label: "Hi.",
+  question:
+  "Hi.",
+  answer:
+  "Ciao.", },
+
+  { id: 45017, label: "Excuse me.",
+  question:
+  "Excuse me.",
+  answer:
+  "Scusa.", },
+
+  { id: 45018, label: "to invite",
+  question:
+  "to invite",
+  answer:
+  "invitare", },
+
+  { id: 45019, label: "È un dolce facile e delizioso.",
+  question:
+  "È un dolce facile e delizioso.",
+  answer:
+  "It's an easy and delicious dessert.", },
+
+  { id: 45020, label: "Io di solito prendo tre fragole e le metto nel gelato.",
+  question:
+  "Io di solito prendo tre fragole e le metto nel gelato.",
+  answer:
+  "I usually take three strawberries and put them in the ice cream.", },
+
+  { id: 45021, label: "daughter",
+  question:
+  "daughter",
+  answer:
+  "figlia", },
+
+  { id: 45022, label: "son",
+  question:
+  "son",
+  answer:
+  "figlio", },
+
+  { id: 45023, label: "wife",
+  question:
+  "wife",
+  answer:
+  "moglie", },
+
+  { id: 45024, label: "husband",
+  question:
+  "husband",
+  answer:
+  "marito", },
+
+  { id: 45025, label: "father",
+  question:
+  "father",
+  answer:
+  "padre", },
+
+  { id: 45026, label: "mother",
+  question:
+  "mother",
+  answer:
+  "madre", },
+
+  { id: 45027, label: "restaurant",
+  question:
+  "restaurant",
+  answer:
+  "ristorante", },
+
+  { id: 45028, label: "restroom,toilet",
+  question:
+  "restroom,toilet",
+  answer:
+  "bagno", },
+
+  { id: 45029, label: "store",
+  question:
+  "store",
+  answer:
+  "negozio" },
+
+  { id: 45030, label: "Thank you very much.",
+  question:
+  "Thank you very much.",
+  answer:
+  "Grazie mille." },
+
+  { id: 45031, label: "pharmacy",
+  question:
+  "pharmacy",
+  answer:
+  "farmacia" },
+
+  { id: 45032, label: "theater",
+  question:
+  "theater",
+  answer:
+  "teatro" },
+
+  { id: 45033, label: "Where's the square? There is a square here.",
+  question:
+  "Where's the square? There is a square here.",
+  answer:
+  "Dov'è la piazza? C'è una piazza qui.", },
+
+  { id: 45034, label: "church",
+  question:
+  "church",
+  answer:
+  "chiesa", },
+
+  { id: 45035, label: "cafe",
+  question:
+  "cafe",
+  answer:
+  "bar", },
+
+  { id: 45036, label: "ma'am",
+  question:
+  "ma'am",
+  answer:
+  "signora", },
+
+  { id: 45037, label: "bank",
+  question:
+  "bank",
+  answer:
+  "banca", },
 
 
 
@@ -371,13 +1387,13 @@ function createQuiz(blockId, data) {
         startSelect.value = data[0].id;
         endSelect.value = data[data.length - 1].id;
 
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 10; i++) {
             const opt = document.createElement("option");
             opt.value = i;
             opt.textContent = i;
             excludeCorrectSelect.appendChild(opt);
         }
-        excludeCorrectSelect.value = 5;
+        excludeCorrectSelect.value = 10;
 
 
         for (const [value, label] of [
@@ -918,6 +1934,7 @@ document.getElementById('clearStorageBtn').addEventListener('click', () => {
   }
 });
 
+// フローティングボタンのクリック
 document.querySelectorAll('.floating-buttons button').forEach(button => {
   button.addEventListener('click', () => {
     const targetId = button.getAttribute('data-target');
@@ -926,6 +1943,17 @@ document.querySelectorAll('.floating-buttons button').forEach(button => {
       targetElement.scrollIntoView({ behavior: 'smooth' });
     }
   });
+});
+
+// ---------------- ステータステーブル表示/非表示 ----------------
+const toggleTableBtn = document.getElementById('toggleTableBtn');
+const tableContainer = document.getElementById('statusTableContainer');
+toggleTableBtn.addEventListener('click', () => {
+  if (tableContainer.style.display === 'none' || tableContainer.style.display === '') {
+    tableContainer.style.display = 'block';
+  } else {
+    tableContainer.style.display = 'none';
+  }
 });
 
 </script>
