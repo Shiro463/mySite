@@ -10,41 +10,8 @@
     margin: 0;
     padding: 0;
     scroll-behavior: smooth;
+    padding-bottom: 100px; /* localstorage-block の高さ分を確保 */
   }
-
-  /* ---------------- LocalStorage UI ---------------- */
-  .localstorage-block {
-    border: 1px solid #aaa;
-    padding: 10px;
-  }
-
-  .localstorage-block .button-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .localstorage-block button {
-    padding: 8px 12px;
-    font-size: 10px;
-    border-radius: 5px;
-    border: none;
-    background: #333;
-    color: #fff;
-    cursor: pointer;
-  }
-
-  #storageInfo {
-    display: none;
-    margin-top: 10px;
-    white-space: pre-wrap;
-    max-height: 200px;
-    overflow-y: auto;
-    background: #f0f0f0;
-    padding: 5px;
-    border-radius: 5px;
-  }
-
   /* ---------------- クイズブロック ---------------- */
   .quiz-block {
     display: flex;
@@ -79,6 +46,7 @@
     line-height: 1.5;
     background: #fafafa;
     overflow-y: auto;
+    white-space: pre-wrap; /* ← これを追加 */
   }
 
   select {
@@ -166,6 +134,48 @@
 
   .floating-buttons button:hover { background: #555; }
 
+
+
+  /* ---------------- LocalStorage UI ---------------- */
+  .localstorage-block {
+    border: 1px solid #aaa;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white; /* 背景色を設定して他の要素と重ならないように */
+    z-index: 1000;
+  }
+
+  .localstorage-block .button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .localstorage-block button {
+    padding: 8px 12px;
+    font-size: 10px;
+    border-radius: 5px;
+    border: none;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  #storageInfo {
+    display: none;
+    margin-top: 10px;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f0f0f0;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+
   /* ---------------- レスポンシブ ---------------- */
   @media (max-width: 768px) {
     .question-area, .answer-area { font-size: 16px; min-height: 40px; padding: 6px;  }
@@ -216,16 +226,16 @@
   <div class="status-table-container" id="statusTableContainer">
     <table class="status-table" id="statusTable-0"></table>
   </div>
-  <!-- LocalStorage表示ブロック -->
-  <div class="localstorage-block">
-    <div class="button-group">
-      <button id="toggleStorageBtn" type="button">LocalStorage表示/非表示</button>
-      <button id="clearStorageBtn" type="button">LocalStorageリセット</button>
-    </div>
-    <pre id="storageInfo"></pre>
-  </div>
 </div>
 
+<!-- LocalStorage表示ブロック -->
+<div class="localstorage-block">
+  <div class="button-group">
+    <button id="toggleStorageBtn" type="button">LocalStorage表示/非表示</button>
+    <button id="clearStorageBtn" type="button">LocalStorageリセット</button>
+  </div>
+  <pre id="storageInfo"></pre>
+</div>
 
 
 <!-- フローティングボタン -->
@@ -1473,6 +1483,7 @@ const quizData2 = [ /*熟語･一字訓読み 80001～*/
 
 
 
+
 // クイズブロック作成
 const titles = ["イタリア語", "音読み", "熟語･一字訓"]; // 任意の科目名リスト
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
@@ -1758,8 +1769,7 @@ function createQuiz(blockId, data) {
         currentId = item.id;
         item.lastReview = now; // 出題時に更新
 
-        let styledQuestion = item.question
-          .replace(/(\(|（)(.*?)(\)|）)/g, '<span style="color: orange;">$1$2$3</span>')
+        let styledQuestion = colorizeNestedParentheses(item.question)
           .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
             if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
             if (p2 !== undefined) {
@@ -1768,7 +1778,7 @@ function createQuiz(blockId, data) {
             }
             return match;
           });
-
+          
         questionArea.innerHTML = styledQuestion;
         answerArea.innerHTML = `<span style="color: gray;">ここに答えが表示されます</span>`;
         highlightCell(item.id, 'blue');
@@ -1776,6 +1786,36 @@ function createQuiz(blockId, data) {
 
         if (window.MathJax) MathJax.typesetPromise([questionArea]);
     }
+
+
+    function colorizeNestedParentheses(text) {
+      const colors = [
+        "#ffbf7f",
+        "#bfff7f",
+        "#7fffbf",
+        "#7fbfff",
+        "#bf7fff"
+      ];
+
+      let result = "";
+      let depth = 0;
+
+      for (let char of text) {
+        if (char === "(" || char === "（") {
+          const color = colors[Math.min(depth, colors.length - 1)];
+          result += `<span style="color: ${color};">` + char;
+          depth++;
+        } else if (char === ")" || char === "）") {
+          depth = Math.max(0, depth - 1);
+          result += char + "</span>";
+        } else {
+          result += char;
+        }
+      }
+
+      return result;
+    }
+
 
 
     // セル色を付ける
@@ -2033,12 +2073,9 @@ function createQuiz(blockId, data) {
             const item = data.find(d => d.id === currentId);
             // answerArea.innerHTML = `<span style="color: black;">${item.answer}</span>`;
 
-          let styledAnswer = colorizeParentheses(item.answer)
-            // 【】と{}の処理を適用
+          let styledAnswer = colorizeNestedParentheses(item.question)
             .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
-              if (p1 !== undefined) {
-                return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
-              }
+              if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
               if (p2 !== undefined) {
                 let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
                 return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
