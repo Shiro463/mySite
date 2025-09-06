@@ -2073,7 +2073,7 @@ function createQuiz(blockId, data) {
             const item = data.find(d => d.id === currentId);
             // answerArea.innerHTML = `<span style="color: black;">${item.answer}</span>`;
 
-          let styledAnswer = colorizeNestedParentheses(item.question)
+          let styledAnswer = colorizeNestedParentheses(item.answer)
             .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
               if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
               if (p2 !== undefined) {
