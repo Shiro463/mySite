@@ -4245,16 +4245,30 @@ function createQuiz(blockId, data) {
         }
 
         const now = new Date();
-        const weights = remaining.map(item => {
-            const wrong = wrongCounts.get(item.id) ?? 0;
-            const correct = correctCounts.get(item.id) ?? 0;
+        const weights = remaining.map(d => {
+            // const wrong = wrongCounts.get(item.id) ?? 0;
+            // const correct = correctCounts.get(item.id) ?? 0;
 
-            let days = 0;
-            if (item.lastReview) {
-                days = Math.floor((now - new Date(item.lastReview)) / (1000 * 60 * 60 * 24));
-            }
+            // let days = 0;
+            // if (item.lastReview) {
+            //     days = Math.floor((now - new Date(item.lastReview)) / (1000 * 60 * 60 * 24));
+            // }
+            // return ((wrong + 1) / (correct + 1)) * (1 + days * 0.1);
+            const wrongCount = wrongCounts.get(d.id) ?? 0;
+            const correctCount = correctCounts.get(d.id) ?? 0;
 
-            return ((wrong + 1) / (correct + 1)) * (1 + days * 0.1);
+            // weight計算 (不正解+1)/(正解+1)
+            // const weight = ((wrongCount + 1) / (correctCount + 1)).toFixed(2);
+            const now = new Date();
+            const days = d.lastReview ? Math.floor((now - new Date(d.lastReview)) / (1000 * 60 * 60 * 24)) : 365;
+            const base = (wrongCount + 1) / (correctCount + 1);
+            const timeFactor = 1 - Math.exp(-days / (5 * (correctCount + 1)));
+            const timeScale = 2.0;
+            const jitter = 1 + (Math.random() - 0.5) * 0.1;
+            const lowCorrectBoost = 0.12 * (1 / (correctCount + 1));
+            const weight = (base * (1 + timeFactor * timeScale) * jitter * (1 + lowCorrectBoost)).toFixed(2);
+
+            return weight;
         });
 
         const totalWeight = weights.reduce((a, b) => a + b, 0);
