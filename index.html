@@ -205,9 +205,6 @@
       <select id="startSelect-0"></select> 〜
       <select id="endSelect-0"></select>
     </label>
-    <label>並び順:
-      <select id="sortSelect-0"></select>
-    </label>
     <label>除外する正解数:
       <select id="excludeCorrectSelect-0"></select>
       <button class="myButtonBlue" id="resetCountsBtn-0">リセット</button>
@@ -225,6 +222,10 @@
       <button id="toggleTableBtn-0">テーブル表示/非表示</button>
       <button id="toggleIdSortBtn-0">ID順</button>
       <button id="toggleWeightSortBtn-0">Weight順</button>
+      <button id="toggleLabelSortBtn-0">Label順</button>
+      <button id="toggleLastReviewSortBtn-0">最終復習順</button>
+      <button id="toggleCorrectSortBtn-0">正答数順</button>
+      <button id="toggleWrongSortBtn-0">誤答数順</button>
     </div>
 
 
@@ -244,12 +245,6 @@
   </div>
   <pre id="storageInfo"></pre>
 </div>
-
-
-<!-- フローティングボタン -->
-<!-- <div class="floating-buttons">
-  <button data-target="quizBlock-0">イタリア語</button>
-</div> -->
 
 <script>
 const quizData0 = [ /*イタリア語 40001～*/
@@ -3383,7 +3378,6 @@ function createQuiz(blockId, data) {
     const startSelect = document.getElementById(`startSelect-${blockId}`);
     const endSelect = document.getElementById(`endSelect-${blockId}`);
     const excludeCorrectSelect = document.getElementById(`excludeCorrectSelect-${blockId}`);
-    const sortSelect = document.getElementById(`sortSelect-${blockId}`);
     const resetCountsBtn = document.getElementById(`resetCountsBtn-${blockId}`);
     const toggleTableBtn = document.getElementById(`toggleTableBtn-${blockId}`);
     const toggleIdSortBtn = document.getElementById(`toggleIdSortBtn-${blockId}`);
@@ -3431,31 +3425,20 @@ function createQuiz(blockId, data) {
         excludeCorrectSelect.value = 100;
 
 
-        for (const [value, label] of [
-        ['label-asc', 'label昇順'],
-        ['label-desc', 'label降順'],
-        ['id-asc', 'id昇順'],
-        ['id-desc', 'id降順']
-        ]) {
-            const opt = document.createElement("option");
-            opt.value = value;
-            opt.textContent = label;
-            sortSelect.appendChild(opt);
-        }
-        sortSelect.value = 'label-asc';
+
 
         startSelect.value = localStorage.getItem(`startSelect-${blockId}`) ?? data[0].id;
         endSelect.value = localStorage.getItem(`endSelect-${blockId}`) ?? data[data.length - 1].id;
         excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 100;
-        sortSelect.value = localStorage.getItem(`sortSelect-${blockId}`) ?? 'label-asc';
 
 
-        buildTable();
+
         loadWrongCounts();
         loadCorrectCounts();
-        resetState();
         loadWeights();
         loadLastReviews();
+        buildTable();
+        resetState();
         loadCellColors(); // ← 最後に追加
     }
   
@@ -3476,21 +3459,13 @@ function createQuiz(blockId, data) {
             const wrongCount = wrongCounts.get(d.id) ?? 0;
             const correctCount = correctCounts.get(d.id) ?? 0;
 
-            // weight計算 (不正解+1)/(正解+1)
-            // const weight = ((wrongCount + 1) / (correctCount + 1)).toFixed(2);
-            const now = new Date();
-            const days = d.lastReview ? Math.floor((now - new Date(d.lastReview)) / (1000 * 60 * 60 * 24)) : 365;
-            const base = (wrongCount + 1) / (correctCount + 1);
-            const timeFactor = 1 - Math.exp(-days / (5 * (correctCount + 1)));
-            const timeScale = 2.0;
-            const jitter = 1 + (Math.random() - 0.5) * 0.1;
-            const lowCorrectBoost = 0.12 * (1 / (correctCount + 1));
-            const weight = (base * (1 + timeFactor * timeScale) * jitter * (1 + lowCorrectBoost)).toFixed(2);
+            // weight計算は削除！代わりに localStorage から読む
+            const savedWeight = weights.get(d.id) ?? "";  
 
             // weight表示
             const weightSpan = document.createElement("span");
             weightSpan.className = "weight-display";
-            weightSpan.textContent = weight;
+            weightSpan.textContent = savedWeight; // ← localStorageの値をそのまま表示
             cell.appendChild(weightSpan);
 
             const wrongSpan = document.createElement("span");
@@ -3503,29 +3478,26 @@ function createQuiz(blockId, data) {
             correctSpan.textContent = `○${correctCount}`;
             cell.appendChild(correctSpan);
 
-
-            // 🔽 lastReview表示を追加
-            if (d.lastReview) {
+            // 🔽 lastReview表示も localStorage の値をそのまま
+            if (lastReviews.has(d.id)) {
                 const reviewSpan = document.createElement("span");
                 reviewSpan.className = "last-review";
-                const date = new Date(d.lastReview);
-                reviewSpan.textContent = date.toLocaleDateString("ja-JP"); // 例: 2025/9/24
+                const date = new Date(lastReviews.get(d.id));
+                reviewSpan.textContent = date.toLocaleDateString("ja-JP");
                 cell.appendChild(reviewSpan);
             }
-            
+
             statusMap.set(d.id, { cell, wrongSpan, correctSpan, weightSpan });
 
-            // ← ここで lastBlueId と一致すれば blue を復元（青は保存しない一時状態なので上書き）
             if (lastBlueId !== null && lastBlueId === d.id) {
-                cell.className = ''; // 保存されている色（green/red）があれば一旦消して青を優先
+                cell.className = '';
                 cell.classList.add('blue');
             }
         });
 
         loadCellColors();
-
-        
     }
+
 
 
 
@@ -3582,27 +3554,7 @@ function createQuiz(blockId, data) {
             (correctCounts.get(d.id) ?? 0) < excludeThreshold
         );
     }
-    // 並び順の取得
-    function getSortedData() {
-        const sortType = sortSelect.value;
-        const sorted = [...data];
-        switch (sortType) {
-            case 'label-asc':
-            sorted.sort((a, b) => a.label.localeCompare(b.label));
-            break;
-            case 'label-desc':
-            sorted.sort((a, b) => b.label.localeCompare(a.label));
-            break;
-            case 'id-asc':
-            sorted.sort((a, b) => a.id - b.id);
-            break;
-            case 'id-desc':
-            sorted.sort((a, b) => b.id - a.id);
-            break;
-        }
-        return sorted;
-    }
- 
+
 
     // 出題
     function pickQuestion() {
@@ -3649,7 +3601,7 @@ function createQuiz(blockId, data) {
             const lowCorrectBoost = 0.12 * (1 / (correctCount + 1));
             const weight = (base * (1 + timeFactor * timeScale) * jitter * (1 + lowCorrectBoost)).toFixed(2);
 
-            console.log("now", now, "days", days, "base", base, "timeFactor", timeFactor, "lowCorrectBoost", lowCorrectBoost, "weight", weight)
+            // console.log("now", now, "days", days, "base", base, "timeFactor", timeFactor, "lowCorrectBoost", lowCorrectBoost, "weight", weight)
 
 
 
@@ -3662,13 +3614,13 @@ function createQuiz(blockId, data) {
         const totalWeight = weights.reduce((a, b) => a + b, 0);
         let r_b = Math.random();
         let r = r_b * totalWeight;
-        console.log("weights", weights)
-        console.log("totalWeight", totalWeight)
-        console.log("Math.random()", r_b)
+        // console.log("weights", weights)
+        // console.log("totalWeight", totalWeight)
+        // console.log("Math.random()", r_b)
         let index = 0;
         for (let i = 0; i < weights.length; i++) {
             r -= weights[i];
-            console.log("r", r, "index", i)
+            // console.log("r", r, "index", i)
             if (r <= 0) {
                 index = i;
                 break;
@@ -3676,7 +3628,7 @@ function createQuiz(blockId, data) {
         }
 
 
-        console.log("remaining_before", remaining)
+        // console.log("remaining_before", remaining)
 
         
 
@@ -3684,9 +3636,9 @@ function createQuiz(blockId, data) {
         currentId = item.id;
         item.lastReview = now; // 出題時に更新
         
-        console.log("remaining_after", remaining)
+        // console.log("remaining_after", remaining)
 
-        console.log("item", item, "item.id", item.id, "item.lastReview", item.lastReview)
+        // console.log("item", item, "item.id", item.id, "item.lastReview", item.lastReview)
 
         let styledQuestion = colorizeNestedParentheses(item.question)
           .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
@@ -4047,11 +3999,7 @@ function createQuiz(blockId, data) {
     });
 
 
-    // 正解数による出題範囲が変わったら保存
-    sortSelect.addEventListener('change', () => {
-        localStorage.setItem(`sortSelect-${blockId}`, sortSelect.value);
-        buildTable();
-    });
+
     // 出題ボタンを押したとき
     nextBtn.addEventListener('click', () => {
         const rangeData = getRangeData();
@@ -4206,23 +4154,34 @@ function createQuiz(blockId, data) {
     // ▼ ソート用状態を追加
     let currentSortMode = 'default'; // 'id-asc', 'id-desc', 'weight-asc', 'weight-desc'
 
-    // ▼ ID順ソートトグルボタンのイベント
-    toggleIdSortBtn.addEventListener('click', () => {
-        if (currentSortMode === 'id-asc') {
-            currentSortMode = 'id-desc';
-        } else {
-            currentSortMode = 'id-asc';
-        }
+
+    document.getElementById('toggleIdSortBtn-0').addEventListener('click', () => {
+        currentSortMode = (currentSortMode === 'id-asc') ? 'id-desc' : 'id-asc';
         buildTable();
     });
 
-    // ▼ Weight順ソートトグルボタンのイベント
-    toggleWeightSortBtn.addEventListener('click', () => {
-        if (currentSortMode === 'weight-asc') {
-            currentSortMode = 'weight-desc';
-        } else {
-            currentSortMode = 'weight-asc';
-        }
+    document.getElementById('toggleWeightSortBtn-0').addEventListener('click', () => {
+        currentSortMode = (currentSortMode === 'weight-asc') ? 'weight-desc' : 'weight-asc';
+        buildTable();
+    });
+
+    document.getElementById('toggleLabelSortBtn-0').addEventListener('click', () => {
+        currentSortMode = (currentSortMode === 'label-asc') ? 'label-desc' : 'label-asc';
+        buildTable();
+    });
+
+    document.getElementById('toggleLastReviewSortBtn-0').addEventListener('click', () => {
+        currentSortMode = (currentSortMode === 'lastReview-asc') ? 'lastReview-desc' : 'lastReview-asc';
+        buildTable();
+    });
+
+    document.getElementById('toggleCorrectSortBtn-0').addEventListener('click', () => {
+        currentSortMode = (currentSortMode === 'correct-asc') ? 'correct-desc' : 'correct-asc';
+        buildTable();
+    });
+
+    document.getElementById('toggleWrongSortBtn-0').addEventListener('click', () => {
+        currentSortMode = (currentSortMode === 'wrong-asc') ? 'wrong-desc' : 'wrong-asc';
         buildTable();
     });
 
@@ -4236,9 +4195,33 @@ function createQuiz(blockId, data) {
             sorted.sort((a, b) => b.id - a.id);
         } else if (currentSortMode === 'weight-asc' || currentSortMode === 'weight-desc') {
             sorted.sort((a, b) => {
-                const weightA = ((wrongCounts.get(a.id) ?? 0) + 1) / ((correctCounts.get(a.id) ?? 0) + 1);
-                const weightB = ((wrongCounts.get(b.id) ?? 0) + 1) / ((correctCounts.get(b.id) ?? 0) + 1);
+                const weightA = weights.get(a.id) ?? ""; 
+                const weightB = weights.get(b.id) ?? ""; 
                 return currentSortMode === 'weight-asc' ? weightA - weightB : weightB - weightA;
+            });
+        } else if (currentSortMode === 'label-asc') {
+            sorted.sort((a, b) => a.label.localeCompare(b.label));
+        } else if (currentSortMode === 'label-desc') {
+            sorted.sort((a, b) => b.label.localeCompare(a.label));
+        } else if (currentSortMode === 'lastReview-asc' || currentSortMode === 'lastReview-desc') {
+            sorted.sort((a, b) => {
+                const dateA = lastReviews.has(a.id) ? new Date(lastReviews.get(a.id)) : new Date(0);
+                const dateB = lastReviews.has(b.id) ? new Date(lastReviews.get(b.id)) : new Date(0);
+                return currentSortMode === 'lastReview-asc'
+                    ? dateA - dateB
+                    : dateB - dateA;
+            });
+        } else if (currentSortMode === 'correct-asc' || currentSortMode === 'correct-desc') {
+            sorted.sort((a, b) => {
+                const correctA = correctCounts.get(a.id) ?? 0;
+                const correctB = correctCounts.get(b.id) ?? 0;
+                return currentSortMode === 'correct-asc' ? correctA - correctB : correctB - correctA;
+            });
+        } else if (currentSortMode === 'wrong-asc' || currentSortMode === 'wrong-desc') {
+            sorted.sort((a, b) => {
+                const wrongA = wrongCounts.get(a.id) ?? 0;
+                const wrongB = wrongCounts.get(b.id) ?? 0;
+                return currentSortMode === 'wrong-asc' ? wrongA - wrongB : wrongB - wrongA;
             });
         } else {
             // デフォルトは label-asc
