@@ -2500,289 +2500,147 @@ const quizData3 = (() => {
     "\n\n"+
     "商第七十七条1項　準用"
 
+
+
+
+  // 各 baseText とその置換パターンをまとめる
+  const sources = [
+    {
+      baseText: toku001j_jitsu001j_i001j_shou001j,
+      label: "特許法第一条",
+      patterns: ["保護及び利用", "奨励", "産業の発達", "形状", "構造", "組合せ", "創作", "保護", "業務上の信用の維持", "需要者の利益" ],
+    },
+    {
+      baseText: toku001jao,
+      label: "特許法第一条青本",
+      patterns: ["代償", "独占", "調和", "技術の進歩", "産業の発達" ],
+    },
+    {
+      baseText: jitsu001jao,
+      label: "実用新案法第一条青本",
+      patterns: ["方法", "程度のいかん", "化学構造", "かるた", "独占権", "外部" ],
+    },
+    {
+      baseText: i001jao,
+      label: "意匠法第一条青本",
+      patterns: ["美感", "興隆", "創作", "技術の進歩", "産業の発達", "業務上の信用", "視覚", "産業政策", "行政処分", "人格的・財産的", "同時" ],
+    },
+    {
+      baseText: shou001jao,
+      label: "商標法第一条青本",
+      patterns: ["継続", "業務上の信用", "有形", "行政処分", "取引秩序", "消費者", "産業の発達" ],
+    },
+    {
+      baseText: toku2j1k_jitsu2j1k_i2j1k_shou2j1k,
+      label: "特許法第二条1項",
+      patterns: ["自然法則", "技術的思想", "高度", "物品の部分", "形状", "模様", "色彩", "結合", "建築物の部分", "機器の操作", "機器がその機能を発揮した結果", "画像の部分", "視覚", "美感", "文字", "図形", "記号", "立体的形状", "提供", "使用", "音", "生産", "証明", "譲渡", "小売", "卸売", "前号に掲げるもの", "便益" ],
+    },
+    {
+      baseText: toku002j1kao,
+      label: "特許法第二条1項青本",
+      patterns: ["電報", "暗号", "主観", "客観", "進歩性", "発明時", "特許出願時" ],
+    },
+    {
+      baseText: jitsu002j1kao,
+      label: "実用新案法第二条1項青本",
+      patterns: ["低度" ],
+    },
+    {
+      baseText: i002j1kao,
+      label: "意匠法第二条1項青本",
+      patterns: ["審美的", "投資", "部分", "物体", "土木構造物", "映画", "一場面", "有体物", "動産", "願書", "図面", "美感", "視覚", "一般的" ],
+    },
+    {
+      baseText: shou002j1kao,
+      label: "商標法第二条1項青本",
+      patterns: ["色彩", "打ち抜いた", "透明", "ガラス", "国際的な調和", "におい", "商品の品質", "役務の質", "石けん", "通信販売", "白", "黒", "動産", "労務", "便益", "商取引", "三次元", "他人", "独立" ],
+    },
+    {
+      baseText: toku002j2k_jitsu002k2k_i2j3k_shou2j5k,
+      label: "特許法第二条2項",
+      patterns: ["特許を受けている発明" ],
+    },
+    {
+      baseText: toku002j2kao,
+      label: "特許法第二条2項青本",
+      patterns: ["※特になし" ],
+    },
+    {
+      baseText: jitsu002j2kao,
+      label: "実用新案法第二条2項青本",
+      patterns: ["※特になし" ],
+    },
+    {
+      baseText: i002j3kao,
+      label: "意匠法第二条3項青本",
+      patterns: ["※特になし" ],
+    },
+    {
+      baseText: shou002j5kao,
+      label: "商標法第二条5項青本",
+      patterns: ["他の何人", "指定商品以外", "指定役務以外", "消費者" ],
+    },
+    {
+      baseText: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k,
+      label: "特許法第二条3,4項",
+      patterns: ["生産", "使用", "譲渡", "貸渡し", "電気通信回線を通じた提供", "輸出", "輸入", "申出", "展示", "前号に掲げるもの", "製造", "貸し渡し", "外国にある者が外国から日本国内に他人をして持ち込ませる", "作成", "記録媒体", "内蔵する機器", "包装", "その提供を受ける者", "役務の提供の用", "当該役務の提供に係る物", "知覚", "映像面", "広告", "価格表", "取引書類", "頒布", "文字", "図形", "記号", "立体的形状", "結合", "色彩", "付する", "標章の形状", "記録する", "類似"  ],
+    },
+    {
+      baseText: toku002j3kao_toku002j4kao,
+      label: "特許法第二条3,4項青本",
+      patterns: ["属地主義", "有線であるか無線であるか", "通信網", "放送網", "譲渡、貸渡し", "本に書かれた情報", "人間の知識"  ],
+    },
+    {
+      baseText: jitsu002j3kao,
+      label: "実用新案法第二条3項青本",
+      patterns: ["※特になし" ],
+    },
+    {
+      baseText: i002j2kao,
+      label: "意匠法第二条2項青本",
+      patterns: ["建築", "輸出入", "作成", "配送料金", "国内の事業者", "国内の消費者", "日本国内に到達", "日本の領域外", "属地主義", "スマートフォン", "洗濯機", "ＤＶＤプレーヤー" ],
+    },
+    {
+      baseText: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao,
+      label: "商標法第二条3,4,6,7項青本",
+      patterns: ["需要者", "自他役務の識別標識", "役務の提供を受ける者の利用", "信用の蓄積", "不使用取消し", "名目的", "機器を用いて再生", "楽器を用いて演奏", "広告塔", "店頭人形", "属地主義", "物の上の現実の支配", "飛行機が空", "カレンダー", "電子情報財", "電子メールでの送信", "譲渡、引渡し", "事業者", "バナー", "契約フォーム", "輸入", "自他商品識別", "電子出版物", "オンラインでの電子出版物の提供", "保存"  ],
+    },
+  ];
+  
+  const baseId = 50001;
+
+
+  // return [
+
+  return sources.flatMap((src) =>
+    src.patterns.map((target, idx) => ({
+    id: baseId + 
+        // 先頭からの通し番号を作るために flatMap 全体の index をあとで使う
+        0, // ダミー、あとで書き換え
+    label: src.label,
+    question: src.baseText.replace(new RegExp(target, "g"), "【】"),
+    answer: target,
+    }))
+  ).map((item, idx) => ({
+    ...item,
+    id: baseId + idx,
+  }));
+
   
 
 
-  return [
-    
-    { id: 50001, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/保護及び利用/g, "【】"), answer: "保護及び利用" },
-    { id: 50002, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/奨励/g, "【】"), answer: "奨励" },
-    { id: 50003, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/産業の発達/g, "【】"), answer: "産業の発達" },
-    { id: 50004, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/形状/g, "【】"), answer: "形状" },
-    { id: 50005, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/構造/g, "【】"), answer: "構造" },
-    { id: 50006, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/組合せ/g, "【】"), answer: "組合せ" },
-    { id: 50007, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/創作/g, "【】"), answer: "創作" },
-    { id: 50008, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/保護/g, "【】"), answer: "保護" },
-    { id: 50009, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/業務上の信用の維持/g, "【】"), answer: "業務上の信用の維持" },
-    { id: 50010, label: "特許法第一条", question: toku001j_jitsu001j_i001j_shou001j.replace(/需要者の利益/g, "【】"), answer: "需要者の利益" },
 
 
-    { id: 50011, label: "特許法第一条青本", question: toku001jao.replace(/代償/g, "【】"), answer: "代償" },
-    { id: 50012, label: "特許法第一条青本", question: toku001jao.replace(/独占/g, "【】"), answer: "独占" },
-    { id: 50013, label: "特許法第一条青本", question: toku001jao.replace(/調和/g, "【】"), answer: "調和" },
-    { id: 50014, label: "特許法第一条青本", question: toku001jao.replace(/技術の進歩/g, "【】"), answer: "技術の進歩" },
-    { id: 50015, label: "特許法第一条青本", question: toku001jao.replace(/産業の発達/g, "【】"), answer: "産業の発達" },
-    { id: 50016, label: "特許法第一条青本", question: toku001jao.replace(/独占的/g, "【】"), answer: "独占的" },
 
 
-    { id: 50017, label: "実用新案法第一条青本", question: jitsu001jao.replace(/方法/g, "【】"), answer: "方法" },
-    { id: 50018, label: "実用新案法第一条青本", question: jitsu001jao.replace(/程度のいかん/g, "【】"), answer: "程度のいかん" },
-    { id: 50019, label: "実用新案法第一条青本", question: jitsu001jao.replace(/化学構造/g, "【】"), answer: "化学構造" },
-    { id: 50020, label: "実用新案法第一条青本", question: jitsu001jao.replace(/かるた/g, "【】"), answer: "かるた" },
-    { id: 50021, label: "実用新案法第一条青本", question: jitsu001jao.replace(/独占権/g, "【】"), answer: "独占権" },
-    { id: 50022, label: "実用新案法第一条青本", question: jitsu001jao.replace(/外部/g, "【】"), answer: "外部" },
 
 
-    { id: 50023, label: "意匠法第一条青本", question: i001jao.replace(/美感/g, "【】"), answer: "美感" },
-    { id: 50024, label: "意匠法第一条青本", question: i001jao.replace(/興隆/g, "【】"), answer: "興隆" },
-    { id: 50025, label: "意匠法第一条青本", question: i001jao.replace(/創作/g, "【】"), answer: "創作" },
-    { id: 50026, label: "意匠法第一条青本", question: i001jao.replace(/技術の進歩/g, "【】"), answer: "技術の進歩" },
-    { id: 50027, label: "意匠法第一条青本", question: i001jao.replace(/産業の発達/g, "【】"), answer: "産業の発達" },
-    { id: 50028, label: "意匠法第一条青本", question: i001jao.replace(/業務上の信用/g, "【】"), answer: "業務上の信用" },
-    { id: 50029, label: "意匠法第一条青本", question: i001jao.replace(/視覚/g, "【】"), answer: "視覚" },
-    { id: 50030, label: "意匠法第一条青本", question: i001jao.replace(/産業政策/g, "【】"), answer: "産業政策" },
-    { id: 50031, label: "意匠法第一条青本", question: i001jao.replace(/行政処分/g, "【】"), answer: "行政処分" },
-    { id: 50032, label: "意匠法第一条青本", question: i001jao.replace(/人格的・財産的/g, "【】"), answer: "人格的・財産的" },
-    { id: 50033, label: "意匠法第一条青本", question: i001jao.replace(/同時/g, "【】"), answer: "同時" },
-    { id: 50034, label: "意匠法第一条青本", question: i001jao.replace(/人格的・財産的/g, "【】"), answer: "人格的・財産的" },
 
 
-    { id: 50035, label: "商標法第一条青本", question: shou001jao.replace(/継続/g, "【】"), answer: "継続" },
-    { id: 50036, label: "商標法第一条青本", question: shou001jao.replace(/業務上の信用/g, "【】"), answer: "業務上の信用" },
-    { id: 50037, label: "商標法第一条青本", question: shou001jao.replace(/有形/g, "【】"), answer: "有形" },
-    { id: 50038, label: "商標法第一条青本", question: shou001jao.replace(/継続/g, "【】"), answer: "継続" },
-    { id: 50039, label: "商標法第一条青本", question: shou001jao.replace(/行政処分/g, "【】"), answer: "行政処分" },
-    { id: 50040, label: "商標法第一条青本", question: shou001jao.replace(/取引秩序/g, "【】"), answer: "取引秩序" },
-    { id: 50041, label: "商標法第一条青本", question: shou001jao.replace(/消費者/g, "【】"), answer: "消費者" },
-    { id: 50042, label: "商標法第一条青本", question: shou001jao.replace(/産業の発達/g, "【】"), answer: "産業の発達" },
 
 
-    { id: 50043, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/自然法則/g, "【】"), answer: "自然法則" },
-    { id: 50044, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/技術的思想/g, "【】"), answer: "技術的思想" },
-    { id: 50045, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/高度/g, "【】"), answer: "高度" },
-    { id: 50046, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/物品の部分/g, "【】"), answer: "物品の部分" },
-    { id: 50047, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/形状/g, "【】"), answer: "形状" },
-    { id: 50048, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/模様/g, "【】"), answer: "模様" },
-    { id: 50049, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/色彩/g, "【】"), answer: "色彩" },
-    { id: 50050, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/結合/g, "【】"), answer: "結合" },
-    { id: 50051, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/建築物の部分/g, "【】"), answer: "建築物の部分" },
-    { id: 50052, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/機器の操作/g, "【】"), answer: "機器の操作" },
-    { id: 50053, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/機器がその機能を発揮した結果/g, "【】"), answer: "機器がその機能を発揮した結果" },
-    { id: 50054, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/画像の部分/g, "【】"), answer: "画像の部分" },
-    { id: 50055, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/視覚/g, "【】"), answer: "視覚" },
-    { id: 50056, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/美感/g, "【】"), answer: "美感" },
-    { id: 50057, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/文字/g, "【】"), answer: "文字" },
-    { id: 50058, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/図形/g, "【】"), answer: "図形" },
-    { id: 50059, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/記号/g, "【】"), answer: "記号" },
-    { id: 50060, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/立体的形状/g, "【】"), answer: "立体的形状" },
-    { id: 50061, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/提供/g, "【】"), answer: "提供" },
-    { id: 50062, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/使用/g, "【】"), answer: "使用" },
-    { id: 50063, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/音/g, "【】"), answer: "音" },
-    { id: 50064, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/生産/g, "【】"), answer: "生産" },
-    { id: 50065, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/証明/g, "【】"), answer: "証明" },
-    { id: 50066, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/譲渡/g, "【】"), answer: "譲渡" },
-    { id: 50067, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/小売/g, "【】"), answer: "小売" },
-    { id: 50068, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/卸売/g, "【】"), answer: "卸売" },
-    { id: 50069, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/（前号に掲げるものを除く。）/g, "【】"), answer: "（前号に掲げるものを除く。）" },
-    { id: 50070, label: "特許法第二条1項", question: toku2j1k_jitsu2j1k_i2j1k_shou2j1k.replace(/便益/g, "【】"), answer: "便益" },
 
-    
-    { id: 50071, label: "特許法第二条1項青本", question: toku002j1kao.replace(/電報/g, "【】"), answer: "電報" },
-    { id: 50072, label: "特許法第二条1項青本", question: toku002j1kao.replace(/暗号/g, "【】"), answer: "暗号" },
-    { id: 50073, label: "特許法第二条1項青本", question: toku002j1kao.replace(/主観/g, "【】"), answer: "主観" },
-    { id: 50074, label: "特許法第二条1項青本", question: toku002j1kao.replace(/客観/g, "【】"), answer: "客観" },
-    { id: 50075, label: "特許法第二条1項青本", question: toku002j1kao.replace(/進歩性/g, "【】"), answer: "進歩性" },
-    { id: 50076, label: "特許法第二条1項青本", question: toku002j1kao.replace(/発明時/g, "【】"), answer: "発明時" },
-    { id: 50077, label: "特許法第二条1項青本", question: toku002j1kao.replace(/特許出願時/g, "【】"), answer: "特許出願時" },
-
-    
-    { id: 50078, label: "実用新案法第二条1項青本", question: jitsu002j1kao.replace(/低度/g, "【】"), answer: "低度" },
-
-    
-    { id: 50078, label: "意匠法第二条1項青本", question: i002j1kao.replace(/審美的/g, "【】"), answer: "審美的" },
-    { id: 50079, label: "意匠法第二条1項青本", question: i002j1kao.replace(/投資/g, "【】"), answer: "投資" },
-    { id: 50080, label: "意匠法第二条1項青本", question: i002j1kao.replace(/部分/g, "【】"), answer: "部分" },
-    { id: 50081, label: "意匠法第二条1項青本", question: i002j1kao.replace(/物体/g, "【】"), answer: "物体" },
-    { id: 50082, label: "意匠法第二条1項青本", question: i002j1kao.replace(/土木構造物/g, "【】"), answer: "土木構造物" },
-    { id: 50083, label: "意匠法第二条1項青本", question: i002j1kao.replace(/土木構造物/g, "【】"), answer: "土木構造物" },
-    { id: 50084, label: "意匠法第二条1項青本", question: i002j1kao.replace(/映画/g, "【】"), answer: "映画" },
-    { id: 50085, label: "意匠法第二条1項青本", question: i002j1kao.replace(/一場面/g, "【】"), answer: "一場面" },
-    { id: 50086, label: "意匠法第二条1項青本", question: i002j1kao.replace(/有体物/g, "【】"), answer: "有体物" },
-    { id: 50087, label: "意匠法第二条1項青本", question: i002j1kao.replace(/動産/g, "【】"), answer: "動産" },
-    { id: 50088, label: "意匠法第二条1項青本", question: i002j1kao.replace(/願書/g, "【】"), answer: "願書" },
-    { id: 50089, label: "意匠法第二条1項青本", question: i002j1kao.replace(/図面/g, "【】"), answer: "図面" },
-    { id: 50090, label: "意匠法第二条1項青本", question: i002j1kao.replace(/美感/g, "【】"), answer: "美感" },
-    { id: 50091, label: "意匠法第二条1項青本", question: i002j1kao.replace(/視覚/g, "【】"), answer: "視覚" },
-    { id: 50092, label: "意匠法第二条1項青本", question: i002j1kao.replace(/一般的/g, "【】"), answer: "一般的" },
-
-    
-    { id: 50093, label: "商標法第二条1項青本", question: shou002j1kao.replace(/色彩/g, "【】"), answer: "色彩" },
-    { id: 50094, label: "商標法第二条1項青本", question: shou002j1kao.replace(/打ち抜いた/g, "【】"), answer: "打ち抜いた" },
-    { id: 50095, label: "商標法第二条1項青本", question: shou002j1kao.replace(/透明/g, "【】"), answer: "透明" },
-    { id: 50096, label: "商標法第二条1項青本", question: shou002j1kao.replace(/ガラス/g, "【】"), answer: "ガラス" },
-    { id: 50097, label: "商標法第二条1項青本", question: shou002j1kao.replace(/国際的な調和/g, "【】"), answer: "国際的な調和" },
-    { id: 50098, label: "商標法第二条1項青本", question: shou002j1kao.replace(/におい/g, "【】"), answer: "におい" },
-    { id: 50099, label: "商標法第二条1項青本", question: shou002j1kao.replace(/商品の品質/g, "【】"), answer: "商品の品質" },
-    { id: 50100, label: "商標法第二条1項青本", question: shou002j1kao.replace(/役務の質/g, "【】"), answer: "役務の質" },
-    { id: 50101, label: "商標法第二条1項青本", question: shou002j1kao.replace(/石けん/g, "【】"), answer: "石けん" },
-    { id: 50102, label: "商標法第二条1項青本", question: shou002j1kao.replace(/通信販売/g, "【】"), answer: "通信販売" },
-    { id: 50103, label: "商標法第二条1項青本", question: shou002j1kao.replace(/白/g, "【】"), answer: "白" },
-    { id: 50104, label: "商標法第二条1項青本", question: shou002j1kao.replace(/黒/g, "【】"), answer: "黒" },
-    { id: 50105, label: "商標法第二条1項青本", question: shou002j1kao.replace(/動産/g, "【】"), answer: "動産" },
-    { id: 50106, label: "商標法第二条1項青本", question: shou002j1kao.replace(/労務/g, "【】"), answer: "労務" },
-    { id: 50107, label: "商標法第二条1項青本", question: shou002j1kao.replace(/便益/g, "【】"), answer: "便益" },
-    { id: 50108, label: "商標法第二条1項青本", question: shou002j1kao.replace(/商取引/g, "【】"), answer: "商取引" },
-    { id: 50109, label: "商標法第二条1項青本", question: shou002j1kao.replace(/三次元/g, "【】"), answer: "三次元" },
-    { id: 50110, label: "商標法第二条1項青本", question: shou002j1kao.replace(/他人/g, "【】"), answer: "他人" },
-    { id: 50111, label: "商標法第二条1項青本", question: shou002j1kao.replace(/独立/g, "【】"), answer: "独立" },
-
-
-    { id: 50112, label: "特許法第二条2項", question: toku002j2k_jitsu002k2k_i2j3k_shou2j5k.replace(/特許を受けている発明/g, "【】"), answer: "特許を受けている発明" },
-
-    { id: 50113, label: "特許法第二条2項青本", question: toku002j2kao.replace(/※特になし/g, "【】"), answer: "※特になし" },
-
-    { id: 50114, label: "実用新案法第二条2項青本", question: jitsu002j2kao.replace(/※特になし/g, "【】"), answer: "※特になし" },
-
-    { id: 50115, label: "意匠法第二条3項青本", question: i002j3kao.replace(/※特になし/g, "【】"), answer: "※特になし" },
-
-    { id: 50116, label: "商標法第二条5項青本", question: shou002j5kao.replace(/他の何人/g, "【】"), answer: "他の何人" },
-    { id: 50117, label: "商標法第二条5項青本", question: shou002j5kao.replace(/指定商品以外/g, "【】"), answer: "指定商品以外" },
-    { id: 50118, label: "商標法第二条5項青本", question: shou002j5kao.replace(/指定役務以外/g, "【】"), answer: "指定役務以外" },
-    { id: 50119, label: "商標法第二条5項青本", question: shou002j5kao.replace(/消費者/g, "【】"), answer: "消費者" },
-    
-    { id: 50120, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/生産/g, "【】"), answer: "生産" },
-    { id: 50121, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/使用/g, "【】"), answer: "使用" },
-    { id: 50122, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/譲渡/g, "【】"), answer: "譲渡" },
-    { id: 50123, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/貸渡し/g, "【】"), answer: "貸渡し" },
-    { id: 50124, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/電気通信回線を通じた提供/g, "【】"), answer: "電気通信回線を通じた提供" },
-    { id: 50125, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/輸出/g, "【】"), answer: "輸出" },
-    { id: 50126, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/輸入/g, "【】"), answer: "輸入" },
-    { id: 50127, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/申出/g, "【】"), answer: "申出" },
-    { id: 50128, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/展示/g, "【】"), answer: "展示" },
-    { id: 50129, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/前号に掲げるもの/g, "【】"), answer: "前号に掲げるもの" },
-    { id: 50130, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/製造/g, "【】"), answer: "製造" },
-    { id: 50131, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/貸し渡し/g, "【】"), answer: "貸し渡し" },
-    { id: 50132, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/外国にある者が外国から日本国内に他人をして持ち込ませる/g, "【】"), answer: "外国にある者が外国から日本国内に他人をして持ち込ませる" },
-    { id: 50133, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/作成/g, "【】"), answer: "作成" },
-    { id: 50134, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/記録媒体/g, "【】"), answer: "記録媒体" },
-    { id: 50135, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/内蔵する機器/g, "【】"), answer: "内蔵する機器" },
-    { id: 50136, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/包装/g, "【】"), answer: "包装" },
-    { id: 50137, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/その提供を受ける者/g, "【】"), answer: "その提供を受ける者" },
-    { id: 50138, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/役務の提供の用/g, "【】"), answer: "役務の提供の用" },
-    { id: 50139, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/当該役務の提供に係る物/g, "【】"), answer: "当該役務の提供に係る物" },
-    { id: 50140, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/知覚/g, "【】"), answer: "知覚" },
-    { id: 50141, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/映像面/g, "【】"), answer: "映像面" },
-    { id: 50142, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/広告/g, "【】"), answer: "広告" },
-    { id: 50143, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/価格表/g, "【】"), answer: "価格表" },
-    { id: 50144, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/取引書類/g, "【】"), answer: "取引書類" },
-    { id: 50145, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/頒布/g, "【】"), answer: "頒布" },
-    { id: 50146, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/文字/g, "【】"), answer: "文字" },
-    { id: 50147, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/図形/g, "【】"), answer: "図形" },
-    { id: 50148, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/記号/g, "【】"), answer: "記号" },
-    { id: 50149, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/立体的形状/g, "【】"), answer: "立体的形状" },
-    { id: 50150, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/結合/g, "【】"), answer: "結合" },
-    { id: 50151, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/色彩/g, "【】"), answer: "色彩" },
-    { id: 50152, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/付する/g, "【】"), answer: "付する" },
-    { id: 50153, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/標章の形状/g, "【】"), answer: "標章の形状" },
-    { id: 50154, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/記録する/g, "【】"), answer: "記録する" },
-    { id: 50155, label: "特許法第二条3,4項", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/類似/g, "【】"), answer: "類似" },
-
-    { id: 50156, label: "特許法第二条3,4項青本", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/属地主義/g, "【】"), answer: "属地主義" },
-    { id: 50157, label: "特許法第二条3,4項青本", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/有線であるか無線であるか/g, "【】"), answer: "有線であるか無線であるか" },
-    { id: 50158, label: "特許法第二条3,4項青本", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/通信網/g, "【】"), answer: "通信網" },
-    { id: 50159, label: "特許法第二条3,4項青本", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/放送網/g, "【】"), answer: "放送網" },
-    { id: 50160, label: "特許法第二条3,4項青本", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/譲渡、貸渡し/g, "【】"), answer: "譲渡、貸渡し" },
-    { id: 50161, label: "特許法第二条3,4項青本", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/本に書かれた情報/g, "【】"), answer: "本に書かれた情報" },
-    { id: 50162, label: "特許法第二条3,4項青本", question: toku002j3k_toku002j4k_jitsu002j3k_i002j2k_shou002j3k_shou002j4k.replace(/人間の知識/g, "【】"), answer: "人間の知識" },
-
-    { id: 50163, label: "実用新案法第二条3項青本", question: jitsu002j3kao.replace(/※特になし/g, "【】"), answer: "※特になし" },
-
-    { id: 50164, label: "意匠法第二条2項青本", question: i002j2kao.replace(/建築/g, "【】"), answer: "建築" },
-    { id: 50165, label: "意匠法第二条2項青本", question: i002j2kao.replace(/輸出入/g, "【】"), answer: "輸出入" },
-    { id: 50166, label: "意匠法第二条2項青本", question: i002j2kao.replace(/作成/g, "【】"), answer: "作成" },
-    { id: 50167, label: "意匠法第二条2項青本", question: i002j2kao.replace(/配送料金/g, "【】"), answer: "配送料金" },
-    { id: 50168, label: "意匠法第二条2項青本", question: i002j2kao.replace(/国内の事業者/g, "【】"), answer: "国内の事業者" },
-    { id: 50169, label: "意匠法第二条2項青本", question: i002j2kao.replace(/国内の消費者/g, "【】"), answer: "国内の消費者" },
-    { id: 50170, label: "意匠法第二条2項青本", question: i002j2kao.replace(/日本国内に到達/g, "【】"), answer: "日本国内に到達" },
-    { id: 50171, label: "意匠法第二条2項青本", question: i002j2kao.replace(/日本の領域外/g, "【】"), answer: "日本の領域外" },
-    { id: 50172, label: "意匠法第二条2項青本", question: i002j2kao.replace(/属地主義/g, "【】"), answer: "属地主義" },
-    { id: 50173, label: "意匠法第二条2項青本", question: i002j2kao.replace(/スマートフォン/g, "【】"), answer: "スマートフォン" },
-    { id: 50174, label: "意匠法第二条2項青本", question: i002j2kao.replace(/洗濯機/g, "【】"), answer: "洗濯機" },
-    { id: 50175, label: "意匠法第二条2項青本", question: i002j2kao.replace(/ＤＶＤプレーヤー/g, "【】"), answer: "ＤＶＤプレーヤー" },
-
-    { id: 50176, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/需要者/g, "【】"), answer: "需要者" },
-    { id: 50177, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/自他役務の識別標識/g, "【】"), answer: "自他役務の識別標識" },
-    { id: 50178, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/役務の提供を受ける者の利用/g, "【】"), answer: "役務の提供を受ける者の利用" },
-    { id: 50179, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/信用の蓄積/g, "【】"), answer: "信用の蓄積" },
-    { id: 50180, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/不使用取消し/g, "【】"), answer: "不使用取消し" },
-    { id: 50181, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/名目的/g, "【】"), answer: "名目的" },
-    { id: 50182, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/機器を用いて再生/g, "【】"), answer: "機器を用いて再生" },
-    { id: 50183, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/楽器を用いて演奏/g, "【】"), answer: "楽器を用いて演奏" },
-    { id: 50184, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/広告塔/g, "【】"), answer: "広告塔" },
-    { id: 50185, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/店頭人形/g, "【】"), answer: "店頭人形" },
-    { id: 50186, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/属地主義/g, "【】"), answer: "属地主義" },
-    { id: 50187, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/物の上の現実の支配/g, "【】"), answer: "物の上の現実の支配" },
-    { id: 50188, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/飛行機が空/g, "【】"), answer: "飛行機が空" },
-    { id: 50189, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/カレンダー/g, "【】"), answer: "カレンダー" },
-    { id: 50190, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/電子情報財/g, "【】"), answer: "電子情報財" },
-    { id: 50190, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/電子メールでの送信/g, "【】"), answer: "電子メールでの送信" },
-    { id: 50191, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/譲渡、引渡し/g, "【】"), answer: "譲渡、引渡し" },
-    { id: 50192, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/事業者/g, "【】"), answer: "事業者" },
-    { id: 50193, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/バナー/g, "【】"), answer: "バナー" },
-    { id: 50194, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/契約フォーム/g, "【】"), answer: "契約フォーム" },
-    { id: 50195, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/輸入/g, "【】"), answer: "輸入" },
-    { id: 50196, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/自他商品識別/g, "【】"), answer: "自他商品識別" },
-    { id: 50197, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/電子出版物/g, "【】"), answer: "電子出版物" },
-    { id: 50198, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/オンラインでの電子出版物の提供/g, "【】"), answer: "オンラインでの電子出版物の提供" },
-    { id: 50199, label: "商標法第二条3,4,6,7項青本", question: shou002j3kao_shou002j4kao_shou002j6kao_shou002j7kao.replace(/保存/g, "【】"), answer: "保存" },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  ]
+  // ]
 
 
 
@@ -2987,43 +2845,43 @@ const quizData4 = [ /*漢字パーツ 110001～*/
   "\n清・淸　河清(かせい)、刻露清秀(こくろせいしゅう)、紫電清霜(しでんせいそう)、笑比河清(しょうひかせい)、清音幽韻(せいおんゆういん)、清灑(せいしゃ)、清浄無垢(せいじょうむく)、清聖濁賢(せいせいだくけん)、清淡虚無(せいたんきょむ)、清淡寡慾(せいたんかよく)、清風故人(せいふうこじん、清風明月(せいふうめいげつ)、清風朗月(せいふうろうげつ)、清穆(せいぼく)、清籟(せいらい)、清冽(せいれつ)、雪裏清香(せつりせいこう)、内清外濁(ないせいがいだく)、風清弊絶(ふうせいへいぜつ)、弊絶風清(へいぜつふうせい)、和敬清寂(わけいせいじゃく)　きよ(い)、きよ(まる)、きよ(める)、さや(か)、す(む)"+
   "\n晴・晴　雨過天晴(うかてんせい)、雨奇晴好(うきせいこう)、晴好雨奇(せいこううき)、晴雲秋月(せいうんしゅうげつ)　は(らす)、は(れる)"+
   "\n靖・靖　靖国(せいこく)、嘉靖(かせい)、閑靖(かんせい)、寧靖(ねいせい)　やす(い)、やす(らか)、やす(んじる)"+
-  "\n睛　眼睛(がんせい)、瞳睛(どうせい)、点睛(てんせい)、目睛(もくせい)　ひとみ"+
+  "\n睛　　　眼睛(がんせい)、瞳睛(どうせい)、点睛(てんせい)、目睛(もくせい)　ひとみ"+
   "\n精・精　精衛塡海(せいえいてんかい)、精勤(せいきん)、精金良玉(せいきんりょうぎょく)、良玉精金(りょうぎょくせいきん)、精精(せいぜい)、精明強幹(せいめいきょうかん)、精励恪勤(せいれいかっきん)、恪勤精励(かっきんせいれい)、搗精(とうせい)、厲精(れいせい)、強精(きょうせい)　くわ(しい)、しら(げる)、もののけ"+
-  "\n蜻　蜻蛉(せいれい)、蜻蜓(せいてい)"+
-  "\n請　稟請(りんせい)　う(ける)、こ(う)"+
-  "\n錆　さび、さ(びる)"+
+  "\n蜻　　　蜻蛉(せいれい)、蜻蜓(せいてい)"+
+  "\n請　　　稟請(りんせい)　う(ける)、こ(う)"+
+  "\n錆　　　さび、さ(びる)"+
   "\n静・靜　虚静恬淡(きょせいてんたん)　しず、しず(か)、しず(まる)、しず(める)"+
-  "\n鯖　五侯鯖(ごこうせい)　さば、よせなべ"+
-  "\n瀞　とろ"+
-  "\n鶄　鵁鶄(こうせい)"+
+  "\n鯖　　　五侯鯖(ごこうせい)　さば、よせなべ"+
+  "\n瀞　　　とろ"+
+  "\n鶄　　　鵁鶄(こうせい)"+
   "\n\n"+
   
   "ショウ"+
   "\n青・靑　紺青(こんじょう)、群青(ぐんじょう)、緑青(ろくしょう)　あお、あお(い)"+
   "\n清・淸　清浄寂滅(しょうじょうじゃくめつ)、六根清浄(ろっこんしょうじょう)　きよ(い)、きよ(まる)、きよ(める)、さや(か)、す(む)"+
   "\n精・精　祇園精舎(ぎおんしょうじゃ)、精進潔斎(しょうじんけっさい)、精霊会(しょうりょうえ)、不精(ぶしょう)、無精(ぶしょう)　くわ(しい)、しら(げる)、もののけ"+
-  "\n請　勧請(かんじょう)、起請(きしょう)、請来(しょうらい)　う(ける)、こ(う)"+
-  "\n錆　さび、さ(びる)"+
-  "\n鯖　さば、よせなべ"+
+  "\n請　　　勧請(かんじょう)、起請(きしょう)、請来(しょうらい)　う(ける)、こ(う)"+
+  "\n錆　　　さび、さ(びる)"+
+  "\n鯖　　　さば、よせなべ"+
   "\n\n"+
 
   "セン"+
-  "\n倩　倩倩(せんせん)　うつく(しい)、つらつら"+
+  "\n倩　　　倩倩(せんせん)　うつく(しい)、つらつら"+
   "\n\n"+
 
   "ジョウ"+
-  "\n情　下情(かじょう)、抒情(じょじょう)、情意投合(じょういとうごう)、情誼(じょうぎ)、情緒纏綿(じょうしょてんめん)、世情(せじょう)、有情(うじょう、ゆうじょう)　なさ(け)、おもむき、こころ"+
+  "\n情　　　下情(かじょう)、抒情(じょじょう)、情意投合(じょういとうごう)、情誼(じょうぎ)、情緒纏綿(じょうしょてんめん)、世情(せじょう)、有情(うじょう、ゆうじょう)　なさ(け)、おもむき、こころ"+
   "\n静・靜　寂静(じゃくじょう)、静脈(じょうみゃく)　しず、しず(か)、しず(まる)、しず(める)"+
-  "\n瀞　とろ"+
+  "\n瀞　　　とろ"+
   "\n\n"+
 
   "サイ"+
-  "\n猜　うたが(う)、そね(む)、ねた(む)　猜忌(さいき)、猜疑(さいぎ)、嫌猜(けんさい)、猜忍(さいにん)"+
+  "\n猜　　　うたが(う)、そね(む)、ねた(む)　猜忌(さいき)、猜疑(さいぎ)、嫌猜(けんさい)、猜忍(さいにん)"+
   "\n\n"+
 
   "シン"+
   "\n清・淸　きよ(い)、きよ(まる)、きよ(める)、さや(か)、す(む)"+
-  "\n請　普請(ふしん)　う(ける)、こ(う)",
+  "\n請　　　普請(ふしん)　う(ける)、こ(う)",
 
  },
 
@@ -3075,45 +2933,45 @@ const quizData4 = [ /*漢字パーツ 110001～*/
   { id: 110003, label: "几",
   answer:
   "キ"+
-  "\n几　床几(しょうぎ)、牀几(しょうぎ)、案几(あんき)、椅几(いき)　つくえ、ひじかけ、おしまずき"+
-  "\n机　明窓浄机(めいそうじょうき)、文机(ふづくえ)　つくえ"+
-  "\n肌　肌膚(きふ)、銘肌鏤骨(めいきるこつ)　はだ、はだえ"+
-  "\n飢　飢渇(きかつ)、飢饉(ききん)、餓飢(がき)、調飢(ちょうき)、凍飢(とうき)　う(える)、う(え)"+
+  "\n几　　　床几(しょうぎ)、牀几(しょうぎ)、案几(あんき)、椅几(いき)　つくえ、ひじかけ、おしまずき"+
+  "\n机　　　明窓浄机(めいそうじょうき)、文机(ふづくえ)　つくえ"+
+  "\n肌　　　肌膚(きふ)、銘肌鏤骨(めいきるこつ)　はだ、はだえ"+
+  "\n飢　　　飢渇(きかつ)、飢饉(ききん)、餓飢(がき)、調飢(ちょうき)、凍飢(とうき)　う(える)、う(え)"+
   "\n\n"+
 
   "コウ"+
-  "\n亢　亢竜(こうりょう)、心悸亢進(しんきこうしん)　あ(がる)、あ(たる)、きわ(める)、たか(い)、たかぶ(る)、のど"+
-  "\n伉　伉儷(こうれい)、伉礼(こうれい)、伉健(こうけん)　おご(る)、たぐい、つよ(い)、なら(ぶ)"+
-  "\n抗　拮抗(きっこう)　あらが(う)、こば(む)、はりあ(う)、ふせ(ぐ)"+
-  "\n坑　竪坑(たてこう)、焚書坑儒(ふんしょこうじゅ)、坑殺(こうさつ)　あな"+
-  "\n吭　のど"+
-  "\n杭　棒杭(ぼうぐい)、乱杭(らんぐい)　くい、わた(る)"+
-  "\n航　独航船(どっこうせん)　わた(る)"+
-  "\n頏　頡頏(けっこう、きっこう)　くび、のど"+
+  "\n亢　　　亢竜(こうりょう)、心悸亢進(しんきこうしん)　あ(がる)、あ(たる)、きわ(める)、たか(い)、たかぶ(る)、のど"+
+  "\n伉　　　伉儷(こうれい)、伉礼(こうれい)、伉健(こうけん)　おご(る)、たぐい、つよ(い)、なら(ぶ)"+
+  "\n抗　　　拮抗(きっこう)　あらが(う)、こば(む)、はりあ(う)、ふせ(ぐ)"+
+  "\n坑　　　竪坑(たてこう)、焚書坑儒(ふんしょこうじゅ)、坑殺(こうさつ)　あな"+
+  "\n吭　　　のど"+
+  "\n杭　　　棒杭(ぼうぐい)、乱杭(らんぐい)　くい、わた(る)"+
+  "\n航　　　独航船(どっこうせん)　わた(る)"+
+  "\n頏　　　頡頏(けっこう、きっこう)　くび、のど"+
   "\n\n"+
 
   "ジョウ"+
-  "\n冗　冗官(じょうかん)、冗漫(じょうまん)　むだ"+
+  "\n冗　　　冗官(じょうかん)、冗漫(じょうまん)　むだ"+
   "\n\n"+
 
   "ショ"+
-  "\n処　御居処(おいど)、大処着墨(たいしょちゃくぼく)　お(く)、お(る)、ところ"+
+  "\n処　　　御居処(おいど)、大処着墨(たいしょちゃくぼく)　お(く)、お(る)、ところ"+
   "\n\n"+
   
   "ソ"+
-  "\n処　お(く)、お(る)、ところ"+
+  "\n処　　　お(く)、お(る)、ところ"+
   "\n\n"+
 
   "キョ"+
-  "\n拠　憑拠(ひょうきょ)　よりどころ、よ(る)"+
+  "\n拠　　　憑拠(ひょうきょ)　よりどころ、よ(る)"+
   "\n\n"+
 
   "コ"+
-  "\n拠　証拠(しょうこ)　よりどころ、よ(る)"+
+  "\n拠　　　証拠(しょうこ)　よりどころ、よ(る)"+
   "\n\n"+
 
   "ヒョウ"+
-  "\n凭　もた(れる)、よ(る)"+
+  "\n凭　　　もた(れる)、よ(る)"+
   "\n\n"+
 
   "フ"+
@@ -3121,11 +2979,11 @@ const quizData4 = [ /*漢字パーツ 110001～*/
   "\n\n"+
 
   "カイ"+
-  "\n凱　かちどき、やわ(らぐ)"+
+  "\n凱　　　かちどき、やわ(らぐ)"+
   "\n\n"+
 
   "ガイ"+
-  "\n凱　凱沢(がいたく)、凱弟(がいてい)、奏凱(そうがい)、八凱(はちがい)　かちどき、やわ(らぐ)",
+  "\n凱　　　凱沢(がいたく)、凱弟(がいてい)、奏凱(そうがい)、八凱(はちがい)　かちどき、やわ(らぐ)",
 
  },
 
