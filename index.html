@@ -38,15 +38,15 @@
 
   /* ---------------- 問題・答えエリア ---------------- */
   .question-area, .answer-area {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 18px;
-    min-height: 40px; /* 少し小さめに調整 */
-    line-height: 1.5;
-    background: #fafafa;
-    overflow-y: auto;
-    white-space: pre-wrap; /* ← これを追加 */
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 18px;
+      height: 100px;       /* 固定高さを指定 */
+      line-height: 1.5;
+      background: #fafafa;
+      overflow-y: auto;    /* 縦方向にスクロール可能 */
+      white-space: pre-wrap;
   }
 
   select {
@@ -196,6 +196,7 @@
 </head>
 <body>
 
+  
 
 <!-- クイズブロック -->
 <div class="quiz-block" id="quizBlock-0">
@@ -223,7 +224,7 @@
       <button id="toggleIdSortBtn-0">ID順</button>
       <button id="toggleWeightSortBtn-0">Weight順</button>
       <button id="toggleLabelSortBtn-0">Label順</button>
-      <button id="toggleLastReviewSortBtn-0">最終復習順</button>
+      <button id="toggleLastReviewSortBtn-0">lastReview順</button>
       <button id="toggleCorrectSortBtn-0">正答数順</button>
       <button id="toggleWrongSortBtn-0">誤答数順</button>
     </div>
@@ -232,7 +233,7 @@
 
   </div>
 
-  <div class="status-table-container" id="statusTableContainer">
+  <div class="status-table-container" id="statusTableContainer-0">
     <table class="status-table" id="statusTable-0"></table>
   </div>
 </div>
@@ -245,6 +246,12 @@
   </div>
   <pre id="storageInfo"></pre>
 </div>
+
+
+<!-- フローティングボタン -->
+<!-- <div class="floating-buttons">
+  <button data-target="quizBlock-0">イタリア語</button>
+</div> -->
 
 <script>
 const quizData0 = [ /*イタリア語 40001～*/
@@ -3375,13 +3382,20 @@ function createQuiz(blockId, data) {
     const correctBtn = document.getElementById(`correctBtn-${blockId}`);
     const wrongBtn = document.getElementById(`wrongBtn-${blockId}`);
     const statusTable = document.getElementById(`statusTable-${blockId}`);
+    const statusTableContainer = document.getElementById(`statusTableContainer-${blockId}`);
     const startSelect = document.getElementById(`startSelect-${blockId}`);
     const endSelect = document.getElementById(`endSelect-${blockId}`);
     const excludeCorrectSelect = document.getElementById(`excludeCorrectSelect-${blockId}`);
     const resetCountsBtn = document.getElementById(`resetCountsBtn-${blockId}`);
+
     const toggleTableBtn = document.getElementById(`toggleTableBtn-${blockId}`);
     const toggleIdSortBtn = document.getElementById(`toggleIdSortBtn-${blockId}`);
     const toggleWeightSortBtn = document.getElementById(`toggleWeightSortBtn-${blockId}`);
+    const toggleLabelSortBtn = document.getElementById(`toggleLabelSortBtn-${blockId}`);
+    const toggleLastReviewSortBtn = document.getElementById(`toggleLastReviewSortBtn-${blockId}`);
+    const toggleCorrectSortBtn = document.getElementById(`toggleCorrectSortBtn-${blockId}`);
+    const toggleWrongSortBtn = document.getElementById(`toggleWrongSortBtn-${blockId}`);
+
 
 
 
@@ -3444,76 +3458,71 @@ function createQuiz(blockId, data) {
   
     // テーブル作成
     function buildTable() {
-        statusTable.innerHTML = '';
-        statusMap.clear();
-        const sortedData = getSortedData();
-        const rowHeight = 500 / data.length + 'px';
+      statusTable.innerHTML = '';
+      statusMap.clear();
+      const sortedData = getSortedData(); 
+      const rowHeight = 500 / data.length + 'px'; 
 
-        sortedData.forEach(d => {
-            const row = statusTable.insertRow();
-            const cell = row.insertCell();
-            cell.textContent = d.label;
-            row.style.height = rowHeight;
-            cell.style.position = "relative";
+      sortedData.forEach(d => { 
+        const row = statusTable.insertRow(); 
+        const cell = row.insertCell(); 
+        cell.textContent = d.label; 
+        row.style.height = rowHeight; 
+        cell.style.position = "relative"; 
+        const wrongCount = wrongCounts.get(d.id) ?? 0; 
+        const correctCount = correctCounts.get(d.id) ?? 0; // weight計算は削除！代わりに localStorage から読む 
+        const savedWeight = weights.get(d.id) ?? "";
 
-            const wrongCount = wrongCounts.get(d.id) ?? 0;
-            const correctCount = correctCounts.get(d.id) ?? 0;
+        // weight表示 
+        const weightSpan = document.createElement("span"); 
+        weightSpan.className = "weight-display";
+        weightSpan.textContent = savedWeight;// ← localStorageの値をそのまま表示 
+        cell.appendChild(weightSpan); 
 
-            // weight計算は削除！代わりに localStorage から読む
-            const savedWeight = weights.get(d.id) ?? "";  
-
-            // weight表示
-            const weightSpan = document.createElement("span");
-            weightSpan.className = "weight-display";
-            weightSpan.textContent = savedWeight; // ← localStorageの値をそのまま表示
-            cell.appendChild(weightSpan);
-
-            const wrongSpan = document.createElement("span");
-            wrongSpan.className = "wrong-count";
-            wrongSpan.textContent = `×${wrongCount}`;
-            cell.appendChild(wrongSpan);
-
-            const correctSpan = document.createElement("span");
-            correctSpan.className = "correct-count";
-            correctSpan.textContent = `○${correctCount}`;
-            cell.appendChild(correctSpan);
-
-            // 🔽 lastReview表示も localStorage の値をそのまま
-            if (lastReviews.has(d.id)) {
-                const reviewSpan = document.createElement("span");
-                reviewSpan.className = "last-review";
-                const date = new Date(lastReviews.get(d.id));
-                reviewSpan.textContent = date.toLocaleDateString("ja-JP");
-                cell.appendChild(reviewSpan);
-            }
-
-            statusMap.set(d.id, { cell, wrongSpan, correctSpan, weightSpan });
-
-            if (lastBlueId !== null && lastBlueId === d.id) {
-                cell.className = '';
-                cell.classList.add('blue');
-            }
-        });
-
-        loadCellColors();
-    }
-
-
-
-
-    // 問題文・答えリセット
-    function resetState() {
-        remaining = [];
-        currentId = null;
-        lastBlueId = null;
-        questionArea.textContent = "ここに問題文が表示されます";
-        answerArea.textContent = "ここに答えが表示されます";
-        data.forEach(d => {
-            const entry = statusMap.get(d.id);
-            entry.cell.className = '';
-        });
-        setButtonsEnabled(false);
-        buildTable();
+        const wrongSpan = document.createElement("span"); 
+        wrongSpan.className = "wrong-count"; 
+        wrongSpan.textContent = `×${wrongCount}`; 
+        cell.appendChild(wrongSpan); 
+        
+        const correctSpan = document.createElement("span"); 
+        correctSpan.className = "correct-count"; 
+        correctSpan.textContent = `○${correctCount}`; 
+        cell.appendChild(correctSpan); 
+        
+        // 🔽 lastReview表示も localStorage の値をそのまま 
+        if (lastReviews.has(d.id)) { 
+          const reviewSpan = document.createElement("span"); 
+          reviewSpan.className = "last-review"; 
+          const date = new Date(lastReviews.get(d.id)); 
+          reviewSpan.textContent = date.toLocaleDateString("ja-JP"); 
+          cell.appendChild(reviewSpan); 
+        } 
+        
+        statusMap.set(d.id, { cell, wrongSpan, correctSpan, weightSpan }); 
+        
+        if (lastBlueId !== null && lastBlueId === d.id) { 
+          cell.className = ''; 
+          cell.classList.add('blue'); 
+        } 
+      }); 
+      
+      loadCellColors(); 
+    } 
+    
+    // 問題文・答えリセット 
+    function resetState() { 
+      remaining = []; 
+      currentId = null; 
+      lastBlueId = null; 
+      questionArea.textContent = "ここに問題文が表示されます"; 
+      answerArea.textContent = "ここに答えが表示されます"; 
+      data.forEach(d => { 
+        const entry = statusMap.get(d.id); 
+        entry.cell.className = ''; 
+      }); 
+      
+      setButtonsEnabled(false); 
+      buildTable(); 
     }
 
 
@@ -4142,45 +4151,68 @@ function createQuiz(blockId, data) {
     
     // ---------------- ステータステーブル表示/非表示 ----------------
     // const toggleTableBtn = document.getElementById('toggleTableBtn-${blockId}');
-    const tableContainer = document.getElementById('statusTableContainer');
+    // const tableContainer = document.getElementById('statusTableContainer');
     toggleTableBtn.addEventListener('click', () => {
-      if (tableContainer.style.display === 'none' || tableContainer.style.display === '') {
-        tableContainer.style.display = 'block';
+      if (statusTableContainer.style.display === 'none' || statusTableContainer.style.display === '') {
+        statusTableContainer.style.display = 'block';
       } else {
-        tableContainer.style.display = 'none';
+        statusTableContainer.style.display = 'none';
       }
     });
 
     // ▼ ソート用状態を追加
     let currentSortMode = 'default'; // 'id-asc', 'id-desc', 'weight-asc', 'weight-desc'
 
+    // // ▼ ID順ソートトグルボタンのイベント
+    // toggleIdSortBtn.addEventListener('click', () => {
+    //     if (currentSortMode === 'id-asc') {
+    //         currentSortMode = 'id-desc';
+    //     } else {
+    //         currentSortMode = 'id-asc';
+    //     }
+    //     buildTable();
+    // });
 
-    document.getElementById('toggleIdSortBtn-0').addEventListener('click', () => {
+    // // ▼ Weight順ソートトグルボタンのイベント
+    // toggleWeightSortBtn.addEventListener('click', () => {
+    //     if (currentSortMode === 'weight-asc') {
+    //         currentSortMode = 'weight-desc';
+    //     } else {
+    //         currentSortMode = 'weight-asc';
+    //     }
+    //     buildTable();
+    // });
+
+
+
+
+    // const toggleIdSortBtn = document.getElementById(`toggleIdSortBtn-${blockId}`);
+    toggleIdSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'id-asc') ? 'id-desc' : 'id-asc';
         buildTable();
     });
 
-    document.getElementById('toggleWeightSortBtn-0').addEventListener('click', () => {
+    toggleWeightSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'weight-asc') ? 'weight-desc' : 'weight-asc';
         buildTable();
     });
 
-    document.getElementById('toggleLabelSortBtn-0').addEventListener('click', () => {
+    toggleLabelSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'label-asc') ? 'label-desc' : 'label-asc';
         buildTable();
     });
 
-    document.getElementById('toggleLastReviewSortBtn-0').addEventListener('click', () => {
+    toggleLastReviewSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'lastReview-asc') ? 'lastReview-desc' : 'lastReview-asc';
         buildTable();
     });
 
-    document.getElementById('toggleCorrectSortBtn-0').addEventListener('click', () => {
+    toggleCorrectSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'correct-asc') ? 'correct-desc' : 'correct-asc';
         buildTable();
     });
 
-    document.getElementById('toggleWrongSortBtn-0').addEventListener('click', () => {
+    toggleWrongSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'wrong-asc') ? 'wrong-desc' : 'wrong-asc';
         buildTable();
     });
