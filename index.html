@@ -3564,19 +3564,21 @@ function createQuiz(blockId, data) {
         let lines = styledQuestion.split("\n");
         let disableBold = false;
 
-        lines = lines.map(line => {
-          if (!disableBold) {
-            if (line.includes("青本")) {
-              disableBold = true; // 以降は太字禁止
+        if (blockId === 3) {   // ←ここを環境に合わせて判定
+          lines = lines.map(line => {
+            if (!disableBold) {
+              if (line.includes("青本")) {
+                disableBold = true; // 以降は太字禁止
+              }
+              // 青本が出る前の行だけ太字処理
+              return line.replace(/^([^（(]+)(?=[（(])/, '<span style="font-weight:bold;">$1</span>');
             }
-            // 青本が出る前の行だけ太字処理
-            return line.replace(/^([^（(]+)(?=[（(])/, '<span style="font-weight:bold;">$1</span>');
-          }
-          // ▼ 「準用」「ただし」を濃い青色太字に
-          line = line.replace(/(準用|ただし)/g, '<span style="color: darkblue; font-weight: bold;">$1</span>');
+            // ▼ 「準用」「ただし」を濃い青色太字に
+            line = line.replace(/(準用|ただし)/g, '<span style="color: darkblue; font-weight: bold;">$1</span>');
 
-          return line; // 以降はそのまま
-        });
+            return line; // 以降はそのまま
+          });
+        }
 
         styledQuestion = lines.join("\n");
 
@@ -4013,7 +4015,7 @@ function createQuiz(blockId, data) {
             weights.set(currentId, newWeight);
             if (entry && entry.weightSpan) entry.weightSpan.textContent = newWeight;
             saveWeights();
-            
+
             questionArea.scrollTop = 0;
 
             highlightCell(currentId, 'red');
