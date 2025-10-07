@@ -213,6 +213,7 @@
     <label>除外する正解数:
       <select id="excludeCorrectSelect-0"></select>
       <select id="excludeCorrectCond-0">
+        <option value="none">問わない</option>
         <option value="lt">未満</option>
         <option value="gt">より大きい</option>
       </select>
@@ -221,6 +222,7 @@
     <label>除外する誤答数:
       <select id="excludeWrongSelect-0"></select>
       <select id="excludeWrongCond-0">
+        <option value="none">問わない</option>
         <option value="lt">未満</option>
         <option value="gt">より大きい</option>
       </select>
@@ -229,6 +231,7 @@
     <label>除外する lastReview:
       <input type="date" id="excludeLastReviewDate-0">
       <select id="excludeLastReviewCond-0">
+        <option value="none">問わない</option>
         <option value="before">以前</option>
         <option value="after">以後</option>
       </select>
@@ -237,6 +240,7 @@
     <label>除外する weight:
       <select id="excludeWeightSelect-0"></select>
       <select id="excludeWeightCond-0">
+        <option value="none">問わない</option>
         <option value="lt">未満</option>
         <option value="gt">より大きい</option>
       </select>
@@ -1278,7 +1282,7 @@ const quizData0 = [ /*イタリア語 40001～*/
 
   { id: 40238, label: "チョコレート",
   question:  "チョコレート",
-  answer: "cioccolationo" },
+  answer: "cioccolatino" },
 
   { id: 40239, label: "かわいい",
   question:  "かわいい",
@@ -1385,6 +1389,96 @@ const quizData0 = [ /*イタリア語 40001～*/
   "\nquestoを正しい形に。意味も。",
   answer: "Questi anziani sono molto allegri."+
   "これらのお年寄りはとても陽気です。" },
+
+  { id: 40260, label: "francese",
+  question:  "フランスの、フランス人の、フランス語の",
+  answer: "フランスの、フランス人の、フランス語の" },
+
+  { id: 40261, label: "telefonino",
+  question:  "telefonino",
+  answer: "携帯電話" },
+
+  { id: 40262, label: "caro",
+  question:  "caro",
+  answer: "(値段が)高い" },
+
+  { id: 40263, label: "pantaloni(m.pl.)",
+  question:  "pantaloni(m.pl.)",
+  answer: "ズボン" },
+
+  { id: 40264, label: "stretto",
+  question:  "stretto",
+  answer: "狭い、窮屈な" },
+
+  { id: 40265, label: "economico",
+  question:  "economico",
+  answer: "安い" },
+
+  { id: 40266, label: "scarpa(f.pl.)",
+  question:  "scarpa(f.pl.)",
+  answer: "靴" },
+
+  { id: 40267, label: "pane(m.)",
+  question: "pane(m.)",
+  answer: "パン" },
+
+  { id: 40268, label: "morbido",
+  question: "morbido",
+  answer: "柔らかい" },
+
+  { id: 40269, label: "buono",
+  question: "buono",
+  answer: "美味しい" },
+
+  { id: 40270, label: "olandese",
+  question: "olandese",
+  answer: "オランダの、オランダ人の、オランダ語の" },
+
+  { id: 40271, label: "豪華な、贅沢な",
+  question: "豪華な、贅沢な",
+  answer: "lussuoso" },
+
+  { id: 40272, label: "( ) anziano è molto allegro.",
+  question:  "( ) anziano è molto allegro."+
+  "\nquestoを正しい形に。意味も。",
+  answer: "Quest'anziano è molto allegro."+
+  "このお年寄りはとても陽気です。" },
+
+  { id: 40273, label: "( ) signore è simpatico.",
+  question:  "( ) signore è simpatico."+
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quel signore è simpatico."+
+  "あの男性は感じがいい。" },
+
+  { id: 40274, label: "( ) fragole sono dolci.",
+  question:  "( ) fragole sono dolci."+
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quelle fragole sono dolci."+
+  "あれらのイチゴは甘い。" },
+
+  { id: 40275, label: "( ) fiori sono belli.",
+  question:  "( ) fiori sono belli."+
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quei fiori sono belli."+
+  "あれらの花は美しい。" },
+
+  { id: 40276, label: "( ) signora è ricca.",
+  question:  "( ) signora è ricca."+
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quella signora è ricca."+
+  "あの婦人はお金持ちです。" },
+
+  { id: 40277, label: "( ) occhiali sono eleganti.",
+  question:  "( ) occhiali sono eleganti."+
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quegli occhiali sono eleganti."+
+  "あの眼鏡はエレガントだ。" },
+
+  { id: 40278, label: "( ) studente è molto sincero.",
+  question:  "( ) studente è molto sincero."+
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quello studente è molto sincero."+
+  "あの男子学生はとても誠実です。" },
 
 
 
@@ -1694,7 +1788,7 @@ const quizData0 = [ /*イタリア語 40001～*/
 
   { id: 47022, label: "I bambini di sei anni si esercitavano a scrivere la lettera C.",
   question:  "I bambini di sei anni si esercitavano a scrivere la lettera C.",
-  answer: "This room is very bright in the morning."},
+  answer: "The six-year-old children were practicing writing the letter C."},
 
   { id: 47023, label: "Il dispositivo usa i raggi ultravioletti per uccidere i batteri.",
   question:  "Il dispositivo usa i raggi ultravioletti per uccidere i batteri.",
@@ -1723,6 +1817,18 @@ const quizData0 = [ /*イタリア語 40001～*/
   { id: 47029, label: "Stasera salto la cena perché abbiamo mangiato tantissimo a pranzo.",
   question:  "Stasera salto la cena perché abbiamo mangiato tantissimo a pranzo.",
   answer: "I'm skipping dinner tonight because we ate a lot at lunch."},
+
+  { id: 47030, label: "Dobbiamo pensare rapidamente a una soluzione.",
+  question:  "Dobbiamo pensare rapidamente a una soluzione.",
+  answer: "We have to think of a solution quickly."},
+
+  { id: 47031, label: "L'archeologo ha trovato l'antico tesoro.",
+  question:  "L'archeologo ha trovato l'antico tesoro.",
+  answer: "The archaeologist found the ancient treasure."},
+
+  { id: 47032, label: "Sta piovendo; dovremo rimandare il nostro picnic.",
+  question:  "Sta piovendo; dovremo rimandare il nostro picnic.",
+  answer: "It's raining; we have to postpone our picnic."},
 
 
 
@@ -2668,6 +2774,8 @@ document.body.appendChild(container); // あるいは適切な場所へ追加
 
 
 // クイズ作成
+
+    // 状態初期化
 function createQuiz(blockId, data) {
     const questionArea = document.getElementById(`questionArea-${blockId}`);
     const answerArea = document.getElementById(`answerArea-${blockId}`);
@@ -2734,7 +2842,7 @@ function createQuiz(blockId, data) {
         }
         excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 100;
         document.getElementById(`excludeCorrectCond-${blockId}`).value =
-          localStorage.getItem(`excludeCorrectCond-${blockId}`) ?? "lt";
+          localStorage.getItem(`excludeCorrectCond-${blockId}`) ?? "none";
 
         // 誤答数選択肢
         const excludeWrongSelect = document.getElementById(`excludeWrongSelect-${blockId}`);
@@ -2746,7 +2854,7 @@ function createQuiz(blockId, data) {
         }
         excludeWrongSelect.value = localStorage.getItem(`excludeWrongSelect-${blockId}`) ?? 100;
         document.getElementById(`excludeWrongCond-${blockId}`).value =
-          localStorage.getItem(`excludeWrongCond-${blockId}`) ?? "lt";
+          localStorage.getItem(`excludeWrongCond-${blockId}`) ?? "none";
 
         // weight選択肢
         const excludeWeightSelect = document.getElementById(`excludeWeightSelect-${blockId}`);
@@ -2759,13 +2867,13 @@ function createQuiz(blockId, data) {
         }
         excludeWeightSelect.value = localStorage.getItem(`excludeWeightSelect-${blockId}`) ?? 100;
         document.getElementById(`excludeWeightCond-${blockId}`).value =
-          localStorage.getItem(`excludeWeightCond-${blockId}`) ?? "lt";
+          localStorage.getItem(`excludeWeightCond-${blockId}`) ?? "none";
 
         // lastReview 初期値
         document.getElementById(`excludeLastReviewDate-${blockId}`).value =
           localStorage.getItem(`excludeLastReviewDate-${blockId}`) ?? "";
         document.getElementById(`excludeLastReviewCond-${blockId}`).value =
-          localStorage.getItem(`excludeLastReviewCond-${blockId}`) ?? "before";
+          localStorage.getItem(`excludeLastReviewCond-${blockId}`) ?? "none";
 
 
 
@@ -2919,21 +3027,27 @@ function createQuiz(blockId, data) {
 
         // 正解数フィルタ
         const correct = correctCounts.get(d.id) ?? 0;
-        if (excludeCorrectCond === "lt" && correct < excludeCorrect) return false;
-        if (excludeCorrectCond === "gt" && correct > excludeCorrect) return false;
+        if (excludeCorrectCond !== "none") {
+            if (excludeCorrectCond === "lt" && correct < excludeCorrect) return false;
+            if (excludeCorrectCond === "gt" && correct > excludeCorrect) return false;
+        }
 
         // 誤答数フィルタ
         const wrong = wrongCounts.get(d.id) ?? 0;
-        if (excludeWrongCond === "lt" && wrong < excludeWrong) return false;
-        if (excludeWrongCond === "gt" && wrong > excludeWrong) return false;
+        if (excludeWrongCond !== "none") {
+            if (excludeWrongCond === "lt" && wrong < excludeWrong) return false;
+            if (excludeWrongCond === "gt" && wrong > excludeWrong) return false;
+        }
 
         // weight フィルタ
         const weight = parseFloat(weights.get(d.id) ?? 0);
-        if (excludeWeightCond === "lt" && weight < excludeWeight) return false;
-        if (excludeWeightCond === "gt" && weight > excludeWeight) return false;
+        if (excludeWeightCond !== "none") {
+            if (excludeWeightCond === "lt" && weight < excludeWeight) return false;
+            if (excludeWeightCond === "gt" && weight > excludeWeight) return false;
+        }
 
         // lastReview フィルタ
-        if (excludeLastReviewDate) {
+        if (excludeLastReviewCond !== "none" && excludeLastReviewDate) {
           const reviewDate = new Date(lastReviews.get(d.id) ?? 0);
           const condDate = new Date(excludeLastReviewDate);
           if (excludeLastReviewCond === "before" && reviewDate <= condDate) return false;
