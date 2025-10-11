@@ -23,7 +23,7 @@
   .quiz-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 2px;
   }
 
   .title {
@@ -47,11 +47,17 @@
       background: #fafafa;
       overflow-y: auto;    /* 縦方向にスクロール可能 */
       white-space: pre-wrap;
+      margin: 2px
   }
 
   select {
     font-size: 16px;
     padding: 5px 6px;
+  }
+
+
+  .myLabel{
+    margin: 2px;
   }
 
   .button-group {
@@ -76,6 +82,41 @@
   .myButtonGreen:hover { background: #76ff67; color: white; }
   .myButtonRed { color: #ff6767; border-color: #ff6767; }
   .myButtonRed:hover { background: #ff6767; color: white; }
+
+
+  .myYellowButton{
+    color: #000000;
+    background-color: #f7ffb2;
+    border-radius: 100vh;
+  }
+  .myYellowButton:hover {
+    color: #000000;
+    background: #f7ffb2;
+  }
+
+
+
+  /* ---------------- サマリーテーブル ---------------- */
+  .color-count-table {
+    border-collapse: collapse;
+    margin-right: 10px;
+    font-size: 12px;
+  }
+
+  .color-count-table td {
+    border: 1px solid #ccc;
+    padding: 3px 6px;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .green-count-cell { background: #90ee90; }
+  .red-count-cell   { background: #f08080; }
+  .white-count-cell { background: #ffffff; }
+  .blue-count-cell  { background: #add8e6; }
+
+
+
 
   /* ---------------- ステータステーブル ---------------- */
   .status-table-container {
@@ -210,7 +251,7 @@
     <!-- <label>除外する正解数:
       <select id="excludeCorrectSelect-0"></select>
     </label> -->
-    <label>除外する正解数:
+    <label class="myLabel">除外する正解数:
       <select id="excludeCorrectSelect-0"></select>
       <select id="excludeCorrectCond-0">
         <option value="none">問わない</option>
@@ -218,7 +259,6 @@
         <option value="gt">より大きい</option>
       </select>
     </label>
-    <br>
     <label>除外する誤答数:
       <select id="excludeWrongSelect-0"></select>
       <select id="excludeWrongCond-0">
@@ -227,7 +267,6 @@
         <option value="gt">より大きい</option>
       </select>
     </label>
-    <br>
     <label>除外する lastReview:
       <input type="date" id="excludeLastReviewDate-0">
       <select id="excludeLastReviewCond-0">
@@ -236,7 +275,6 @@
         <option value="after">以後</option>
       </select>
     </label>
-    <br>
     <label>除外する weight:
       <select id="excludeWeightSelect-0"></select>
       <select id="excludeWeightCond-0">
@@ -251,22 +289,28 @@
     <button class="myButtonBlue" id="showAnswerBtn-0">答えを見る</button>
     <div class="answer-area" id="answerArea-0" style="color: gray;">ここに答えが表示されます</div>
     <div class="button-group">
+      <table id="colorCountTable-0" class="color-count-table">
+        <tr>
+          <td class="green-count-cell">緑: <span id="greenCount-0">0</span></td>
+          <td class="red-count-cell">赤: <span id="redCount-0">0</span></td>
+          <td class="white-count-cell">白: <span id="whiteCount-0">0</span></td>
+          <td class="blue-count-cell">青: <span id="blueCount-0">0</span></td>
+        </tr>
+      </table>
+      <span id="remainingCount-0" style="align-self:center; font-weight:bold; margin-right:auto;">残り: 0問</span>
       <button class="myButtonGreen" id="correctBtn-0">正解</button>
       <button class="myButtonRed" id="wrongBtn-0">不正解</button>
     </div>
     <!-- ステータステーブル表示/非表示ボタン -->
     <div class="button-group">
-      <button id="toggleTableBtn-0">テーブル表示/非表示</button>
-      <button id="toggleIdSortBtn-0">ID順</button>
-      <button id="toggleWeightSortBtn-0">Weight順</button>
-      <button id="toggleLabelSortBtn-0">Label順</button>
-      <button id="toggleLastReviewSortBtn-0">lastReview順</button>
-      <button id="toggleCorrectSortBtn-0">正答数順</button>
-      <button id="toggleWrongSortBtn-0">誤答数順</button>
+      <button class="myYellowButton" id="toggleTableBtn-0">テーブル表示/非表示</button>
+      <button class="myYellowButton" id="toggleIdSortBtn-0">ID順</button>
+      <button class="myYellowButton" id="toggleWeightSortBtn-0">Weight順</button>
+      <button class="myYellowButton" id="toggleLabelSortBtn-0">Label順</button>
+      <button class="myYellowButton" id="toggleLastReviewSortBtn-0">lastReview順</button>
+      <button class="myYellowButton" id="toggleCorrectSortBtn-0">正答数順</button>
+      <button class="myYellowButton" id="toggleWrongSortBtn-0">誤答数順</button>
     </div>
-
-
-
   </div>
 
   <div class="status-table-container" id="statusTableContainer-0">
@@ -1476,6 +1520,105 @@ const quizData0 = [ /*イタリア語 40001～*/
   answer: "Quello studente è molto sincero."+
   "あの男子学生はとても誠実です。" },
 
+  { id: 40279, label: "( ) macchina è italiana.",
+  question:  "( ) macchina è italiana.",
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quella macchina è italiana."+
+  "あの車はイタリア製だ。" },
+
+  { id: 40280, label: "( ) acero non è acido.",
+  question:  "( ) acero non è acido.",
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quell'acero non è acido."+
+  "あの酢は酸っぱくない。" },
+
+  { id: 40281, label: "( ) zaini sono pesanti.",
+  question: "( ) zaini sono pesanti.",
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quegli zaini sono pesanti."+
+  "あれらのリュックは重い。" },
+
+  { id: 40282, label: "( ) orchestra è famosa.",
+  question: "( ) orchestra è famosa.",
+  "\nquelloを正しい形に。意味も。",
+  answer: "Quell'orchestra è famosa."+
+  "あのオーケストラは有名です。" },
+
+  { id: 40283, label: "signore(m.)",
+  question: "signore(m.)",
+  answer: "男性、紳士" },
+
+  { id: 40284, label: "simpatico",
+  question: "simpatico",
+  answer: "感じの良い" },
+
+  { id: 40285, label: "fragola",
+  question: "fragola",
+  answer: "イチゴ" },
+
+  { id: 40286, label: "signora",
+  question: "signora",
+  answer: "女性、婦人" },
+
+  { id: 40287, label: "ricco",
+  question: "ricco",
+  answer: "金持ちの" },
+
+  { id: 40288, label: "occhiali(m.pl.)",
+  question: "occhiali(m.pl.)",
+  answer: "メガネ" },
+
+  { id: 40289, label: "sincero",
+  question: "sincero",
+  answer: "誠実な、率直な" },
+
+  { id: 40290, label: "aceto",
+  question: "aceto",
+  answer: "酢" },
+
+  { id: 40291, label: "acido",
+  question: "acido",
+  answer: "酢っぱい" },
+
+  { id: 40292, label: "Quello è un cane vecchio.",
+  question: "Quello è un cane vecchio.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quello è un cane vecchio.\n　あれは1匹の年老いた犬だ。\nQuel cane è vecchio.\n　あの犬は年老いている。" },
+
+  { id: 40293, label: "Quelli sono ragazzi stranieri.",
+  question: "Quelli sono ragazzi stranieri.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quelli sono ragazzi stranieri.\n　あれらは外国の男の子たちです。\nQuei ragazzi sono stranieri.\n　あの男の子たちは外国人だ。" },
+
+  { id: 40294, label: "Quelle sono cravatte vistose.",
+  question: "Quelle sono cravatte vistose.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quelle sono cravatte vistose.\n　あれらは派手なネクタイです。\nQuelle cravatte sono vistose.\n　あれらのネクタイは派手です。" },
+
+  { id: 40295, label: "Quella è un'isola bella.",
+  question: "Quella è un'isola bella.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quella è un'isola bella.\n　あれは1つの美しい島です。\nQuell'isola è bella.\n　あの島は美しい。" },
+
+  { id: 40296, label: "Quelli sono spaghetti cattivi.",
+  question: "Quelli sono spaghetti cattivi.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quelli sono spaghetti cattivi.\n　あれはまずいスパゲッティです。\nQuegli spaghetti sono cattivi.\n　あのスパゲッティはまずい。" },
+
+  { id: 40297, label: "Quello è un anello brillante.",
+  question: "Quello è un anello brillante.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quello è un anello brillante.\n　あれは1つの輝く指輪です。\nQuell'anello è brillante.\n　あの指輪は輝いている。" },
+
+  { id: 40298, label: "Quella è una camicia bianca.",
+  question: "Quella è una camicia bianca.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quella è una camicia bianca.\n　あれは1つの白いブラウスです。\nQuella camicia è bianca.\n　あのブラウスは白い。" },
+
+  { id: 40299, label: "Quelle sono aziende famose.",
+  question: "Quelle sono aziende famose.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quelle sono aziende famose.\n　あれらは有名な会社です。\nQuelle aziende sono famose.\n　あれらの会社は有名です。" },
+
+  { id: 40300,  label: "Quello è uno specchio molto decorato.",
+  question: "Quello è uno specchio molto decorato.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quello è uno specchio molto decorato.\n　あれはとても装飾された1枚の鏡です。\nQuello specchio è molto decorato.\n　あの鏡はとても装飾されている。" },
+
+  { id: 40301,  label: "Quelli sono elefanti molto feroci.",
+  question: "Quelli sono elefanti molto feroci.\n意味は？指示代名詞を指示形容詞に。その意味も。",
+  answer: "Quelli sono elefanti molto feroci.\n　あれらはとても獰猛な像です。\nQuegli elefanti sono molto feroci.\n　あれらの像はとても獰猛です。" },
 
 
 
@@ -2736,6 +2879,7 @@ quizData4.forEach(item => {
 
 
 
+
 // クイズブロック作成
 const titles = ["イタリア語", "音読み", "熟字・一字訓", "四法", "漢字パーツ" ]; // 任意の科目名リスト// 任意の科目名リスト
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
@@ -2766,8 +2910,6 @@ document.body.appendChild(container); // あるいは適切な場所へ追加
 
 
 // クイズ作成
-
-    // 状態初期化
 function createQuiz(blockId, data) {
     const questionArea = document.getElementById(`questionArea-${blockId}`);
     const answerArea = document.getElementById(`answerArea-${blockId}`);
@@ -2791,6 +2933,12 @@ function createQuiz(blockId, data) {
     const toggleWrongSortBtn = document.getElementById(`toggleWrongSortBtn-${blockId}`);
 
 
+    const remainingCountLabel = document.getElementById(`remainingCount-${blockId}`);
+
+    const greenCountEl = document.getElementById(`greenCount-${blockId}`);
+    const redCountEl   = document.getElementById(`redCount-${blockId}`);
+    const blueCountEl  = document.getElementById(`blueCount-${blockId}`);
+    const whiteCountEl = document.getElementById(`whiteCount-${blockId}`);
 
 
     let currentId = null;
@@ -2935,6 +3083,7 @@ function createQuiz(blockId, data) {
       }); 
       
       loadCellColors(); 
+      updateColorCount(); // ← 追加
     } 
     
     // 問題文・答えリセット 
@@ -2979,22 +3128,24 @@ function createQuiz(blockId, data) {
         wrongBtn.disabled = !enabled;
     }
 
+    function updateColorCount() {
+      const table = document.getElementById(`statusTable-${blockId}`);
+      const greenCells = table.querySelectorAll('.green').length;
+      const redCells   = table.querySelectorAll('.red').length;
+      const blueCells  = table.querySelectorAll('.blue').length;
 
-    // 出題範囲の取得
-    // function getRangeData() {
-    //     const start = parseInt(startSelect.value);
-    //     const end = parseInt(endSelect.value);
-    //     const excludeThreshold = parseInt(excludeCorrectSelect.value);
-    //     return data.filter(d =>
-    //         d.id >= start &&
-    //         d.id <= end &&
-    //         (correctCounts.get(d.id) ?? 0) < excludeThreshold
-    //     );
-    // }
+      // 白セル = すべてのセル数 - 他の色セル
+      const allCells = table.querySelectorAll('td').length;
+      const whiteCells = allCells - (greenCells + redCells + blueCells);
+
+      greenCountEl.textContent = greenCells;
+      redCountEl.textContent   = redCells;
+      blueCountEl.textContent  = blueCells;
+      whiteCountEl.textContent = whiteCells;
+    }
+
+
     function getRangeData() {
-      // const start = parseInt(startSelect.value);
-      // const end = parseInt(endSelect.value);
-      // const excludeCorrect = parseInt(excludeCorrectSelect.value);
       
       const start = parseInt(document.getElementById(`startSelect-${blockId}`).value);
       const end = parseInt(document.getElementById(`endSelect-${blockId}`).value);
@@ -3045,6 +3196,7 @@ function createQuiz(blockId, data) {
           if (excludeLastReviewCond === "before" && reviewDate <= condDate) return false;
           if (excludeLastReviewCond === "after" && reviewDate >= condDate) return false;
         }
+        
 
         return true;
       });
@@ -3211,19 +3363,13 @@ function createQuiz(blockId, data) {
       const cellRect = cell.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
 
-      // container.scrollTop は「コンテナ内の現在のスクロール位置」
-      // cellRect.top - containerRect.top は「ビューポート基準で見た container 内の相対位置」
-      // よってコンテナ内の絶対 top は以下で得られる
       const absoluteTopInContainer = container.scrollTop + (cellRect.top - containerRect.top);
 
-      // セルをコンテナの垂直中央に持ってくる目標 scrollTop を計算
       const targetScrollTop = Math.round( absoluteTopInContainer - (container.clientHeight - cellRect.height) / 2 );
 
-      // 上下の境界に収める
       const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
       const boundedTop = Math.min(Math.max(0, targetScrollTop), maxScrollTop);
 
-      // 一発で移動（即時）にしたい場合は behavior: 'auto'。滑らかにしたい場合は 'smooth' に。
       container.scrollTo({
         top: boundedTop,
         behavior: 'auto' // または 'smooth'
@@ -3235,11 +3381,9 @@ function createQuiz(blockId, data) {
       if (className === 'blue' && lastBlueId !== null && lastBlueId !== id) {
         restoreCellClass(lastBlueId);
       }
-
       const entry = statusMap.get(id);
       if (!entry) return;
 
-      // 一旦全消し
       entry.cell.className = '';
 
       if (className) {
@@ -3251,7 +3395,6 @@ function createQuiz(blockId, data) {
         } else {
           lastBlueId = id;
 
-          // ★ requestAnimationFrame で次フレームにスクロール
           requestAnimationFrame(() => {
             scrollCellIntoView(entry.cell);
           });
@@ -3261,8 +3404,6 @@ function createQuiz(blockId, data) {
         if (lastBlueId === id) lastBlueId = null;
       }
     }
-
-
 
     function restoreCellClass(id) {
       const entry = statusMap.get(id);
@@ -3275,7 +3416,6 @@ function createQuiz(blockId, data) {
       }
     }
 
-    // セル色を保存
     function saveCellColor(id, className) {
         if (className !== "blue"){
             const key = `cellColors-${blockId}`;
@@ -3285,7 +3425,7 @@ function createQuiz(blockId, data) {
             localStorage.setItem(key, JSON.stringify(colors));
         }
     }
-    // セル色を削除
+
     function removeCellColor(id) {
         const key = `cellColors-${blockId}`;
         const saved = localStorage.getItem(key);
@@ -3295,7 +3435,7 @@ function createQuiz(blockId, data) {
             localStorage.setItem(key, JSON.stringify(colors));
         }
     }
-    // セル色をロード
+
     function loadCellColors() {
         const key = `cellColors-${blockId}`;
         const saved = localStorage.getItem(key);
@@ -3309,7 +3449,7 @@ function createQuiz(blockId, data) {
             }
             }
         }
-        // 追加：lastBlueId があれば青を優先して復元（青は保存されない一時表示）
+
         if (lastBlueId !== null) {
             const entry = statusMap.get(lastBlueId);
             if (entry) {
@@ -3327,8 +3467,6 @@ function createQuiz(blockId, data) {
       return colors[id] ?? null;
     }
 
-
-    // 間違い数を保存
     function saveWrongCounts() {
         const obj = {};
         for (const [id, count] of wrongCounts.entries()) {
@@ -3336,7 +3474,6 @@ function createQuiz(blockId, data) {
         }
         localStorage.setItem(`wrongCounts-${blockId}`, JSON.stringify(obj));
     }
-    // 間違い数をロード
     function loadWrongCounts() {
         const saved = localStorage.getItem(`wrongCounts-${blockId}`);
         if (saved) {
@@ -3353,8 +3490,6 @@ function createQuiz(blockId, data) {
             }
         }
     }
-  
-    // 正解数を保存
     function saveCorrectCounts() {
         const obj = {};
         for (const [id, count] of correctCounts.entries()) {
@@ -3362,7 +3497,6 @@ function createQuiz(blockId, data) {
         }
         localStorage.setItem(`correctCounts-${blockId}`, JSON.stringify(obj));
     }
-    // 正解数をロード
     function loadCorrectCounts() {
         const saved = localStorage.getItem(`correctCounts-${blockId}`);
         if (saved) {
@@ -3379,8 +3513,6 @@ function createQuiz(blockId, data) {
             }
         }
     }
-
-    // weightを保存
     function saveWeights() {
         const obj = {};
         for (const [id, weight] of weights.entries()) {
@@ -3388,8 +3520,6 @@ function createQuiz(blockId, data) {
         }
         localStorage.setItem(`weights-${blockId}`, JSON.stringify(obj));
     }
-
-    // weightをロード
     function loadWeights() {
         const saved = localStorage.getItem(`weights-${blockId}`);
         if (saved) {
@@ -3406,8 +3536,6 @@ function createQuiz(blockId, data) {
             }
         }
     }
-
-    // lastReviewを保存
     function saveLastReviews() {
         const obj = {};
         for (const [id, dateStr] of lastReviews.entries()) {
@@ -3415,8 +3543,6 @@ function createQuiz(blockId, data) {
         }
         localStorage.setItem(`lastReviews-${blockId}`, JSON.stringify(obj));
     }
-
-    // lastReviewをロード
     function loadLastReviews() {
         const saved = localStorage.getItem(`lastReviews-${blockId}`);
         if (saved) {
@@ -3463,11 +3589,14 @@ function createQuiz(blockId, data) {
         }
         remaining = rangeData.slice();
         pickQuestion();
-
-        
         questionArea.scrollTop = 0;
-
+        updateRemainingCount();  // ← これを追加
+        updateColorCount(); // ← 追加
     });
+
+    function updateRemainingCount() {
+      remainingCountLabel.textContent = `残り: ${remaining.length}問`;
+    }
 
     function colorizeParentheses(text) {
       const colors = [
@@ -3556,9 +3685,11 @@ function createQuiz(blockId, data) {
 
             questionArea.scrollTop = 0;
 
+            updateRemainingCount(); // ← 残り更新
             highlightCell(currentId, 'green');
             saveCorrectCounts();
             pickQuestion();
+            updateColorCount(); // ← 追加
         }
     });
     // 不正解だったボタンを押したとき
@@ -3592,12 +3723,14 @@ function createQuiz(blockId, data) {
             weights.set(currentId, newWeight);
             if (entry && entry.weightSpan) entry.weightSpan.textContent = newWeight;
             saveWeights();
-
+            
             questionArea.scrollTop = 0;
 
+            updateRemainingCount(); // ← 残り更新
             highlightCell(currentId, 'red');
             saveWrongCounts();
             pickQuestion();
+            updateColorCount(); // ← 追加
         }
     });
 
@@ -3617,35 +3750,27 @@ function createQuiz(blockId, data) {
     let currentSortMode = 'default'; // 'id-asc', 'id-desc', 'weight-asc', 'weight-desc'
 
 
-
-
-
     // const toggleIdSortBtn = document.getElementById(`toggleIdSortBtn-${blockId}`);
     toggleIdSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'id-asc') ? 'id-desc' : 'id-asc';
         buildTable();
     });
-
     toggleWeightSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'weight-asc') ? 'weight-desc' : 'weight-asc';
         buildTable();
     });
-
     toggleLabelSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'label-asc') ? 'label-desc' : 'label-asc';
         buildTable();
     });
-
     toggleLastReviewSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'lastReview-asc') ? 'lastReview-desc' : 'lastReview-asc';
         buildTable();
     });
-
     toggleCorrectSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'correct-asc') ? 'correct-desc' : 'correct-asc';
         buildTable();
     });
-
     toggleWrongSortBtn.addEventListener('click', () => {
         currentSortMode = (currentSortMode === 'wrong-asc') ? 'wrong-desc' : 'wrong-asc';
         buildTable();
