@@ -68,8 +68,8 @@
   }
 
   .myButtonBlue, .myButtonGreen, .myButtonRed {
-    font-size: 14px;
-    padding: 0.2em 0.4em;
+    font-size: 18px;
+    padding: 0.4em 0.8em;
     border-radius: 5px;
     border: 2px solid;
     cursor: pointer;
@@ -93,19 +93,82 @@
     color: #000000;
     background: #f7ffb2;
   }
+  /* === フィルタグリッド === */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* 2列 */
+    grid-template-rows: auto auto auto auto; /* 4行 */
+    gap: 8px 12px;                  /* 縦横の隙間 */
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+
+  /* 各labelをブロック化して均等に伸ばす */
+  .filter-grid label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    font-size: 14px;
+    flex-wrap: wrap;
+    width: 100%;
+    background: #f9f9f9;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+
+  /* select / input のサイズ調整 */
+  .filter-grid select,
+  .filter-grid input[type="date"] {
+    font-size: 14px;
+    padding: 3px 5px;
+  }
+
+  /* リセットボタンセルを右下に配置 */
+  .reset-cell {
+    grid-column: 1 / span 2;  /* 2列分をまたぐ */
+    text-align: right;
+    padding-top: 4px;
+  }
+
+
+  /* === 色フィルタセレクトの基本スタイル === */
+  #colorFilterSelect-0 {
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+  }
+  /* 各色ごとの背景（クラスで付け替える） */
+  .color-filter-red {
+    background-color: #f08080 !important;
+  }
+  .color-filter-green {
+    background-color: #90ee90 !important;
+  }
+  .color-filter-white {
+    background-color: #ffffff !important;
+  }
+  .color-filter-all {
+    background-color: #f0f0f0 !important;
+  }
+
+
 
 
 
   /* ---------------- サマリーテーブル ---------------- */
   .color-count-table {
     border-collapse: collapse;
-    margin-right: 6px;
-    font-size: 10px;
+    margin-right: 10px;
+    font-size: 12px;
   }
 
   .color-count-table td {
     border: 1px solid #ccc;
-    padding: 2px 2px;
+    padding: 3px 6px;
     text-align: center;
     border-radius: 4px;
   }
@@ -232,7 +295,15 @@
     .myButtonBlue, .myButtonGreen, .myButtonRed { font-size: 16px; padding: 0.35em 0.7em; }
     .floating-buttons { right: 50%; transform: translateX(50%); flex-direction: row; gap: 8px; }
     .status-table td { font-size: 12px; min-width: 50px; padding: 5px; }
+    .filter-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    .reset-cell {
+      text-align: center;
+    }
   }
+
 </style>
 </head>
 <body>
@@ -243,46 +314,63 @@
 <div class="quiz-block" id="quizBlock-0">
   <div class="quiz-container">
     <p class="title">イタリア語</p>
-    <label>出題範囲:
-      <select id="startSelect-0"></select> 〜
-      <select id="endSelect-0"></select>
-    </label>
-    <button class="myButtonBlue" id="resetCountsBtn-0">リセット</button>
-    <!-- <label>除外する正解数:
-      <select id="excludeCorrectSelect-0"></select>
-    </label> -->
-    <label class="myLabel">除外する正解数:
-      <select id="excludeCorrectSelect-0"></select>
-      <select id="excludeCorrectCond-0">
-        <option value="none">問わない</option>
-        <option value="lt">未満</option>
-        <option value="gt">より大きい</option>
-      </select>
-    </label>
-    <label>除外する誤答数:
-      <select id="excludeWrongSelect-0"></select>
-      <select id="excludeWrongCond-0">
-        <option value="none">問わない</option>
-        <option value="lt">未満</option>
-        <option value="gt">より大きい</option>
-      </select>
-    </label>
-    <label>除外する lastReview:
-      <input type="date" id="excludeLastReviewDate-0">
-      <select id="excludeLastReviewCond-0">
-        <option value="none">問わない</option>
-        <option value="before">以前</option>
-        <option value="after">以後</option>
-      </select>
-    </label>
-    <label>除外する weight:
-      <select id="excludeWeightSelect-0"></select>
-      <select id="excludeWeightCond-0">
-        <option value="none">問わない</option>
-        <option value="lt">未満</option>
-        <option value="gt">より大きい</option>
-      </select>
-    </label>
+
+    <div class="filter-grid">
+      <label class="myLabel">出題ID範囲:
+        <select id="startSelect-0"></select> 〜
+        <select id="endSelect-0"></select>
+      </label>
+
+      <label class="myLabel">出題色フィルタ:
+        <select id="colorFilterSelect-0">
+          <option value="all">問わない</option>
+          <option value="green">緑だけ</option>
+          <option value="red">赤だけ</option>
+          <option value="white">白だけ</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する正解数:
+        <select id="excludeCorrectSelect-0"></select>
+        <select id="excludeCorrectCond-0">
+          <option value="none">問わない</option>
+          <option value="lt">未満</option>
+          <option value="gt">より大きい</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する誤答数:
+        <select id="excludeWrongSelect-0"></select>
+        <select id="excludeWrongCond-0">
+          <option value="none">問わない</option>
+          <option value="lt">未満</option>
+          <option value="gt">より大きい</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する lastReview:
+        <input type="date" id="excludeLastReviewDate-0">
+        <select id="excludeLastReviewCond-0">
+          <option value="none">問わない</option>
+          <option value="before">以前</option>
+          <option value="after">以後</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する weight:
+        <select id="excludeWeightSelect-0"></select>
+        <select id="excludeWeightCond-0">
+          <option value="none">問わない</option>
+          <option value="lt">未満</option>
+          <option value="gt">より大きい</option>
+        </select>
+      </label>
+
+      <!-- 7番目のセル：リセットボタン -->
+      <div class="reset-cell">
+        <button class="myButtonBlue" id="resetCountsBtn-0">リセット</button>
+      </div>
+    </div>
 
     <button class="myButtonBlue" id="nextBtn-0">出題</button>
     <div class="question-area" id="questionArea-0" style="color: gray;">ここに問題文が表示されます</div>
@@ -291,13 +379,13 @@
     <div class="button-group">
       <table id="colorCountTable-0" class="color-count-table">
         <tr>
-          <td class="green-count-cell"><span id="greenCount-0">0</span></td>
-          <td class="red-count-cell"><span id="redCount-0">0</span></td>
-          <td class="white-count-cell"><span id="whiteCount-0">0</span></td>
-          <td class="blue-count-cell"><span id="blueCount-0">0</span></td>
+          <td class="green-count-cell">緑: <span id="greenCount-0">0</span></td>
+          <td class="red-count-cell">赤: <span id="redCount-0">0</span></td>
+          <td class="white-count-cell">白: <span id="whiteCount-0">0</span></td>
+          <td class="blue-count-cell">青: <span id="blueCount-0">0</span></td>
         </tr>
       </table>
-      <span id="remainingCount-0" style="align-self:center; font-size: 10px; font-weight:bold; margin-right:auto;">残り: 0問</span>
+      <span id="remainingCount-0" style="align-self:center; font-weight:bold; margin-right:auto;">残り: 0問</span>
       <button class="myButtonGreen" id="correctBtn-0">正解</button>
       <button class="myButtonRed" id="wrongBtn-0">不正解</button>
     </div>
@@ -326,12 +414,6 @@
   </div>
   <pre id="storageInfo"></pre>
 </div>
-
-
-<!-- フローティングボタン -->
-<!-- <div class="floating-buttons">
-  <button data-target="quizBlock-0">イタリア語</button>
-</div> -->
 
 <script>
 const quizData0 = [ /*イタリア語 40001～*/
@@ -2474,208 +2556,208 @@ const quizData3 = (() => {
 const quizData4 = [ /*漢字パーツ 110001～*/
   { id: 110001, label: "青・靑1",
   answer: "セイ、ショウ"+
-  "\n青・靑　箚青(さっせい)\n　　　　緑青(ろくしょう)\n　　　　群青(ぐんじょう)\n　　　　※影青(いんちん)\n　　　　青萍(あおうきくさ)\n　　　　青瓷(あおじ)"+
-  "\n清・淸　清籟(せいらい)\n　　　　六根清浄(ろっこんしょうじょう)\n　　　　※シンもあるが熟語無し"+
-  "\n精・精　精衛塡海(せいえいてんかい)\n　　　　精霊会(しょうりょうえ)\n　　　　不精(ぶしょう)\n　　　　無精(ぶしょう)"
+  "\n青・靑　箚青(さっせい)\n　　　　緑青(ろくしょう)\n　　　　群青(ぐんじょう)\n　　　　※影青(いんちん)\n　　　　青萍(あおうきくさ)\n　　　　青瓷(あおじ)\n　　　　あお\n　　　　あお(い)"+
+  "\n清・淸　清籟(せいらい)\n　　　　六根清浄(ろっこんしょうじょう)\n　　　　※シンもあるが熟語無し\n　　　　きよ(い)\n　　　　きよ(まる)\n　　　　きよ(める)\n　　　　さや(か)\n　　　　す(む)"+
+  "\n精・精　精衛塡海(せいえいてんかい)\n　　　　精霊会(しょうりょうえ)\n　　　　不精(ぶしょう)\n　　　　無精(ぶしょう)\n　　　　くわ(しい)\n　　　　しら(げる)\n　　　　もののけ"
 },
   { id: 110002, label: "青・靑2",
   answer: "セイ、セン"+
-  "\n倩　倩人(せいじん)\n　　倩粧(せんしょう)\n　　倩倩(せんせん)\n　　妹倩(まいせん)\n　　倩眄(せんべん)"
+  "\n倩　倩人(せいじん)\n　　倩粧(せんしょう)\n　　倩倩(せんせん)\n　　妹倩(まいせん)\n　　倩眄(せんべん)\n　　うつく(しい)\n　　むこ\n　　やと(う)\n　　つらつら"
 },
   { id: 110003, label: "青・靑3",
   answer: "セイ"+
-  "\n凊"+
-  "\n菁\n　　　　※ショウもあるが熟語無し"+
-  "\n晴・晴"+
-  "\n靖・靖"+
-  "\n睛"+
+  "\n凊\n　　　　さむ(い)\n　　　　すず(しい)"+
+  "\n菁\n　　　　※ショウもあるが熟語無し\n　　　　かぶ\n　　　　かぶら\n　　　　かぶらな"+
+  "\n晴・晴\n　　　　は(らす)\n　　　　は(れる)"+
+  "\n靖・靖\n　　　　やす(い)\n　　　　やす(らか)\n　　　　やす(んじる)"+
+  "\n睛\n　　　　ひとみ"+
   "\n蜻"+
-  "\n錆\n　　　　※ショウもあるが熟語無し"+
-  "\n鯖\n　　　　※ショウもあるが熟語無し"+
-  "\n瀞\n　　　　※セイ、ショウもあるが熟語無し"+
+  "\n錆\n　　　　※ショウもあるが熟語無し\n　　　　さび\n　　　　さ(びる)"+
+  "\n鯖\n　　　　※ショウもあるが熟語無し\n　　　　さば\n　　　　よせなべ"+
+  "\n瀞\n　　　　※セイ、ショウもあるが熟語無し\n　　　　とろ"+
   "\n鶄"
 },
   { id: 110004, label: "青・靑4",
   answer: "ジョウ、ゼイ"+
-  "\n情　抒情(じょじょう)\n　　契情(けいせい)"
+  "\n情　抒情(じょじょう)\n　　契情(けいせい)\n　　なさ(け)\n　　おもむき\n　　こころ"
 },
   { id: 110005, label: "青・靑5",
   answer: "サイ"+
-  "\n猜　猜忌(さいき)"
+  "\n猜　猜忌(さいき)\n　　　　うたが(う)\n　　　　そね(む)\n　　　　ねた(む)"
 },
   { id: 110006, label: "青・靑6",
   answer: "セイ、ジョウ"+
-  "\n静・靜　虚静恬淡(きょせいてんたん)\n　　　　寂静(じゃくじょう)"
+  "\n静・靜　虚静恬淡(きょせいてんたん)\n　　　　寂静(じゃくじょう)\n　　　　しず\n　　　　しず(か)\n　　　　しず(まる)\n　　　　しず(める)"
 },
   { id: 110007, label: "青・靑7",
   answer: "セイ、シン、ショウ"+
-  "\n請　　　稟請(りんせい)\n　　　　普請(ふしん)\n　　　　勧請(かんじょう)\n　　　　起請(きしょう)\n　　　　請来(しょうらい)"
+  "\n請　　　稟請(りんせい)\n　　　　普請(ふしん)\n　　　　勧請(かんじょう)\n　　　　起請(きしょう)\n　　　　請来(しょうらい)\n　　　　う(ける)\n　　　　こ(う)"
 },
 
 
   { id: 110008, label: "甚1",
   answer: "ジン"+
-  "\n甚"+
-  "\n糂\n　　※ジン、サンもあるが熟語無し"
+  "\n甚\n　　はなは(だ)\n　　はなは(だしい)\n　　いた(く)"+
+  "\n糂\n　　※ジン、サンもあるが熟語無し\n　　こながき\n　　ま(じる)"
   },
   { id: 110009, label: "甚2",
   answer: "カン"+
-  "\n勘"+
-  "\n戡\n　　戡殄(かんてん)\n　　戡定(かんてい)"
+  "\n勘\n　　かんが(える)"+
+  "\n戡\n　　戡殄(かんてん)\n　　戡定(かんてい)\n　　か(つ)\n　　ころ(す)"
   },
   { id: 110010, label: "甚3",
   answer: "カン、タン"+
-  "\n堪　堪忍(かんにん)\n　　不堪(ふかん)\n　　堪航能力(たんこうのうりょく)\n　　堪能(たんのう)"
+  "\n堪　堪忍(かんにん)\n　　不堪(ふかん)\n　　堪航能力(たんこうのうりょく)\n　　堪能(たんのう)\n　　た(える)\n　　こた(える)\n　　こら(える)\n　　たま(る)"
   },
   { id: 110011, label: "甚4",
   answer: "チン、タン"+
-  "\n湛　湛湎(ちんめん)\n　　黯湛(あんたん)\n　　湛然(たんぜん)\n　　湛湛(たんたん)"
+  "\n湛　湛湎(ちんめん)\n　　黯湛(あんたん)\n　　湛然(たんぜん)\n　　湛湛(たんたん)\n　　あつ(い)\n　　たた(える)\n　　ふけ(る)"
   },
   { id: 110012, label: "甚5",
   answer: "セン"+
-  "\n尠　尠少(せんしょう)"
+  "\n尠　尠少(せんしょう)\n　　すく(ない)"
   },
   { id: 110013, label: "甚6",
   answer: "シン"+
-  "\n斟　斟酌(しんしゃく)\n　　斟量(しんりょう)"
+  "\n斟　斟酌(しんしゃく)\n　　斟量(しんりょう)\n　　おしはか(る)\n　　く(む)"
   },
   { id: 110014, label: "甚7",
   answer: "チン、ジン"+
-  "\n椹　椹質(ちんしつ)\n　　桑椹(そうじん)\n　　※シンもあるが熟語無し"
+  "\n椹　椹質(ちんしつ)\n　　桑椹(そうじん)\n　　※シンもあるが熟語無し\n　　あてぎ\n　　くわのみ\n　　さわら"
   },
   { id: 110015, label: "甚8",
   answer: "チン"+
-  "\n碪　碪杵(ちんしょ)\n　　擣碪(とうちん)\n　　※ガンもあるが熟語無し"
+  "\n碪　碪杵(ちんしょ)\n　　擣碪(とうちん)\n　　※ガンもあるが熟語無し\n　　きぬた"
   },
 
 
   { id: 110016, label: "几1",
   answer: "キ"+
-  "\n几　凭几(ひょうき)\n　　床几(しょうぎ)\n　　牀几(しょうぎ)\n　　案几(あんき)\n　　椅几(いき)"+
-  "\n机　※文机(ふづくえ)"+
-  "\n肌　肌膚(きふ)\n　　銘肌鏤骨(めいきるこつ)"+
-  "\n飢"
+  "\n几　凭几(ひょうき)\n　　床几(しょうぎ)\n　　牀几(しょうぎ)\n　　案几(あんき)\n　　椅几(いき)\n　　つくえ\n　　ひじかけ\n　　おしまずき"+
+  "\n机　※文机(ふづくえ)\n　　つくえ"+
+  "\n肌　肌膚(きふ)\n　　銘肌鏤骨(めいきるこつ)\n　　はだ\n　　はだえ"+
+  "\n飢　う(える)\n　　う(え)"
   },
   { id: 110017, label: "几2",
   answer: "ジョウ"+
-  "\n冗"
+  "\n冗　むだ"
   },
   { id: 110018, label: "几3",
   answer: "コウ"+
-  "\n亢　亢竜(こうりょう)"+
-  "\n伉"+
-  "\n抗　拮抗(きっこう)"+
-  "\n坑　竪坑(たてこう)\n　　焚書坑儒(ふんしょこうじゅ)"+
-  "\n吭"+
-  "\n杭　※棒杭(ぼうぐい)\n　　※乱杭(らんぐい)"+
-  "\n航　独航船(どっこうせん)"+
-  "\n頏　頡頏(けっこう、きっこう)"
+  "\n亢　亢竜(こうりょう)\n　　あ(がる)\n　　あ(たる)\n　　きわ(める)\n　　たか(い)\n　　たかぶ(る)\n　　のど"+
+  "\n伉　おご(る)\n　　たぐい\n　　つよ(い)\n　　なら(ぶ)"+
+  "\n抗　拮抗(きっこう)\n　　あらが(う)\n　　こば(む)\n　　はりあ(う)\n　　ふせ(ぐ)"+
+  "\n坑　竪坑(たてこう)\n　　焚書坑儒(ふんしょこうじゅ)\n　　あな"+
+  "\n吭　のど"+
+  "\n杭　※棒杭(ぼうぐい)\n　　※乱杭(らんぐい)\n　　くい\n　　わた(る)"+
+  "\n航　独航船(どっこうせん)\n　　わた(る)"+
+  "\n頏　頡頏(けっこう、きっこう)\n　　くび\n　　のど"
   },
   { id: 110019, label: "几4",
   answer: "ショ"+
-  "\n処　※御居処(おいど)\n　　※ソもあるが熟語無し"
+  "\n処　※御居処(おいど)\n　　※ソもあるが熟語無し\n　　お(く)\n　　お(る)\n　　ところ"
   },
   { id: 110020, label: "几5",
   answer: "キョ、コ"+
-  "\n拠　拠軾(きょしょく)\n　　証拠(しょうこ)"
+  "\n拠　拠軾(きょしょく)\n　　証拠(しょうこ)\n　　よりどころ\n　　よ(る)"
   },
   { id: 110021, label: "几6",
   answer: "ヒョウ"+
-  "\n凭　凭几(ひょうき)\n　　凭欄(ひょうらん)\n　　凭肩(ひょうけん)"
+  "\n凭　凭几(ひょうき)\n　　凭欄(ひょうらん)\n　　凭肩(ひょうけん)\n　　もた(れる)\n　　よ(る)"
   },
   { id: 110022, label: "几7",
   answer: "フ"+
-  "\n鳧・鳬　鳧脛(ふけい)\n　　　　鳧燕(ふけい)\n　　　　鳧舫(ふほう)\n　　　　鳧鴨(ふおう)\n　　　　鳧脛(ふけい)\n　　　　鳧翁(ふおう)\n　　　　鶴長鳧短(かくけいふたん)\n　　　　※田鳧(たげり)"
+  "\n鳧・鳬　鳧脛(ふけい)\n　　　　鳧燕(ふけい)\n　　　　鳧舫(ふほう)\n　　　　鳧鴨(ふおう)\n　　　　鳧脛(ふけい)\n　　　　鳧翁(ふおう)\n　　　　鶴長鳧短(かくけいふたん)\n　　　　※田鳧(たげり)\n　　　　かも\n　　　　けり"
   },
   { id: 110023, label: "几8",
   answer: "ガイ"+
-  "\n凱　凱沢(がいたく)\n　　※カイもあるが熟語無し",
+  "\n凱　凱沢(がいたく)\n　　※カイもあるが熟語無し\n　　かちどき\n　　やわ(らぐ)",
  },
 
 
 
   { id: 110026, label: "吂1",
   answer: "ルイ"+
-  "\n羸　羸馬(るいば)\n　　羸憊(るいはい)\n　　病羸(びょうるい)\n　　痩羸(そうるい)\n　　羸瘠(るいせき)\n　　疲羸(ひるい)\n　　羸骸(るいがい)\n　　羸師(るいし)\n　　羸弱(るいじゃく)\n　　羸兵(るいへい)"
+  "\n羸　羸馬(るいば)\n　　羸憊(るいはい)\n　　病羸(びょうるい)\n　　痩羸(そうるい)\n　　羸瘠(るいせき)\n　　疲羸(ひるい)\n　　羸骸(るいがい)\n　　羸師(るいし)\n　　羸弱(るいじゃく)\n　　羸兵(るいへい)\n　　つか(れる)\n　　や(せる)\n　　よわ(い)\n　　よわ(る)"
  },
   { id: 110027, label: "吂2",
   answer: "エイ"+
-  "\n贏　贏輸(えいしゅ)\n　　贏縢(えいとう)\n　　贏儲(えいちょ)\n　　贏得(えいとく)\n　　贏糧(えいりょう)\n　　贏財(えいざい)\n　　贏余(えいよ)\n　　贏利(えいり)\n　　輸贏(ゆえい・しゅえい)\n　　余贏(よえい)"+
-  "\n瀛　滄瀛(そうえい)\n　　瀛寰(えいかん)\n　　瀛海(えいかい)\n　　瀛表(えいひょう)\n　　大瀛(たいえい)\n　　東瀛(とうえい)",
+  "\n贏　贏輸(えいしゅ)\n　　贏縢(えいとう)\n　　贏儲(えいちょ)\n　　贏得(えいとく)\n　　贏糧(えいりょう)\n　　贏財(えいざい)\n　　贏余(えいよ)\n　　贏利(えいり)\n　　輸贏(ゆえい・しゅえい)\n　　余贏(よえい)\n　　あま(る)\n　　か(つ)\n　　にな(う)\n　　の(びる)\n　　もう(ける)"+
+  "\n瀛　滄瀛(そうえい)\n　　瀛寰(えいかん)\n　　瀛海(えいかい)\n　　瀛表(えいひょう)\n　　大瀛(たいえい)\n　　東瀛(とうえい)\n　　うみ",
  },
 
 
   { id: 110028, label: "執1",
   answer: "シツ、シュウ"+
-  "\n執　被堅執鋭(ひけんしつえい)\n　　我執(がしゅう)"
+  "\n執　被堅執鋭(ひけんしつえい)\n　　我執(がしゅう)\n　　と(る)\n　　とら(える)"
   },
   { id: 110029, label: "執2",
   answer: "シ"+
-  "\n摯　竺摯(とくし)\n　　搏摯(はくし)\n　　摯忱(ししん)\n　　摯実(しじつ)\n　　真摯(しんし)"+
-  "\n贄　贄敬(しけい)"+
-  "\n鷙　鷙鳥(しちょう)\n　　鷙悍(しかん)\n　　鷙勇(しゆう)" 
+  "\n摯　竺摯(とくし)\n　　搏摯(はくし)\n　　摯忱(ししん)\n　　摯実(しじつ)\n　　真摯(しんし)\n　　あら(い)\n　　と(る)\n　　にえ\n　　まこと"+
+  "\n贄　贄敬(しけい)\n　　にえ"+
+  "\n鷙　鷙鳥(しちょう)\n　　鷙悍(しかん)\n　　鷙勇(しゆう)\n　　あら(い)\n　　あらどり\n　　う(つ)" 
   },
   { id: 110030, label: "執3",
   answer: "チツ"+
-  "\n蟄　蟄蟄(ちつちつ)\n　　啓蟄(けいちつ)\n　　蟄居屛息(ちっきょへいそく)\n　　蟄虫(ちっちゅう)\n　　蟄伏(ちっぷく)\n　　蟄竜(ちつりょう)\n　　※チュウもあるが熟語無し"
+  "\n蟄　蟄蟄(ちつちつ)\n　　啓蟄(けいちつ)\n　　蟄居屛息(ちっきょへいそく)\n　　蟄虫(ちっちゅう)\n　　蟄伏(ちっぷく)\n　　蟄竜(ちつりょう)\n　　※チュウもあるが熟語無し\n　　かく(れる)\n　　とじこ(もる)"
   },
 
 
-
-  { id: 110033, label: "曷1",
+  { id: 110031, label: "曷1",
   answer: "カツ"+
-  "\n曷　　　曷鼻(かつび)\n　　　　いずく(んぞ)\n　　　　いつ\n　　　　なに\n　　　　なん(ぞ)"+
+  "\n曷　　　いずく(んぞ)\n　　　　いつ\n　　　　なに\n　　　　なん(ぞ)"+
   "\n葛　　　裘葛(きゅうかつ)\n　　　　くず\n　　　　かずら\n　　　　かたびら\n　　　　つづら"+
-  "\n渇・渴　随喜渇仰(ずいきかつごう)\n　　　　饑渇(きかつ)\n　　　　かわ(く)\n　　　　むさぼ(る)"+
-  "\n愒　　　恫喝(どうかつ)\n　　　　おど(す)"+
   "\n喝・喝　喝火(かっこ)\n　　　　喝食(かっしき)\n　　　　喝破(かっぱ)\n　　　　おど(す)\n　　　　しか(る)"+
-  "\n歇　　　歇驕(かつきょう)"+
+  "\n渇・渴　随喜渇仰(ずいきかつごう)\n　　　　饑渇(きかつ)\n　　　　かわ(く)\n　　　　※ケツもあるが熟語無し\n　　　　むさぼ(る)"+
   "\n褐・褐　褐色(かちいろ)\n　　　　褐衣(かちえ)\n　　　　褐冠(かちかぶり)\n　　　　褐藻(かっそう)\n　　　　短褐穿結(たんかつせんけつ)\n　　　　被褐懐玉(ひかつかいぎょく)\n　　　　ぬのこ"+
-  "\n蝎　　　蛇蝎(だかつ)\n　　　　蝎虎(かっこ)\n　　　　きくいむし\n　　　　さそり\n　　　　すくもむし"+
-  "\n羯　　　羯鼓(かっこ)\n　　　　羯磨(かつま)\n　　　　矜羯羅(こんがら)\n　　　　えびす"+
-  "\n鞨　　　靺鞨(まっかつ)\n　　　　かわぐつ\n　　　　くつ"+
-  "\n蠍　　　蛇蠍(だかつ)\n　　　　さそり"
+  "\n蝎　　　蝎蠹(かつと)\n　　　　蛇蝎(だかつ)\n　　　　蝎虎(かっこ)\n　　　　きくいむし\n　　　　さそり\n　　　　すくもむし"+
+  "\n羯　　　羯羶(かっせん)\n　　　　羯鼓(かっこ)\n　　　　羯磨(かつま)\n　　　　矜羯羅(こんがら)\n　　　　えびす"+
+  "\n鞨　　　鞨鼓(かっこ)\n　　　　靺鞨(まっかつ)\n　　　　かわぐつ\n　　　　くつ"+
+  "\n蠍　　　蛇蠍(だかつ)\n　　　　※ケツもあるが熟語無し\n　　　　さそり"
   },
-  { id: 110034, label: "曷2",
-  answer: "ゲ"+
-  "\n偈　　　偈(げ)\n　　　　偈頌(げじゅ)\n　　　　頌偈(じゅげ)\n　　　　讃偈(さんげ)\n　　　　いこ(う)　"
+  { id: 110032, label: "曷2",
+  answer: "ゲ、ケツ"+
+  "\n偈　偈(げ)\n　　偈頌(げじゅ)\n　　頌偈(じゅげ)\n　　讃偈(さんげ)\n　　遺偈(いげ)\n　　讃仏偈(さんぶつげ)\n　　偈偈(けっけつ)\n　　※ケイもあるが熟語無し\n　　いこ(う)\n　　はや(い)"
   },
-  { id: 110035, label: "曷3",
+  { id: 110033, label: "曷3",
   answer: "ケイ"+
-  "\n偈　　　いこ(う)"+
-  "\n掲・揭　深厲浅掲(しんれいせんけい)\n　　　　かか(げる)"+
-  "\n愒　　　愒息(けいそく)\n　　　　いこ(う)"
+  "\n掲・揭　掀掲(きんけい)\n　　　　深厲浅掲(しんれいせんけい)\n　　　　かか(げる)"
   },
-  { id: 110036, label: "曷4",
-  answer: "ケツ"+
-  "\n偈　　　偈偈(けつけつ)\n　　　　はや(い)"+
-  "\n渇・渴　かわ(く)"+
-  "\n歇　　　間歇(かんけつ)\n　　　　歇後(けつご)\n　　　　歇息(けっそく)\n　　　　か(れる)\n　　　　つ(きる)\n　　　　やす(む)\n　　　　や(む)\n　　　　や(める)　"+
-  "\n碣　　　碑碣(ひけつ)\n　　　　碣石(けっせき)\n　　　　石碣(せっけつ)\n　　　　墓碣(ぼけつ)\n　　　　いしぶみ"+
-  "\n竭　　　殫竭(たんけつ)\n　　　　枯竭(こけつ)\n　　　　匱竭(きけつ)\n　　　　竭慮(けつりょ)\n　　　　竭至(けっし)\n　　　　竭沢(けったく)\n　　　　竭尽(けつじん)\n　　　　枯竭(こけつ)\n　　　　か(れる)\n　　　　ことごと(く)\n　　　　つ(きる)\n　　　　つ(くす)"+
-  "\n蠍　　　さそり"
+  { id: 110034, label: "曷4",
+  answer: "カツ、ケツ"+
+  "\n歇　　　歇驕(かつきょう)\n　　　　間歇(かんけつ)\n　　　　歇後(けつご)\n　　　　歇息(けっそく)\n　　　　か(れる)\n　　　　つ(きる)\n　　　　やす(む)\n　　　　や(む)\n　　　　や(める)"
   },
-  { id: 110037, label: "曷5",
-  answer: "カイ"+
-  "\n愒　愒日(かいじつ)\n　　玩愒(がんかい)\n　　愒陰(かいいん)\n　　翫愒(がんかい)\n　　むさぼ(る)"
+  { id: 110035, label: "曷5",
+  answer: "カツ、カイ、ケイ"+
+  "\n愒　恫愒(どうかつ)\n　　愒日(かいじつ)\n　　玩愒(がんかい)\n　　愒陰(かいいん)\n　　翫愒(がんかい)\n　　愒息(けいそく)\n　　おど(す)\n　　いこ(う)\n　　むさぼ(る)"
   },
-  { id: 110038, label: "曷6",
+  { id: 110036, label: "曷6",
   answer: "アツ"+
   "\n遏　遏密(あつみつ)\n　　壅遏(ようあつ)\n　　沮遏(そあつ・しょあつ)\n　　遏佚(あついつ)\n　　遏止(あっし)\n　　遏絶(あつぜつ)\n　　遏雲(あつうん)\n　　禁遏(きんあつ)\n　　防遏(ぼうあつ)\n　　さえぎ(る)\n　　た(つ)\n　　とど(める)\n　　と(める)"
   },
-  { id: 110039, label: "曷7",
+  { id: 110037, label: "曷7",
+  answer: "ケツ"+
+  "\n碣　　　碑碣(ひけつ)\n　　　　碣石(けっせき)\n　　　　石碣(せっけつ)\n　　　　墓碣(ぼけつ)\n　　　　いしぶみ"+
+  "\n竭　　　殫竭(たんけつ)\n　　　　枯竭(こけつ)\n　　　　匱竭(きけつ)\n　　　　竭慮(けつりょ)\n　　　　竭至(けっし)\n　　　　竭沢(けったく)\n　　　　竭尽(けつじん)\n　　　　枯竭(こけつ)\n　　　　か(れる)\n　　　　ことごと(く)\n　　　　つ(きる)\n　　　　つ(くす)"
+  },
+  { id: 110038, label: "曷8",
   answer: "ロウ"+
   "\n﨟・臈　﨟纈(ろうけち)\n　　　　上﨟(じょうろう)\n　　　　くれ"
   },
-  { id: 110040, label: "曷8",
+  { id: 110039, label: "曷9",
   answer: "エツ"+
-  "\n謁・謁　謁見(えっけん)\n　　　　内謁(ないえつ)\n　　　　拝謁(はいえつ)\n　　　　参謁(さんえつ)\n　　　　私謁(しえつ)\n　　　　上謁(じょうえつ)\n　　　　請謁(せいえつ)\n　　　　まみ(える)"
+  "\n謁・謁　謁見(えっけん)\n　　　　内謁(ないえつ)\n　　　　拝謁(はいえつ)\n　　　　参謁(さんえつ)\n　　　　私謁(しえつ)\n　　　　上謁(じょうえつ)\n　　　　請謁(せいえつ)\n　　　　脩謁(しゅうえつ)\n　　　　まみ(える)"
   },
-  { id: 110041, label: "曷9",
+  { id: 110040, label: "曷10",
   answer: "アイ"+
   "\n藹・譪　奄藹(えんあい)\n　　　　黝藹(ゆうあい)\n　　　　藹藹(あいあい)\n　　　　藹然(あいぜん)\n　　　　おお(い)\n　　　　おだ(やか)\n　　　　さか(ん)"+
   "\n靄　　　靄迺(あいだい)\n　　　　杳靄(ようあい)\n　　　　靄靄(あいあい)\n　　　　靄然(あいぜん)\n　　　　暮靄(ぼあい)\n　　　　山靄(さんあい)\n　　　　淡靄(たんあい)\n　　　　もや",
   },
+
+
+
+
+
 
   { id: 110042, label: "乍1",
   answer: "サ"+
@@ -2910,6 +2992,9 @@ function createQuiz(blockId, data) {
     const blueCountEl  = document.getElementById(`blueCount-${blockId}`);
     const whiteCountEl = document.getElementById(`whiteCount-${blockId}`);
 
+    const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+
+
 
     let currentId = null;
     let remaining = [];
@@ -3132,11 +3217,9 @@ function createQuiz(blockId, data) {
       const excludeLastReviewDate = document.getElementById(`excludeLastReviewDate-${blockId}`).value;
       const excludeLastReviewCond = document.getElementById(`excludeLastReviewCond-${blockId}`).value;
 
-      return data.filter(d => {
+      // ✅ まずは既存条件で範囲抽出
+      let rangeData = data.filter(d => {
         if (d.id < start || d.id > end) return false;
-
-        // 正解数フィルタ（従来の仕様）
-        // if ((correctCounts.get(d.id) ?? 0) >= excludeCorrect) return false;
 
         // 正解数フィルタ
         const correct = correctCounts.get(d.id) ?? 0;
@@ -3166,12 +3249,26 @@ function createQuiz(blockId, data) {
           if (excludeLastReviewCond === "before" && reviewDate <= condDate) return false;
           if (excludeLastReviewCond === "after" && reviewDate >= condDate) return false;
         }
-        
 
         return true;
       });
-    }
 
+      // ✅ ここからセル色フィルタを追加
+      const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+      if (colorFilterSelect) {
+        const colorChoice = colorFilterSelect.value; // "all", "green", "red", "white"
+        const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
+
+        if (colorChoice === "green" || colorChoice === "red") {
+          rangeData = rangeData.filter(item => savedColors[item.id] === colorChoice);
+        } else if (colorChoice === "white") {
+          rangeData = rangeData.filter(item => !savedColors[item.id]);
+        }
+        // "all" の場合はフィルタしない
+      }
+
+      return rangeData;
+    }
 
 
 
@@ -3550,6 +3647,7 @@ function createQuiz(blockId, data) {
     });
 
 
+
     // 出題ボタンを押したとき
     nextBtn.addEventListener('click', () => {
         const rangeData = getRangeData();
@@ -3563,6 +3661,9 @@ function createQuiz(blockId, data) {
         updateRemainingCount();  // ← これを追加
         updateColorCount(); // ← 追加
     });
+
+
+
 
     function updateRemainingCount() {
       remainingCountLabel.textContent = `残り: ${remaining.length}問`;
@@ -3703,6 +3804,35 @@ function createQuiz(blockId, data) {
             updateColorCount(); // ← 追加
         }
     });
+
+    function updateColorFilterBackground() {
+      // まず既存クラスを全削除
+      colorFilterSelect.classList.remove(
+        'color-filter-red',
+        'color-filter-green',
+        'color-filter-white',
+        'color-filter-all'
+      );
+
+      // 現在の値に応じてクラスを追加
+      const value = colorFilterSelect.value;
+      if (value === 'red') {
+        colorFilterSelect.classList.add('color-filter-red');
+      } else if (value === 'green') {
+        colorFilterSelect.classList.add('color-filter-green');
+      } else if (value === 'white') {
+        colorFilterSelect.classList.add('color-filter-white');
+      } else {
+        colorFilterSelect.classList.add('color-filter-all');
+      }
+    }
+
+    // 初期状態の反映
+    updateColorFilterBackground();
+
+    // 変更イベント時に反映
+    colorFilterSelect.addEventListener('change', updateColorFilterBackground);
+
 
     
     // ---------------- ステータステーブル表示/非表示 ----------------
