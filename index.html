@@ -98,10 +98,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;  /* 2列 */
     grid-template-rows: auto auto auto auto; /* 4行 */
-    gap: 8px 12px;                  /* 縦横の隙間 */
+    gap: 4px 8px;                  /* 縦横の隙間 */
     width: 100%;
     box-sizing: border-box;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
 
   /* 各labelをブロック化して均等に伸ばす */
@@ -386,8 +386,8 @@
         </tr>
       </table>
       <span id="remainingCount-0" style="align-self:center; font-size: 14px; margin-right:auto;">残り: 0問</span>
-      <button class="myButtonGreen" id="correctBtn-0">正解</button>
-      <button class="myButtonRed" id="wrongBtn-0">不正解</button>
+      <button class="myButtonGreen" id="correctBtn-0">○</button>
+      <button class="myButtonRed" id="wrongBtn-0">×</button>
     </div>
     <!-- ステータステーブル表示/非表示ボタン -->
     <div class="button-group">
@@ -4001,4 +4001,5 @@ document.querySelectorAll('.floating-buttons button').forEach(button => {
 </script>
 </body>
 </html>
+
 
