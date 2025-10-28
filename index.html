@@ -5511,19 +5511,23 @@ function createQuiz(blockId, data) {
         setButtonsEnabled(true);
 
         if (window.MathJax) MathJax.typesetPromise([questionArea]);
-
     }
 
 
     function colorizeNestedParentheses(text) {
       const colors = [
-        "#ffbf7f",
-        "#bfff7f",
-        "#7fffbf",
-        "#7fbfff",
-        "#bf7fff"
+        "#ff7f00",
+        "#ffff00",
+        "#7fff00",
+        "#00ff00",
+        "#00ff7f",
+        "#00ffff",
+        "#007fff",
+        "#0000ff",
+        "#7f00ff",
+        "#ff00ff",
+        "#ff007f"
       ];
-
       let result = "";
       let depth = 0;
 
