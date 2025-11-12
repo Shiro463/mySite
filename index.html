@@ -327,7 +327,7 @@
   padding: 10px;
 }
 
-/* ✅ 下部のボーダーを内部要素で表現する */
+/* ✅ 下部のボーダーを内部要素で表現 */
 #lawPanel::after {
   content: "";
   display: block;
@@ -337,17 +337,20 @@
   width: 100%;
   height: 2px;
   background: #6cb4e4;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   opacity: 0;
+  transform: translateY(-5px);
 }
 
-/* 開いたときだけ border 表示 */
+/* ✅ 開いたときにボーダーが一緒に動く */
 #lawPanel.open::after {
   opacity: 1;
+  transform: translateY(0);
 }
 
+/* 閉じるボタン */
 #lawPanelClose {
-  position: fixed;      /* 画面右上に固定 */
+  position: fixed;
   top: 10px;
   right: 15px;
   cursor: pointer;
@@ -358,7 +361,7 @@
   border-radius: 5px;
   padding: 5px 10px;
   z-index: 3001;
-  display: none;        /* ← 最初は非表示 */
+  display: none;
 }
 
 /* lawPanel が open のときだけボタンを表示 */
@@ -366,24 +369,25 @@
   display: block;
 }
 
+/* ✅ lawPanelContent（1箇所にまとめる） */
 #lawPanelContent {
   white-space: pre-wrap;
   font-size: 16px;
   line-height: 1.6;
-  margin-top: 40px; /* ボタン領域分の余白 */
-  max-height: calc(25vh - 50px); /* パネル高さに合わせて調整 */
-  overflow-y: auto; /* ✅ スクロール可能 */
-  padding-right: 20px;    /* ✅ スクロールバーが本文にかからないように余白 */
-  margin-right: 10px;     /* ✅ ページ右端から少し左に寄せる */
-  padding-bottom: 20px; /* ✅ 末尾が切れないよう余白を追加 */
-  box-sizing: content-box; /* ✅ 余白計算を自然に */
+  margin-top: 40px; /* 上部のボタン領域分 */
+  max-height: calc(25vh - 60px); /* 上部余白 + 下端ボーダー分を引く */
+  overflow-y: auto; /* スクロールを有効化 */
+  padding-right: 20px;  /* スクロールバー分の余白 */
+  padding-bottom: 16px; /* ✅ 最後の行が切れないように少し余白 */
+  margin-right: 10px;   /* ページ右端と被らないように */
+  box-sizing: border-box;
 }
 
 /* 左右ナビボタン */
 #lawPanelPrev, #lawPanelNext {
   position: fixed;
   top: 10px;
-  display: none;            /* デフォルトは非表示（panel openで表示） */
+  display: none;
   z-index: 3002;
   background: #ffffff;
   border: 1px solid #ccc;
@@ -394,7 +398,7 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
-/* 右ボタンと左ボタン位置（画面右上に寄せる）*/
+/* 右ボタンと左ボタン位置 */
 #lawPanelNext { right: 60px; }
 #lawPanelPrev { right: 100px; }
 
@@ -410,18 +414,6 @@
   pointer-events: none;
 }
 
-/* lawPanelContent の既存スタイルがある前提：スクロール領域を確保 */
-#lawPanelContent {
-  white-space: pre-wrap;
-  font-size: 16px;
-  line-height: 1.6;
-  margin-top: 40px; /* 上部のボタン領域と被らないように */
-  max-height: calc(25vh - 20px);
-  overflow-y: auto;
-  padding-right: 18px;
-  padding-bottom: 20px; /* ✅ 末尾が切れないよう余白を追加 */
-  box-sizing: border-box;
-}
 
 
 </style>
