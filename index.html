@@ -8005,22 +8005,9 @@ function createQuiz(blockId, data) {
       blueCountEl.textContent  = blueCells;
       whiteCountEl.textContent = whiteCells;
 
-      sendGreenCount(greenCells);
-
     }
 
-    function sendGreenCount(greenCells) {
-      const greenCount = greenCells;
-      fetch("https://script.google.com/macros/s/AKfycbzO7wgQuaN25WEjJXDKzLKGGb3KK0gmd3cXM1-lMyRIo7TWXD1CksV7CqH1Si8hxOFx/exec", {
-        method: "POST",
-        body: JSON.stringify({ greenCount: greenCount }),
-        headers: { "Content-Type": "application/json" }
-      })
-        .then(response => response.text())
-        .then(result => console.log("送信成功:", result))
-        .catch(err => console.error("送信エラー:", err));
-      }
-    }
+
 
 
 
