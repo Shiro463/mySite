@@ -420,7 +420,9 @@
 </head>
 <body>
 
-  
+<div>
+<button id="saveDataBtn">今日の記録を保存</button>
+</div>
 
 <!-- クイズブロック -->
 <div class="quiz-block" id="quizBlock-0">
@@ -1161,7 +1163,7 @@ const quizData0_1 = createQuizData([ /*イタリア語 40001～*/
   "Questi sono cani." ],
 
   ["これは1台のミニバイクです。",
-  "これらは1台のミニバイクです。",
+  "これは1台のミニバイクです。",
   "Questo è un motorino." ],
 
   ["これらはミニバイクです。",
@@ -8961,6 +8963,37 @@ updateNavButtons();
 
       return result;
     }
+
+
+
+
+
+document.getElementById("saveDataBtn").addEventListener("click", () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  const greenValue = Number(document.getElementById("greenCount-0").textContent);
+  const redValue   = Number(document.getElementById("redCount-0").textContent);
+  const whiteValue = Number(document.getElementById("whiteCount-0").textContent);
+  const blueValue  = Number(document.getElementById("blueCount-0").textContent);
+
+  console.log("g", greenValue, "r", redValue, "w", whiteValue, "b", blueValue);
+
+
+  fetch("https://script.google.com/macros/s/AKfycbyxI2lkD41XXwlbQp9QAQMRPtaj0SoFQajQ-9Y43Qxhy6f-liixwdunPdpXI19Jwe-i/exec", {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      date: today,
+      greenValue: greenValue,
+      redValue: redValue,
+      whiteValue: whiteValue,
+      blueValue: blueValue
+    })
+  })
+  .then(() => alert("4色データを送信しました！"))
+  .catch(err => alert("エラー:" + err));
+});
 
 
 </script>
