@@ -414,19 +414,6 @@
   pointer-events: none;
 }
 
-.chart-container {
-    width: 100%;       /* 横幅を親コンテナにフィット */
-    max-width: 600px;  /* 任意の最大幅 */
-    height: 300px;     /* 初期高さ */
-    margin: 0 auto;    /* 中央寄せ */
-}
-
-@media (max-width: 480px) {
-    .chart-container {
-        height: 200px; /* 小さい画面では高さを縮小 */
-    }
-}
-
 
 
 </style>
@@ -544,8 +531,11 @@
   <div class="status-table-container" id="statusTableContainer-0">
     <table class="status-table" id="statusTable-0"></table>
   </div>
-  <div class="chart-container" id="chartContainer-0">
-      <canvas id="chartCanvas-0"></canvas>
+  <div class="quiz-block" id="quiz-0">
+      <button id="toggle-chart-0">グラフ表示/非表示</button>
+      <div class="chart-container" id="chartContainer-0" style="display:none;">
+          <canvas id="chartCanvas-0"></canvas>
+      </div>
   </div>
 </div>
 
@@ -8801,12 +8791,40 @@ function createQuiz(blockId, data) {
 
 
 
+    /* ====== グローバルなチャート保持 ====== */
+    const charts = {}; // blockId -> Chart instance
 
+    /* ====== レスポンシブ用 CSS を動的に追加（希望なければ外部CSSへ移してOK） ====== */
+    (function addChartStyles() {
+      const css = `
+        .chart-container {
+          width: 100%;
+          max-width: 720px;
+          height: 300px;
+          margin: 12px auto;
+          box-sizing: border-box;
+          padding: 8px;
+        }
+        @media (max-width: 480px) {
+          .chart-container { height: 200px; padding: 6px; }
+        }
+        .chart-empty {
+          display:flex; align-items:center; justify-content:center;
+          height:100%;
+          color:#666;
+          font-size:14px;
+        }
+      `;
+      const s = document.createElement('style');
+      s.textContent = css;
+      document.head.appendChild(s);
+    })();
 
-
-
+    /* ====== 日次保存関数（1日1回/ブロック） ====== */
     function saveDailyColorCounts(blockId) {
         const table = document.getElementById(`statusTable-${blockId}`);
+        if (!table) return; // テーブル未生成なら何もしない
+
         const greenCells = table.querySelectorAll('.green').length;
         const redCells   = table.querySelectorAll('.red').length;
         const blueCells  = table.querySelectorAll('.blue').length;
@@ -8818,13 +8836,14 @@ function createQuiz(blockId, data) {
         const key = `dailyCounts-${blockId}`;
         const saved = JSON.parse(localStorage.getItem(key) || '{}');
 
-        // 1日1回のみ保存
+        // 1日1回のみ保存（既に同日があれば上書きしない）
         if (!saved[today]) {
             saved[today] = { green: greenCells, red: redCells, white: whiteCells };
             localStorage.setItem(key, JSON.stringify(saved));
         }
     }
 
+    /* ====== チャート描画関数（ローカルデータから） ====== */
     function renderChart(blockId) {
         const key = `dailyCounts-${blockId}`;
         const saved = JSON.parse(localStorage.getItem(key) || '{}');
@@ -8833,43 +8852,132 @@ function createQuiz(blockId, data) {
         const redData   = dates.map(d => saved[d].red);
         const whiteData = dates.map(d => saved[d].white);
 
-        // Chart.js を利用
-        const containerId = `chartContainer-${blockId}`;
-        const container = document.getElementById(containerId);
-        container.innerHTML = '<canvas id="chartCanvas-' + blockId + '"></canvas>';
+        const container = document.getElementById(`chartContainer-${blockId}`);
+        if (!container) return;
 
-        const ctx = document.getElementById(`chartCanvas-${blockId}`);
-        new Chart(ctx, {
+        // canvas を取得（存在しなければ作る） — 既に canvas が存在する場合は使い回す
+        let canvas = document.getElementById(`chartCanvas-${blockId}`);
+        if (!canvas) {
+            canvas = document.createElement('canvas');
+            canvas.id = `chartCanvas-${blockId}`;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            container.innerHTML = ''; // 中身クリア
+            container.appendChild(canvas);
+        } else {
+            // canvasがある場合は中身クリアして再描画用に使う
+            container.innerHTML = '';
+            container.appendChild(canvas);
+        }
+
+        // データが空ならメッセージを出して終了（チャートは作らない）
+        if (dates.length === 0) {
+            container.innerHTML = '<div class="chart-empty">保存データがありません</div>';
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+
+        // 既にチャートがあれば破棄しておく（安全のため）
+        if (charts[blockId]) {
+            try { charts[blockId].destroy(); } catch (e) {}
+            charts[blockId] = null;
+        }
+
+        charts[blockId] = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: dates,
                 datasets: [
-                    { label: '緑', data: greenData, backgroundColor: 'green' },
-                    { label: '赤', data: redData, backgroundColor: 'red' },
-                    { label: '白', data: whiteData, backgroundColor: 'gray' }
+                    { label: '緑', data: greenData, backgroundColor: 'rgba(40,167,69,0.85)' },
+                    { label: '赤', data: redData,   backgroundColor: 'rgba(220,53,69,0.85)' },
+                    { label: '白', data: whiteData, backgroundColor: 'rgba(108,117,125,0.85)' }
                 ]
             },
             options: {
-                responsive: true,  // ← ここでレスポンシブ化
-                maintainAspectRatio: false, // ← 高さを自由に設定可能
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'top' },
-                    title: { display: true, text: 'セル色の推移' }
+                    title: { display: true, text: '日次セル色カウント' }
                 },
                 scales: {
-                    x: { stacked: true },
+                    x: { stacked: true, ticks: { maxRotation: 45, minRotation: 0 } },
                     y: { stacked: true, beginAtZero: true }
                 }
             }
         });
-
     }
 
-    // --- ページロード時に各ブロックで実行 ---
+    /* ====== トグルボタンとチャートコンテナを作成/紐付け ======
+      ボタン ID は toggle-chart-{blockId} を期待します（既にあれば使う）.
+      コンテナ ID は chartContainer-{blockId} を使います（無ければ自動作成） */
+    function ensureChartUIForBlock(blockElement, blockId) {
+        // ボタン
+        let toggleBtn = document.getElementById(`toggle-chart-${blockId}`);
+        if (!toggleBtn) {
+            toggleBtn = document.createElement('button');
+            toggleBtn.id = `toggle-chart-${blockId}`;
+            toggleBtn.textContent = 'グラフ表示/非表示';
+            toggleBtn.style.margin = '8px 0';
+            // ボタンは status-table-container の直後（あれば）に挿入、それがなければブロック末尾
+            const tableContainer = blockElement.querySelector(`#statusTableContainer-${blockId}`) || blockElement;
+            tableContainer.parentNode.insertBefore(toggleBtn, tableContainer.nextSibling);
+        }
+
+        // コンテナ
+        let chartContainer = document.getElementById(`chartContainer-${blockId}`);
+        if (!chartContainer) {
+            chartContainer = document.createElement('div');
+            chartContainer.id = `chartContainer-${blockId}`;
+            chartContainer.className = 'chart-container';
+            chartContainer.style.display = 'none'; // 初期は非表示
+            // append after toggleBtn
+            toggleBtn.parentNode.insertBefore(chartContainer, toggleBtn.nextSibling);
+        }
+
+        // 一度だけイベント登録
+        if (!toggleBtn.dataset.chartListener) {
+            toggleBtn.addEventListener('click', () => {
+                // トグル表示
+                if (chartContainer.style.display === 'none' || chartContainer.style.display === '') {
+                    chartContainer.style.display = 'block';
+                    // 高さはCSSに任せるが念のため minHeightを確保
+                    chartContainer.style.minHeight = chartContainer.style.minHeight || '180px';
+                    // 初回のみ描画
+                    if (!charts[blockId]) {
+                        renderChart(blockId);
+                    }
+                } else {
+                    chartContainer.style.display = 'none';
+                    // 非表示時にメモリ解放する（必要なければこの destroy 行をコメントアウト）
+                    if (charts[blockId]) {
+                        try { charts[blockId].destroy(); } catch (e) {}
+                        charts[blockId] = null;
+                        // canvas を空にしておく（DOMは残す）
+                        const canvas = document.getElementById(`chartCanvas-${blockId}`);
+                        if (canvas) {
+                            canvas.remove(); // 削除しておくと次回新しいcanvasを作る
+                        }
+                    }
+                }
+            });
+            toggleBtn.dataset.chartListener = '1';
+        }
+    }
+
+    /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
     document.querySelectorAll('.quiz-block').forEach((block, index) => {
-        saveDailyColorCounts(index);
-        renderChart(index);
+        try {
+            saveDailyColorCounts(index);
+        } catch (e) {
+            // 保険: テーブルが未生成等で失敗する可能性があるので無視
+            console.warn('saveDailyColorCounts failed for', index, e);
+        }
+        // ボタンとコンテナを作っておく（描画は未実行）
+        ensureChartUIForBlock(block, index);
     });
+
 
 
 
@@ -9062,39 +9170,93 @@ updateNavButtons();
 
 
 
-    function colorizeNestedParentheses(text) {
-      const colors = [
-        "#ff7f00", //オレンジ
-        "#00ff7f", //薄い青緑
-        "#ff00ff", //ピンクめ紫
-        "#007fff", //薄い青
-        "#7fff00", //明るめ緑
-        "#0000ff", //青
-        "#00ff00", //緑
-        "#7f00ff", //紫
-        "#00ffff", //水色
-        "#ff007f", //赤紫
-      ];
-      let result = "";
-      let depth = 0;
+function colorizeNestedParentheses(text) {
+  const colors = [
+    "#ff7f00", //オレンジ
+    "#00ff7f", //薄い青緑
+    "#ff00ff", //ピンクめ紫
+    "#007fff", //薄い青
+    "#7fff00", //明るめ緑
+    "#0000ff", //青
+    "#00ff00", //緑
+    "#7f00ff", //紫
+    "#00ffff", //水色
+    "#ff007f", //赤紫
+  ];
+  let result = "";
+  let depth = 0;
 
-      for (let char of text) {
-        if (char === "(" || char === "（") {
-          const color = colors[Math.min(depth, colors.length - 1)];
-          result += `<span style="color: ${color};">${char}`;
-          depth++;
-        } else if (char === ")" || char === "）") {
-          depth = Math.max(0, depth - 1);
-          result += `${char}</span>`;   // ← char の後に閉じる
-        } else {
-          result += char;
-        }
-      }
-
-      return result;
+  for (let char of text) {
+    if (char === "(" || char === "（") {
+      const color = colors[Math.min(depth, colors.length - 1)];
+      result += `<span style="color: ${color};">${char}`;
+      depth++;
+    } else if (char === ")" || char === "）") {
+      depth = Math.max(0, depth - 1);
+      result += `${char}</span>`;   // ← char の後に閉じる
+    } else {
+      result += char;
     }
+  }
+
+  return result;
+}
 
 
+// // --- Chart 破棄（非表示時にメモリを解放する） ---
+// function destroyChart(blockId) {
+//     const chart = charts[blockId];
+//     const container = document.getElementById(`chartContainer-${blockId}`);
+//     if (chart) {
+//         try { chart.destroy(); } catch (e) { /* ignore */ }
+//         delete charts[blockId];
+//     }
+//     if (container) {
+//         // 非表示にして中身をクリア
+//         container.style.display = 'none';
+//         container.innerHTML = '';
+//     }
+// }
+
+// // --- toggle ボタンの初期化（id="toggle-chart-{blockId}" を探す） ---
+// function initChartToggles() {
+//     // ボタンのセレクタ: idが toggle-chart- で始まるもの
+//     document.querySelectorAll('button[id^="toggle-chart-"]').forEach(button => {
+//         button.addEventListener('click', () => {
+//             const idStr = button.id.replace('toggle-chart-', '');
+//             const blockId = idStr; // 文字列のままでも OK（キー用途）
+
+//             const containerId = `chartContainer-${blockId}`;
+//             let container = document.getElementById(containerId);
+
+//             // コンテナが存在して表示中 -> 隠して destroy
+//             if (container && container.style.display === 'block') {
+//                 destroyChart(blockId);
+//                 return;
+//             }
+
+//             // 表示されていない場合: renderChart（ボタン押下で初めて描画）
+//             // 先に最新のセル数を保存しておく（必要なら）
+//             saveDailyColorCounts(blockId);
+//             renderChart(blockId);
+//         });
+//     });
+// }
+
+// // --- ページロード時処理 ---
+// // 各 quiz-block について日次カウントを保存（軽量）し、トグルを初期化する
+// window.addEventListener('load', () => {
+//     // 保存のみ行う（重い描画は行わない）
+//     document.querySelectorAll('.quiz-block').forEach((block, idx) => {
+//         // ブロックの id が quizBlock-<n> 形式ならそれを使い、そうでなければ idx を使用
+//         const idMatch = block.id && block.id.match(/^quizBlock-(\d+)$/);
+//         const blockId = idMatch ? idMatch[1] : String(idx);
+//         saveDailyColorCounts(blockId);
+//     });
+
+//     // toggle ボタンのイベントを設定
+//     initChartToggles();
+// });
 
 
 // const greenEl0 = document.getElementById("greenCount-0");
