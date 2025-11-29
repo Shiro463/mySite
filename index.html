@@ -414,6 +414,19 @@
   pointer-events: none;
 }
 
+.chart-container {
+    width: 100%;       /* 横幅を親コンテナにフィット */
+    max-width: 600px;  /* 任意の最大幅 */
+    height: 300px;     /* 初期高さ */
+    margin: 0 auto;    /* 中央寄せ */
+}
+
+@media (max-width: 480px) {
+    .chart-container {
+        height: 200px; /* 小さい画面では高さを縮小 */
+    }
+}
+
 
 
 </style>
@@ -531,9 +544,9 @@
   <div class="status-table-container" id="statusTableContainer-0">
     <table class="status-table" id="statusTable-0"></table>
   </div>
-
-  <div class="chart-container" id="chartContainer-0"></div>
-
+  <div class="chart-container" id="chartContainer-0">
+      <canvas id="chartCanvas-0"></canvas>
+  </div>
 </div>
 
 
@@ -8837,7 +8850,8 @@ function createQuiz(blockId, data) {
                 ]
             },
             options: {
-                responsive: true,
+                responsive: true,  // ← ここでレスポンシブ化
+                maintainAspectRatio: false, // ← 高さを自由に設定可能
                 plugins: {
                     legend: { position: 'top' },
                     title: { display: true, text: 'セル色の推移' }
@@ -8848,6 +8862,7 @@ function createQuiz(blockId, data) {
                 }
             }
         });
+
     }
 
     // --- ページロード時に各ブロックで実行 ---
