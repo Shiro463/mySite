@@ -531,11 +531,10 @@
   <div class="status-table-container" id="statusTableContainer-0">
     <table class="status-table" id="statusTable-0"></table>
   </div>
-  <div class="quiz-block" id="quiz-0">
+  <div>
       <button id="toggle-chart-0">グラフ表示/非表示</button>
-      <div class="chart-container" id="chartContainer-0" style="display:none;">
-          <canvas id="chartCanvas-0"></canvas>
-      </div>
+      <button id="save-button-0">データ保存</button>
+      <div class="chart-container" id="chartContainer-0" style="display:none;"></div>
   </div>
 </div>
 
@@ -8823,27 +8822,38 @@ function createQuiz(blockId, data) {
     /* ====== 日次保存関数（1日1回/ブロック） ====== */
     function saveDailyColorCounts(blockId) {
         const table = document.getElementById(`statusTable-${blockId}`);
-        if (!table) return; // テーブル未生成なら何もしない
+        if (!table) return;
 
-        const greenCells = table.querySelectorAll('.green').length;
-        const redCells   = table.querySelectorAll('.red').length;
-        const blueCells  = table.querySelectorAll('.blue').length;
+        const green = table.querySelectorAll('.green').length;
+        const red = table.querySelectorAll('.red').length;
+        const blue = table.querySelectorAll('.blue').length;
         const allCells = table.querySelectorAll('td').length;
-        const whiteCells = allCells - (greenCells + redCells + blueCells);
+        const white = allCells - (green + red + blue);
 
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const now = new Date();
+        const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const time = now.toTimeString().split(' ')[0].slice(0,5); // HH:MM
+
+        // 1回ごとにユニークなキーとする（例：2025-05-10_12:34）
+        const timestamp = `${date}_${time}`;
 
         const key = `dailyCounts-${blockId}`;
         const saved = JSON.parse(localStorage.getItem(key) || '{}');
 
-        // 1日1回のみ保存（既に同日があれば上書きしない）
-        if (!saved[today]) {
-            saved[today] = { green: greenCells, red: redCells, white: whiteCells };
-            localStorage.setItem(key, JSON.stringify(saved));
-        }
+        // 日付が同じでも時刻が違えば別データとして保存される
+        saved[timestamp] = { green, red, white };
+
+        localStorage.setItem(key, JSON.stringify(saved));
+        console.log(`Saved → Block:${blockId} / ${timestamp}`);
+
+        // 保存後にグラフ更新
+        renderChart(blockId);
     }
 
+
     /* ====== チャート描画関数（ローカルデータから） ====== */
+    // const charts = {}; // 複数ブロック対応
+
     function renderChart(blockId) {
         const key = `dailyCounts-${blockId}`;
         const saved = JSON.parse(localStorage.getItem(key) || '{}');
@@ -8852,46 +8862,41 @@ function createQuiz(blockId, data) {
         const redData   = dates.map(d => saved[d].red);
         const whiteData = dates.map(d => saved[d].white);
 
-        const container = document.getElementById(`chartContainer-${blockId}`);
-        if (!container) return;
+        const containerId = `chartContainer-${blockId}`;
+        const container = document.getElementById(containerId);
+        container.innerHTML = '<canvas id="chartCanvas-' + blockId + '"></canvas>';
 
-        // canvas を取得（存在しなければ作る） — 既に canvas が存在する場合は使い回す
-        let canvas = document.getElementById(`chartCanvas-${blockId}`);
-        if (!canvas) {
-            canvas = document.createElement('canvas');
-            canvas.id = `chartCanvas-${blockId}`;
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            container.innerHTML = ''; // 中身クリア
-            container.appendChild(canvas);
-        } else {
-            // canvasがある場合は中身クリアして再描画用に使う
-            container.innerHTML = '';
-            container.appendChild(canvas);
-        }
+        const ctx = document.getElementById(`chartCanvas-${blockId}`);
 
-        // データが空ならメッセージを出して終了（チャートは作らない）
-        if (dates.length === 0) {
-            container.innerHTML = '<div class="chart-empty">保存データがありません</div>';
-            return;
-        }
-
-        const ctx = canvas.getContext('2d');
-
-        // 既にチャートがあれば破棄しておく（安全のため）
-        if (charts[blockId]) {
-            try { charts[blockId].destroy(); } catch (e) {}
-            charts[blockId] = null;
-        }
-
-        charts[blockId] = new Chart(ctx, {
-            type: 'bar',
+        new Chart(ctx, {
+            type: 'line',  // ← 折れ線グラフへ変更
             data: {
                 labels: dates,
                 datasets: [
-                    { label: '緑', data: greenData, backgroundColor: 'rgba(40,167,69,0.85)' },
-                    { label: '赤', data: redData,   backgroundColor: 'rgba(220,53,69,0.85)' },
-                    { label: '白', data: whiteData, backgroundColor: 'rgba(108,117,125,0.85)' }
+                    { 
+                        label: '緑',
+                        data: greenData,
+                        borderColor: 'green',
+                        backgroundColor: 'green',
+                        tension: 0.25,
+                        fill: false 
+                    },
+                    { 
+                        label: '赤',
+                        data: redData,
+                        borderColor: 'red',
+                        backgroundColor: 'red',
+                        tension: 0.25,
+                        fill: false 
+                    },
+                    { 
+                        label: '白',
+                        data: whiteData,
+                        borderColor: 'gray',
+                        backgroundColor: 'gray',
+                        tension: 0.25,
+                        fill: false 
+                    }
                 ]
             },
             options: {
@@ -8899,15 +8904,22 @@ function createQuiz(blockId, data) {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'top' },
-                    title: { display: true, text: '日次セル色カウント' }
+                    title: { display: true, text: 'セル色の推移' }
                 },
                 scales: {
-                    x: { stacked: true, ticks: { maxRotation: 45, minRotation: 0 } },
-                    y: { stacked: true, beginAtZero: true }
+                    x: { 
+                        beginAtZero: false,
+                        display: true
+                    },
+                    y: { 
+                        beginAtZero: true 
+                    }
                 }
             }
         });
     }
+
+
 
     /* ====== トグルボタンとチャートコンテナを作成/紐付け ======
       ボタン ID は toggle-chart-{blockId} を期待します（既にあれば使う）.
@@ -8968,21 +8980,29 @@ function createQuiz(blockId, data) {
 
     /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
     document.querySelectorAll('.quiz-block').forEach((block, index) => {
-        try {
-            saveDailyColorCounts(index);
-        } catch (e) {
-            // 保険: テーブルが未生成等で失敗する可能性があるので無視
-            console.warn('saveDailyColorCounts failed for', index, e);
-        }
+        // try {
+        //     saveDailyColorCounts(index);
+        // } catch (e) {
+        //     // 保険: テーブルが未生成等で失敗する可能性があるので無視
+        //     console.warn('saveDailyColorCounts failed for', index, e);
+        // }
         // ボタンとコンテナを作っておく（描画は未実行）
         ensureChartUIForBlock(block, index);
     });
 
+    function setSaveButtonListener(blockId) {
+        const saveBtn = document.getElementById(`save-button-${blockId}`);
+        if (!saveBtn) return;
+
+        saveBtn.addEventListener('click', () => {
+            saveDailyColorCounts(blockId);
+        });
+    }
 
 
 
 
-
+    setSaveButtonListener(blockId);
 
     init();
 
