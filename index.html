@@ -536,6 +536,10 @@
       <button id="save-button-0">データ保存</button>
       <div class="chart-container" id="chartContainer-0" style="display:none;"></div>
   </div>
+  <div id="deleteArea-0" class="delete-area">
+      <select id="deleteSelect-0"></select>
+      <button id="delete-button-0">選択したデータを削除</button>
+  </div>
 </div>
 
 
@@ -8973,6 +8977,7 @@ function createQuiz(blockId, data) {
                         }
                     }
                 }
+                updateDeleteOptions(blockId);
             });
             toggleBtn.dataset.chartListener = '1';
         }
@@ -8996,13 +9001,87 @@ function createQuiz(blockId, data) {
 
         saveBtn.addEventListener('click', () => {
             saveDailyColorCounts(blockId);
+            updateDeleteOptions(blockId);
         });
     }
 
 
 
 
+
+
+    function updateDeleteOptions(blockId) {
+        const key = `dailyCounts-${blockId}`;
+        const saved = JSON.parse(localStorage.getItem(key) || '{}');
+        const dates = Object.keys(saved).sort();
+
+        const select = document.getElementById(`deleteSelect-${blockId}`);
+        const prevSelect = select.value; // 現在選択中の値保持
+
+        select.innerHTML = ""; // リセット
+
+        dates.forEach(date => {
+            const option = document.createElement("option");
+            option.value = date;
+            option.textContent = `${date} : 緑${saved[date].green}, 赤${saved[date].red}, 白${saved[date].white}`;
+            select.appendChild(option);
+        });
+
+        // 削除後も選択が残っていたら保持
+        if (dates.includes(prevSelect)) {
+            select.value = prevSelect;
+        }
+    }
+
+
+    function deleteDailyData(blockId) {
+        const key = `dailyCounts-${blockId}`;
+        let saved = JSON.parse(localStorage.getItem(key) || '{}');
+
+        const select = document.getElementById(`deleteSelect-${blockId}`);
+        const selectedDate = select.value;
+
+        if (!selectedDate || !(selectedDate in saved)) {
+            alert("削除する日付が選択されていません！");
+            return;
+        }
+
+        if (!confirm(`${selectedDate} のデータを削除しますか？`)) return;
+
+        // --- 選択された日付のみ削除 ---
+        delete saved[selectedDate];
+
+        localStorage.setItem(key, JSON.stringify(saved));
+
+        // セレクト更新
+        updateDeleteOptions(blockId);
+
+        // グラフ更新
+        renderChart(blockId);
+        
+
+        alert(`${selectedDate} のデータを削除しました。`);
+    }
+
+
+
+    function setDeleteButtonListener(blockId) {
+        const deleteBtn = document.getElementById(`delete-button-${blockId}`);
+        if (!deleteBtn) return;
+
+        deleteBtn.addEventListener('click', () => {
+            deleteDailyData(blockId);
+            updateDeleteOptions(blockId);
+        });
+
+        // updateDeleteOptions(blockId);
+    }
+
+
+
     setSaveButtonListener(blockId);
+    setDeleteButtonListener(blockId);
+
 
     init();
 
