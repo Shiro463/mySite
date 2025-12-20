@@ -10492,6 +10492,20 @@ function createQuiz(blockId, data) {
       document.head.appendChild(s);
     })();
 
+
+    function getRoundUnit(n) {
+        if (n < 10) return 1;
+        const digits = Math.floor(Math.log10(n));
+        return Math.pow(10, Math.max(1, digits - 1));
+    }
+    function ceilByUnit(n, unit) {
+        return Math.ceil(n / unit) * unit;
+    }
+    function floorByUnit(n, unit) {
+        return Math.floor(n / unit) * unit;
+    }
+
+
     /* ====== 日次保存関数（1日1回/ブロック） ====== */
     function saveDailyColorCounts(blockId) {
         const table = document.getElementById(`statusTable-${blockId}`);
@@ -10552,9 +10566,17 @@ function createQuiz(blockId, data) {
         );
 
         // y軸 上限・下限（10の位）
-        const yMax = Math.ceil(recentMax / 10) * 10;
-        const yMin = Math.floor(recentMin / 10) * 10;
-
+        const unitMax = getRoundUnit(recentMax);
+        const unitMin = getRoundUnit(recentMin);
+        const yMax = ceilByUnit(recentMax, unitMax);
+        let yMin;
+        if (recentMin >= 0 && recentMin <= 9) {
+            yMin = 0;
+        } else {
+            const unitMin = getRoundUnit(recentMin);
+            yMin = floorByUnit(recentMin, unitMin);
+        }
+        
         // canvas 再生成
         const container = document.getElementById(`chartContainer-${blockId}`);
         container.innerHTML = `<canvas id="chartCanvas-${blockId}"></canvas>`;
