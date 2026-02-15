@@ -1639,20 +1639,14 @@ async function fetchQuizData() {
 }
 
 
-async function initQuiz() {
-  // const url = "https://script.google.com/macros/s/AKfycbzxjmwVzybB-5JcQOHFtuqOMfyunl3bwhARTIfJTTX4CgoxoQQeX-p0MS_MrQzYkM8U/exec";
+async function initQuizApp() {
+  const allData = await fetchQuizData();
 
-  // const allData = await fetchQuizData(url);
-
-  // 必要に応じて科目別にfilter
-  const quizData0 = allData.filter(d => d.category === "イタリア語");
-  const quizData1 = allData.filter(d => d.category === "音読み");
-
-  createQuiz(0, quizData0);
-  createQuiz(1, quizData1);
+  // 例：ブロック0にデータを入れる
+  createQuiz(0, allData);
 }
 
-initQuiz();
+initQuizApp();
 
 
 
