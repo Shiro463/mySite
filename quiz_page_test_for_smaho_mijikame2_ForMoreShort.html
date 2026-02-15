@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クイズアプリ（スマホ最適化版）</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    padding-bottom: 100px; /* localstorage-block の高さ分を確保 */
+  }
+  /* ---------------- クイズブロック ---------------- */
+  .quiz-block {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .quiz-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .title {
+    color: #6cb4e4;
+    text-align: center;
+    padding: 0.5em;
+    border-top: 2px solid #6cb4e4;
+    border-bottom: 2px solid #6cb4e4;
+    background: repeating-linear-gradient(-45deg, #f0f8ff, #f0f8ff 3px, #e9f4ff 3px, #e9f4ff 7px);
+    font-size: 22px;
+  }
+
+  /* ---------------- 問題・答えエリア ---------------- */
+  .question-area, .answer-area {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 18px;
+      height: 100px;       /* 固定高さを指定 */
+      line-height: 1.5;
+      background: #fafafa;
+      overflow-y: auto;    /* 縦方向にスクロール可能 */
+      white-space: pre-wrap;
+      margin: 2px
+  }
+  #questionArea-3{
+      height: 400px;       /* 固定高さを指定 */
+  }
+  #questionArea-4{
+      height: 300px;       /* 固定高さを指定 */
+  }
+
+  select {
+    font-size: 16px;
+    padding: 5px 6px;
+  }
+
+
+  .myLabel{
+    margin: 2px;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end; /* 右寄せ */
+  }
+
+  .myButtonBlue, .myButtonGreen, .myButtonRed {
+    font-size: 18px;
+    padding: 0.4em 0.8em;
+    border-radius: 5px;
+    border: 2px solid;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .myButtonBlue { color: #67c5ff; border-color: #67c5ff; }
+  .myButtonBlue:hover { background: #67c5ff; color: white; }
+  .myButtonGreen { color: #76ff67; border-color: #76ff67; }
+  .myButtonGreen:hover { background: #76ff67; color: white; }
+  .myButtonRed { color: #ff6767; border-color: #ff6767; }
+  .myButtonRed:hover { background: #ff6767; color: white; }
+
+
+  .myYellowButton{
+    color: #000000;
+    background-color: #f7ffb2;
+    border-radius: 100vh;
+  }
+  .myYellowButton:hover {
+    color: #000000;
+    background: #f7ffb2;
+  }
+  /* === フィルタグリッド === */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* 2列 */
+    grid-template-rows: auto auto auto auto; /* 4行 */
+    gap: 4px 8px;                  /* 縦横の隙間 */
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+  }
+
+  /* 各labelをブロック化して均等に伸ばす */
+  .filter-grid label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    font-size: 14px;
+    flex-wrap: wrap;
+    width: 100%;
+    background: #f9f9f9;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+
+  /* select / input のサイズ調整 */
+  .filter-grid select,
+  .filter-grid input[type="date"] {
+    font-size: 14px;
+    padding: 3px 5px;
+  }
+
+  /* リセットボタンセルを右下に配置 */
+  .reset-cell {
+    grid-column: 1 / span 2;  /* 2列分をまたぐ */
+    text-align: right;
+    padding-top: 4px;
+  }
+
+
+  /* === 色フィルタセレクトの基本スタイル === */
+  #colorFilterSelect-0 {
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+  }
+  /* 各色ごとの背景（クラスで付け替える） */
+  .color-filter-red {
+    background-color: #f08080 !important;
+  }
+  .color-filter-green {
+    background-color: #90ee90 !important;
+  }
+  .color-filter-white {
+    background-color: #ffffff !important;
+  }
+  .color-filter-all {
+    background-color: #f0f0f0 !important;
+  }
+
+
+
+
+
+  /* ---------------- サマリーテーブル ---------------- */
+  .color-count-table {
+    border-collapse: collapse;
+    margin-right: 10px;
+    font-size: 12px;
+  }
+
+  .color-count-table td {
+    border: 1px solid #ccc;
+    padding: 3px 6px;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .green-count-cell { background: #90ee90; }
+  .red-count-cell   { background: #f08080; }
+  .white-count-cell { background: #ffffff; }
+  .blue-count-cell  { background: #add8e6; }
+
+
+
+
+  /* ---------------- ステータステーブル ---------------- */
+  .status-table-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+  }
+
+  #statusTableContainer {
+    overflow-y: auto;
+
+  }
+  .status-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    overflow-y: auto;
+  }
+
+  .status-table td {
+    padding: 6px;
+    border: 1px solid #000;
+    text-align: center;
+    position: relative;
+    min-width: 60px;
+
+  }
+
+  .status-table .wrong-count { position: absolute; right: 4px; top: 2px; font-size: 12px; color: red; }
+  .correct-count { position: absolute; left: 4px; top: 2px; font-size: 12px; color: green; }
+  .weight-display { position: absolute; left: 15%; top: 2px; font-size: 12px; color: gray; }
+  .last-review { position: absolute; left: 35%; top: 2px; font-size: 12px; color: gray; }
+
+
+  .blue { background-color: #add8e6; }
+  .green { background-color: #90ee90; }
+  .red { background-color: #f08080; }
+
+
+
+  /* ---------------- レスポンシブ ---------------- */
+  @media (max-width: 768px) {
+    .question-area, .answer-area { font-size: 16px; min-height: 40px; padding: 6px;  }
+    select { font-size: 14px; padding: 4px 5px; }
+    .myButtonBlue, .myButtonGreen, .myButtonRed { font-size: 16px; padding: 0.35em 0.7em; }
+    .floating-buttons { right: 50%; transform: translateX(50%); flex-direction: row; gap: 8px; }
+    .status-table td { font-size: 12px; min-width: 50px; padding: 5px; }
+    .filter-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    .reset-cell {
+      text-align: center;
+    }
+  }
+
+
+
+
+</style>
+</head>
+<body>
+
+<!-- <div>
+<button id="saveDataBtn">データ保存</button>
+
+<canvas id="colorChart" width="400" height="200"></canvas>
+
+</div> -->
+
+<!-- クイズブロック -->
+<div class="quiz-block" id="quizBlock-0">
+  
+  <!-- 上部に出る法条文パネル -->
+  <div id="lawPanel">
+    <button id="lawPanelClose">×</button>
+    <!-- lawPanel内の左右ナビ（#lawPanel の子要素として配置） -->
+    <button id="lawPanelPrev" aria-label="前へ">◀</button>
+    <button id="lawPanelNext" aria-label="次へ">▶</button>
+    <div id="lawPanelContent"></div>
+  </div>
+
+  <div class="quiz-container">
+    <p class="title">イタリア語</p>
+
+    <div class="filter-grid">
+      <label class="myLabel">出題ID範囲:
+        <select id="startSelect-0"></select> 〜
+        <select id="endSelect-0"></select>
+      </label>
+
+      <label class="myLabel">出題色フィルタ:
+        <select id="colorFilterSelect-0">
+          <option value="all">問わない</option>
+          <option value="green">緑だけ</option>
+          <option value="red">赤だけ</option>
+          <option value="white">白だけ</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する正解数:
+        <select id="excludeCorrectSelect-0"></select>
+        <select id="excludeCorrectCond-0">
+          <option value="none">問わない</option>
+          <option value="lt">以下</option>
+          <option value="gt">以上</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する誤答数:
+        <select id="excludeWrongSelect-0"></select>
+        <select id="excludeWrongCond-0">
+          <option value="none">問わない</option>
+          <option value="lt">以下</option>
+          <option value="gt">以上</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する lastReview:
+        <input type="date" id="excludeLastReviewDate-0">
+        <select id="excludeLastReviewCond-0">
+          <option value="none">問わない</option>
+          <option value="before">以前</option>
+          <option value="after">以後</option>
+        </select>
+      </label>
+
+      <label class="myLabel">除外する weight:
+        <select id="excludeWeightSelect-0"></select>
+        <select id="excludeWeightCond-0">
+          <option value="none">問わない</option>
+          <option value="lt">以下</option>
+          <option value="gt">以上</option>
+        </select>
+      </label>
+
+      <!-- 7番目のセル：リセットボタン -->
+      <div class="reset-cell">
+        <button class="myButtonBlue" id="resetCountsBtn-0">リセット</button>
+      </div>
+    </div>
+
+    <button class="myButtonBlue" id="nextBtn-0">出題</button>
+    <div class="question-area" id="questionArea-0" style="color: gray;">ここに問題文が表示されます</div>
+    <button class="myButtonBlue" id="showAnswerBtn-0">答えを見る</button>
+    <div class="answer-area" id="answerArea-0" style="color: gray;">ここに答えが表示されます</div>
+    <div class="button-group">
+      <table id="colorCountTable-0" class="color-count-table">
+        <tr>
+          <td class="green-count-cell"><span id="greenCount-0">0</span></td>
+          <td class="red-count-cell"><span id="redCount-0">0</span></td>
+          <td class="white-count-cell"><span id="whiteCount-0">0</span></td>
+          <td class="blue-count-cell"><span id="blueCount-0">0</span></td>
+        </tr>
+      </table>
+      <span id="remainingCount-0" style="align-self:center; font-size: 14px; margin-right:auto;">残り: 0問</span>
+      <button class="myButtonGreen" id="correctBtn-0">○</button>
+      <button class="myButtonRed" id="wrongBtn-0">×</button>
+    </div>
+    <!-- ステータステーブル表示/非表示ボタン -->
+    <div class="button-group">
+      <button class="myYellowButton" id="toggleTableBtn-0">テーブル表示/非表示</button>
+      <button class="myYellowButton" id="toggleIdSortBtn-0">ID順</button>
+      <button class="myYellowButton" id="toggleWeightSortBtn-0">Weight順</button>
+      <button class="myYellowButton" id="toggleLabelSortBtn-0">Label順</button>
+      <button class="myYellowButton" id="toggleLastReviewSortBtn-0">lastReview順</button>
+      <button class="myYellowButton" id="toggleCorrectSortBtn-0">正答数順</button>
+      <button class="myYellowButton" id="toggleWrongSortBtn-0">誤答数順</button>
+    </div>
+  </div>
+
+  <div class="status-table-container" id="statusTableContainer-0">
+    <table class="status-table" id="statusTable-0"></table>
+  </div>
+  <div>
+      <button id="toggle-chart-0">グラフ表示/非表示</button>
+      <button id="save-button-0">データ保存</button>
+      <div class="chart-container" id="chartContainer-0" style="display:none;"></div>
+  </div>
+  <div id="deleteArea-0" class="delete-area">
+      <select id="deleteSelect-0"></select>
+      <button id="delete-button-0">選択したデータを削除</button>
+  </div>
+</div>
+
+
+<!-- LocalStorage表示ブロック -->
+<div class="localstorage-block">
+  <div class="button-group">
+    <button id="toggleStorageBtn" type="button">LocalStorage表示/非表示</button>
+    <button id="clearStorageBtn" type="button">LocalStorageリセット</button>
+  </div>
+  <pre id="storageInfo"></pre>
+</div>
+
+<script>
+
+
+
+
+
+// const quizData0_1 = createQuizData([ /*イタリア語 40001～*/
+//   ["fiore (m.)","fiore (m.)",
+//   "花" ],
+//   ["porta","porta",
+//   "門" ],
+
+
+// ], 40001);
+
+
+// const quizData0_2 = createQuizData([ /*イタリア語 47001～*/
+//   ["La luna è bellissima stasera.",
+//   "La luna è bellissima stasera.",
+//   "The moon is beautiful tonight."],
+
+
+
+// ], 47001);
+
+// const quizData0 = [ /*イタリア語データ合体*/
+//   ...quizData0_1,
+//   ...quizData0_2
+// ];
+
+
+
+// const quizData1 = createQuizData([ /*音読み 20001～*/
+// [ "蹉跌","蹉跌","さてつ\n┌1"],[ "錚錚","錚錚","そうそう\n┌1."],
+// ], 20001);
+
+// const quizData2 = createQuizData([ /*熟語･一字訓読み 80001～*/
+// [ "緇衣、緇い","緇衣、緇い","しい or しえ、くろ" ], [ "抉剔、剔る","抉剔、剔る","けってき、えぐ" ], 
+// ], 80001);
+
+
+// const quizData3 = [ /*四法 50001～*/
+// const quizData3 = (() => {
+
+//   const defs = {
+//     toku1j: `特第一条{目的}　こ`,
+
+//   };
+
+
+
+  
+//   // 文字列中から start〜end を抜き出す関数（そのまま使う）
+//   function extractBetweenRegex(text = "", startStr, endStr) {
+//     const regex = new RegExp(`${startStr}[\\s\\S]*?${endStr}`, "g");
+//     const matches = text.match(regex);
+//     return matches ? matches.join("") : "";
+//   }
+
+//   // ヘルパ：トップレベルの + で分割（文字列リテラル内の + は無視）
+//   function splitTopLevelPlus(expr) {
+//     const parts = [];
+//     let cur = "";
+//     let inSingle = false, inDouble = false, depth = 0;
+//     for (let i = 0; i < expr.length; i++) {
+//       const ch = expr[i];
+//       if (ch === "'" && !inDouble) { inSingle = !inSingle; cur += ch; continue; }
+//       if (ch === '"' && !inSingle) { inDouble = !inDouble; cur += ch; continue; }
+//       if (!inSingle && !inDouble) {
+//         if (ch === "(") { depth++; cur += ch; continue; }
+//         if (ch === ")") { depth--; cur += ch; continue; }
+//         if (ch === "+" && depth === 0) {
+//           parts.push(cur.trim());
+//           cur = "";
+//           continue;
+//         }
+//       }
+//       cur += ch;
+//     }
+//     if (cur.trim() !== "") parts.push(cur.trim());
+//     return parts;
+//   }
+
+//   // 許可する式だけを安全に評価する（evalは使わない）
+//   // expr例： "i3j2k"、 "defs.i38j"、 "extractBetweenRegex(i38j, \"start\", \"end\")"、またはそれらの + 連結
+//   function safeEvaluate(expr, seen) {
+//     const parts = splitTopLevelPlus(expr);
+//     let out = "";
+//     for (const part of parts) {
+//       // 関数呼び出しパターン: extractBetweenRegex(optional defs.)key, "start", "end"
+//       const fnRe = /^extractBetweenRegex\(\s*(?:defs\.)?([A-Za-z0-9_]+)\s*,\s*(['"])([\s\S]*?)\2\s*,\s*(['"])([\s\S]*?)\4\s*\)$/;
+//       const m = part.match(fnRe);
+//       if (m) {
+//         const [, key, , startStr, , endStr] = m;
+//         // innerText は resolve(key) で展開してから抜き出すのが望ましい
+//         const inner = resolve(key, new Set(seen));
+//         out += extractBetweenRegex(inner, startStr, endStr);
+//         continue;
+//       }
+
+//       // 単純 key（defs.key または key）
+//       const keyRe = /^(?:defs\.)?([A-Za-z0-9_]+)$/;
+//       const mk = part.match(keyRe);
+//       if (mk) {
+//         out += resolve(mk[1], new Set(seen));
+//         continue;
+//       }
+
+//       // 文字列リテラル（"..." または '...'）
+//       const strRe = /^(['"])([\s\S]*)\1$/;
+//       const ms = part.match(strRe);
+//       if (ms) {
+//         out += ms[2];
+//         continue;
+//       }
+
+//       // 未対応
+//       out += `[未対応:${part}]`;
+//     }
+//     return out;
+//   }
+
+//   // 展開関数（${...} を安全評価）
+//   function resolve(key, seen = new Set()) {
+//     if (seen.has(key)) return `[循環参照:${key}]`;
+//     seen.add(key);
+
+//     const val = defs[key];
+//     if (val === undefined) return `[未定義:${key}]`;
+
+//     // ${...} 全体を safeEvaluate で置換
+//     return val.replace(/\$\{([^}]+)\}/g, (_, expr) => {
+//       try {
+//         return safeEvaluate(expr, seen);
+//       } catch (e) {
+//         console.warn("safeEvaluate error:", e);
+//         return `[評価エラー:${expr}]`;
+//       }
+//     });
+//   }
+
+//   window.resolve = resolve;
+
+
+//   const toku1j_jitsu1j_i1j_shou1j = 
+//     resolve("toku1j")+"\n\n"+resolve("jitsu1j")+"\n\n"+resolve("i1j")+"\n\n"+resolve("shou1j")
+//   const toku1jao = 
+//     resolve("toku1j")+"\n\n"+
+//     "青本\n本条は"
+
+
+
+
+
+//   // 各 baseText とその置換パターンをまとめる
+//   const sources = [
+//     { baseText: toku1j_jitsu1j_i1j_shou1j,
+//       label: "特許法第一条",
+//       patterns: ["保護及び利用", "奨励"], },
+//     { baseText: toku1jao,
+//       label: "特許法第一条青本",
+//       patterns: ["代償", "独占" ], },
+   
+
+//   ];
+  
+//   const baseId = 50001;
+
+
+//   // return [
+
+//   return sources.flatMap((src) =>
+//     src.patterns.map((target, idx) => ({
+//     id: baseId + 
+//         // 先頭からの通し番号を作るために flatMap 全体の index をあとで使う
+//         0, // ダミー、あとで書き換え
+//     label: src.label,
+//     question: src.baseText.replace(new RegExp(target, "g"), "【】"),
+//     answer: target,
+//     }))
+//   ).map((item, idx) => ({
+//     ...item,
+//     id: baseId + idx,
+//   }));
+
+// })();
+
+
+
+
+
+
+
+
+
+// const quizData4_1 = createQuizData_kanjiParts([ /*漢字パーツ 110001～*/
+//   ["青靑　１種1",
+//   "セイ"+
+//   "\n凊　　温凊定省(おんせいていせい)"+
+//   "\n菁　　菁莪(せいが)"
+//   ],
+//   ["青靑　１種2",
+//   "サイ"+
+//   "\n猜　猜忌(さいき)"
+//   ],
+
+
+
+// ], 110000);
+
+
+// const quizData4_2 = createQuizData([
+//   ["とる",
+//   "【難】"+
+//   "\n搴る　　　　　ぬきとる。「搴旗(けんき)」"+
+//   "\n\n【易】"+
+//   "\n采る　　　　　つみとる。えらびとる。「采配」「納采」"+
+//   "とる"
+//   ],
+//   ["しりぞける",
+//   "【難】"+
+//   "\n鐫ける　ひき下げる。「鐫黜(センチュツ)」 "
+//   ],
+
+// ], 117001)
+
+
+
+
+
+
+
+// id自動割当
+function createQuizData(rawData, startId = 1) {
+  console.log(rawData)
+  return rawData.map(([label, question, answer], index) => ({
+
+    id: startId + index,
+    label,
+    question,
+    answer
+  }));
+
+}
+
+
+// id自動割当_漢字パーツ（漢字）用
+function createQuizData_kanjiParts(rawData, startId = 1) {
+  return rawData.map(([label, answer], index) => ({
+    id: startId + index,
+    label,
+    answer
+  }));
+}
+
+
+
+
+// quizData4の変換
+// helpers
+// before の中に 1つでも漢字が含まれていれば true
+function isKanji(str) {
+  return /[\u4E00-\u9FFF]/.test(str);
+}
+function isHiragana(ch) {
+  console.log(/[\u3040-\u309F]/.test(ch))
+  return /[\u3040-\u309F]/.test(ch);
+}
+
+// 変換関数（最終版）
+function isKanji(str) {
+  return /[\u4E00-\u9FFF]/.test(str);
+}
+function isHiragana(ch) {
+  return /[\u3040-\u309F]/.test(ch);
+}
+
+
+
+function transformAnswerToQuestion(text) {
+  let out = String(text);
+
+  // 1) カタカナ見出し行を削除
+  out = out.replace(
+    /(^|\n)[ \t　]*[ァ-ヶー]+([、，][ァ-ヶー]+)*[ \t　]*(?=\n|$)/g,
+    "$1"
+  );
+
+  // 2) 送り仮名（ひらがな1字 + (ひらがな1字)）
+  out = out.replace(
+    /([\u3040-\u309F])[\(\（]([\u3040-\u309F])[\)\）]/g,
+    "$1○"
+  );
+
+  // 3) 漢字語の読み括弧削除（仮名全般対応）
+  out = out.replace(
+    /([\u4E00-\u9FFF][^\n\(\（]*)[\(\（][\u3040-\u30FFー]+([、，][\u3040-\u30FFー]+)*[\)\）]/g,
+    "$1"
+  );
+
+  // 4) ※行の括弧全削除
+  out = out
+    .split("\n")
+    .map(line => {
+      if (/^[ \t　]*※/.test(line)) {
+        return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
+      }
+      return line;
+    })
+    .join("\n");
+
+  // 5) 残り括弧保護
+  const placeholders = [];
+  out = out.replace(/[\(\（][^\)\）]*[\)\）]/g, (m) => {
+    const token = `@@P${placeholders.length}@@`;
+    placeholders.push(m);
+    return token;
+  });
+
+  // 6) 行全体ひらがなだけマスク
+  out = out
+    .split("\n")
+    .map(line => {
+
+      if (/^[ \t　]*※/.test(line)) return line;
+
+      const trimmed = line.trim();
+
+      if (/^[\u3040-\u309F]+([、，][\u3040-\u309F]+)*$/.test(trimmed)) {
+        return line.replace(/([\u3040-\u309F]+)/g, m =>
+          m[0] + "○".repeat(m.length - 1)
+        );
+      }
+
+      return line;
+    })
+    .join("\n");
+
+  // 7) カタカナ単語行マスク
+  out = out.replace(
+    /(^|\n)([ \t　]*)([ァ-ヶー]{2,})(?=\n|$)/g,
+    (_, br, indent, word) =>
+      br + indent + word[0] + "○".repeat(word.length - 1)
+  );
+
+  // 8) 括弧復元
+  placeholders.forEach((orig, i) => {
+    out = out.replace(`@@P${i}@@`, orig);
+  });
+
+  return out.trim();
+}
+
+
+
+
+// const quizData4 = [ /*イタリア語データ合体*/
+//   ...quizData4_1,
+//   ...quizData4_2
+// ];
+
+
+// // quizData4 全体に適用
+// quizData4_1.forEach(item => {
+//   item.question = transformAnswerToQuestion(item.answer);
+// });
+
+
+
+
+
+// クイズブロック作成
+const titles = ["イタリア語", "音読み", "熟字・一字訓", "四法", "漢字パーツ", "みんはや", "首都" ]; // 任意の科目名リスト// 任意の科目名リスト
+const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
+const container = document.createElement('div'); // 全体を包む要素（任意）
+
+titles.forEach((title, index) => {
+  const newBlock = template.cloneNode(true);
+  newBlock.id = `quizBlock-${index}`;
+
+  // タイトル書き換え
+  newBlock.querySelector('p.title').textContent = title;
+
+  // ID付き要素のIDをすべて更新
+  const elementsWithId = newBlock.querySelectorAll('[id]');
+  elementsWithId.forEach(el => {
+    const oldId = el.id;
+    const newId = oldId.replace(/-\d+$/, `-${index}`);
+    el.id = newId;
+  });
+
+  container.appendChild(newBlock);
+});
+
+// 元のテンプレートは削除しておく（重複を防ぐ）
+template.remove();
+document.body.appendChild(container); // あるいは適切な場所へ追加
+
+
+
+// クイズ作成
+function createQuiz(blockId, data) {
+    const questionArea = document.getElementById(`questionArea-${blockId}`);
+    const answerArea = document.getElementById(`answerArea-${blockId}`);
+    const nextBtn = document.getElementById(`nextBtn-${blockId}`);
+    const showAnswerBtn = document.getElementById(`showAnswerBtn-${blockId}`);
+    const correctBtn = document.getElementById(`correctBtn-${blockId}`);
+    const wrongBtn = document.getElementById(`wrongBtn-${blockId}`);
+    const statusTable = document.getElementById(`statusTable-${blockId}`);
+    const statusTableContainer = document.getElementById(`statusTableContainer-${blockId}`);
+    const startSelect = document.getElementById(`startSelect-${blockId}`);
+    const endSelect = document.getElementById(`endSelect-${blockId}`);
+    const excludeCorrectSelect = document.getElementById(`excludeCorrectSelect-${blockId}`);
+    const resetCountsBtn = document.getElementById(`resetCountsBtn-${blockId}`);
+
+    const toggleTableBtn = document.getElementById(`toggleTableBtn-${blockId}`);
+    const toggleIdSortBtn = document.getElementById(`toggleIdSortBtn-${blockId}`);
+    const toggleWeightSortBtn = document.getElementById(`toggleWeightSortBtn-${blockId}`);
+    const toggleLabelSortBtn = document.getElementById(`toggleLabelSortBtn-${blockId}`);
+    const toggleLastReviewSortBtn = document.getElementById(`toggleLastReviewSortBtn-${blockId}`);
+    const toggleCorrectSortBtn = document.getElementById(`toggleCorrectSortBtn-${blockId}`);
+    const toggleWrongSortBtn = document.getElementById(`toggleWrongSortBtn-${blockId}`);
+
+
+    const remainingCountLabel = document.getElementById(`remainingCount-${blockId}`);
+
+    const greenCountEl = document.getElementById(`greenCount-${blockId}`);
+    const redCountEl   = document.getElementById(`redCount-${blockId}`);
+    const blueCountEl  = document.getElementById(`blueCount-${blockId}`);
+    const whiteCountEl = document.getElementById(`whiteCount-${blockId}`);
+
+    const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+    const savedColorFilter = localStorage.getItem(`colorFilterSelect-${blockId}`) || 'all';
+    colorFilterSelect.value = savedColorFilter;
+
+
+    let currentId = null;
+    let remaining = [];
+    let previousHighlightedId = null; // 前回青くしたセルのIDを保存
+    let lastBlueId = null; // 直前に青にしたセル
+
+
+
+    const statusMap = new Map();
+    const wrongCounts = new Map();
+    const correctCounts = new Map();
+    const weights = new Map();
+    const lastReviews = new Map();
+
+
+
+    // 状態初期化
+    function init() {
+        startSelect.innerHTML = '';
+        endSelect.innerHTML = '';
+        excludeCorrectSelect.innerHTML = '';
+        lastBlueId = null;
+
+        data.forEach(d => {
+            const opt1 = document.createElement("option");
+            opt1.value = d.id;
+            opt1.textContent = d.id;
+            const opt2 = opt1.cloneNode(true);
+            startSelect.appendChild(opt1);
+            endSelect.appendChild(opt2);
+        });
+        startSelect.value = data[0].id;
+        endSelect.value = data[data.length - 1].id;
+
+        // 正答数選択肢
+        // const excludeCorrectSelect = document.getElementById(`excludeCorrectSelect-${blockId}`);
+        for (let i = 0; i <= 100; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = i;
+          excludeCorrectSelect.appendChild(opt);
+        }
+        excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 100;
+        document.getElementById(`excludeCorrectCond-${blockId}`).value =
+          localStorage.getItem(`excludeCorrectCond-${blockId}`) ?? "none";
+
+        // 誤答数選択肢
+        const excludeWrongSelect = document.getElementById(`excludeWrongSelect-${blockId}`);
+        for (let i = 0; i <= 100; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = i;
+          excludeWrongSelect.appendChild(opt);
+        }
+        excludeWrongSelect.value = localStorage.getItem(`excludeWrongSelect-${blockId}`) ?? 100;
+        document.getElementById(`excludeWrongCond-${blockId}`).value =
+          localStorage.getItem(`excludeWrongCond-${blockId}`) ?? "none";
+
+        // weight選択肢
+        const excludeWeightSelect = document.getElementById(`excludeWeightSelect-${blockId}`);
+        for (let j = 0; j <= 300; j++) {
+          let i = (j / 10).toFixed(1); // 小数点以下1桁に丸める
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = i;
+          excludeWeightSelect.appendChild(opt);
+        }
+        excludeWeightSelect.value = localStorage.getItem(`excludeWeightSelect-${blockId}`) ?? 100;
+        document.getElementById(`excludeWeightCond-${blockId}`).value =
+          localStorage.getItem(`excludeWeightCond-${blockId}`) ?? "none";
+
+        // lastReview 初期値
+        document.getElementById(`excludeLastReviewDate-${blockId}`).value =
+          localStorage.getItem(`excludeLastReviewDate-${blockId}`) ?? "";
+        document.getElementById(`excludeLastReviewCond-${blockId}`).value =
+          localStorage.getItem(`excludeLastReviewCond-${blockId}`) ?? "none";
+
+
+
+        startSelect.value = localStorage.getItem(`startSelect-${blockId}`) ?? data[0].id;
+        endSelect.value = localStorage.getItem(`endSelect-${blockId}`) ?? data[data.length - 1].id;
+        // excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 100;
+
+
+
+        loadWrongCounts();
+        loadCorrectCounts();
+        loadWeights();
+        loadLastReviews();
+        buildTable();
+        resetState();
+        loadCellColors(); // ← 最後に追加
+        updateDeleteOptions(blockId);
+    }
+  
+    // テーブル作成
+    function buildTable() {
+      statusTable.innerHTML = '';
+      statusMap.clear();
+      const sortedData = getSortedData(); 
+      const rowHeight = 500 / data.length + 'px'; 
+
+      sortedData.forEach(d => { 
+        const row = statusTable.insertRow(); 
+        const cell = row.insertCell(); 
+        cell.textContent = d.label; 
+        row.style.height = rowHeight; 
+        cell.style.position = "relative"; 
+        const wrongCount = wrongCounts.get(d.id) ?? 0; 
+        const correctCount = correctCounts.get(d.id) ?? 0; // weight計算は削除！代わりに localStorage から読む 
+        const savedWeight = weights.get(d.id) ?? "";
+
+        // weight表示 
+        const weightSpan = document.createElement("span"); 
+        weightSpan.className = "weight-display";
+        weightSpan.textContent = savedWeight;// ← localStorageの値をそのまま表示 
+        cell.appendChild(weightSpan); 
+
+        const wrongSpan = document.createElement("span"); 
+        wrongSpan.className = "wrong-count"; 
+        wrongSpan.textContent = `×${wrongCount}`; 
+        cell.appendChild(wrongSpan); 
+        
+        const correctSpan = document.createElement("span"); 
+        correctSpan.className = "correct-count"; 
+        correctSpan.textContent = `○${correctCount}`; 
+        cell.appendChild(correctSpan); 
+        
+        // 🔽 lastReview表示も localStorage の値をそのまま 
+        if (lastReviews.has(d.id)) { 
+          const reviewSpan = document.createElement("span"); 
+          reviewSpan.className = "last-review"; 
+          const date = new Date(lastReviews.get(d.id)); 
+          reviewSpan.textContent = date.toLocaleDateString("ja-JP"); 
+          cell.appendChild(reviewSpan); 
+        } 
+        
+        statusMap.set(d.id, { cell, wrongSpan, correctSpan, weightSpan }); 
+        
+        if (lastBlueId !== null && lastBlueId === d.id) { 
+          cell.className = ''; 
+          cell.classList.add('blue'); 
+        } 
+      }); 
+      
+      loadCellColors(); 
+      updateColorCount(); // ← 追加
+    } 
+    
+    // 問題文・答えリセット 
+    function resetState() { 
+      remaining = []; 
+      currentId = null; 
+      lastBlueId = null; 
+      questionArea.textContent = "ここに問題文が表示されます"; 
+      answerArea.textContent = "ここに答えが表示されます"; 
+      data.forEach(d => { 
+        const entry = statusMap.get(d.id); 
+        entry.cell.className = ''; 
+      }); 
+      
+      setButtonsEnabled(false); 
+      buildTable(); 
+    }
+
+
+    // 正解・不正解数をリセットボタンを押したとき
+    resetCountsBtn.addEventListener('click', () => {
+        if (!confirm('正解・不正解数をリセットしますか？')) return;
+
+        // カウント初期化
+        wrongCounts.clear();
+        correctCounts.clear();
+
+        // localStorageから削除
+        localStorage.removeItem(`wrongCounts-${blockId}`);
+        localStorage.removeItem(`correctCounts-${blockId}`);
+        localStorage.removeItem(`cellColors-${blockId}`); // ← この1行を追加
+
+
+        // テーブル再描画
+        buildTable();
+    });
+
+    // ボタンを使えないようにする
+    function setButtonsEnabled(enabled) {
+        showAnswerBtn.disabled = !enabled;
+        correctBtn.disabled = !enabled;
+        wrongBtn.disabled = !enabled;
+    }
+
+    function updateColorCount() {
+      const table = document.getElementById(`statusTable-${blockId}`);
+      const greenCells = table.querySelectorAll('.green').length;
+      const redCells   = table.querySelectorAll('.red').length;
+      const blueCells  = table.querySelectorAll('.blue').length;
+
+      // 白セル = すべてのセル数 - 他の色セル
+      const allCells = table.querySelectorAll('td').length;
+      const whiteCells = allCells - (greenCells + redCells + blueCells);
+
+      greenCountEl.textContent = greenCells;
+      redCountEl.textContent   = redCells;
+      blueCountEl.textContent  = blueCells;
+      whiteCountEl.textContent = whiteCells;
+
+    }
+
+
+
+
+
+
+
+    function getRangeData() {
+      
+      const start = parseInt(document.getElementById(`startSelect-${blockId}`).value);
+      const end = parseInt(document.getElementById(`endSelect-${blockId}`).value);
+
+      const excludeCorrect = parseInt(document.getElementById(`excludeCorrectSelect-${blockId}`).value);
+      const excludeCorrectCond = document.getElementById(`excludeCorrectCond-${blockId}`).value;
+
+      const excludeWrong = parseInt(document.getElementById(`excludeWrongSelect-${blockId}`).value);
+      const excludeWrongCond = document.getElementById(`excludeWrongCond-${blockId}`).value;
+
+      const excludeWeight = parseFloat(document.getElementById(`excludeWeightSelect-${blockId}`).value);
+      const excludeWeightCond = document.getElementById(`excludeWeightCond-${blockId}`).value;
+
+      const excludeLastReviewDate = document.getElementById(`excludeLastReviewDate-${blockId}`).value;
+      const excludeLastReviewCond = document.getElementById(`excludeLastReviewCond-${blockId}`).value;
+
+      // ✅ まずは既存条件で範囲抽出
+      let rangeData = data.filter(d => {
+        if (d.id < start || d.id > end) return false;
+
+        // 正解数フィルタ
+        const correct = correctCounts.get(d.id) ?? 0;
+        if (excludeCorrectCond !== "none") {
+            if (excludeCorrectCond === "lt" && correct <= excludeCorrect) return false;
+            if (excludeCorrectCond === "gt" && correct >= excludeCorrect) return false;
+        }
+
+        // 誤答数フィルタ
+        const wrong = wrongCounts.get(d.id) ?? 0;
+        if (excludeWrongCond !== "none") {
+            if (excludeWrongCond === "lt" && wrong <= excludeWrong) return false;
+            if (excludeWrongCond === "gt" && wrong >= excludeWrong) return false;
+        }
+
+        // weight フィルタ
+        const weight = parseFloat(weights.get(d.id) ?? 0);
+        if (excludeWeightCond !== "none") {
+            if (excludeWeightCond === "lt" && weight <= excludeWeight) return false;
+            if (excludeWeightCond === "gt" && weight >= excludeWeight) return false;
+        }
+
+        // lastReview フィルタ
+        if (excludeLastReviewCond !== "none" && excludeLastReviewDate) {
+          const reviewDate = new Date(lastReviews.get(d.id) ?? 0);
+          const condDate = new Date(excludeLastReviewDate);
+          if (excludeLastReviewCond === "before" && reviewDate <= condDate) return false;
+          if (excludeLastReviewCond === "after" && reviewDate >= condDate) return false;
+        }
+
+        return true;
+      });
+
+      // ✅ ここからセル色フィルタを追加
+      const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+      if (colorFilterSelect) {
+        const colorChoice = colorFilterSelect.value; // "all", "green", "red", "white"
+        const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
+
+        if (colorChoice === "green" || colorChoice === "red") {
+          rangeData = rangeData.filter(item => savedColors[item.id] === colorChoice);
+        } else if (colorChoice === "white") {
+          rangeData = rangeData.filter(item => !savedColors[item.id]);
+        }
+        // "all" の場合はフィルタしない
+      }
+
+      return rangeData;
+    }
+
+
+
+    // 出題
+    function pickQuestion() {
+        if (remaining.length === 0) {
+            // console.log("本日出題済みの問題しか残っていません。");
+            questionArea.textContent = "おわり！";
+            answerArea.textContent = "";
+            setButtonsEnabled(false);
+            return;
+        }
+
+
+        const now = new Date();
+        const weights = remaining.map(d => {
+            const wrongCount = wrongCounts.get(d.id) ?? 0;
+            const correctCount = correctCounts.get(d.id) ?? 0;
+
+            const now = new Date();
+            const days = d.lastReview ? Math.floor((now - new Date(d.lastReview)) / (1000 * 60 * 60 * 24)) : 365;
+            const base = (wrongCount + 1) / (correctCount + 1);
+            const timeFactor = 1 - Math.exp(-days / (5 * (correctCount + 1)));
+            const timeScale = 2.0;
+            const jitter = 1 + (Math.random() - 0.5) * 0.1;
+            const lowCorrectBoost = 0.12 * (1 / (correctCount + 1));
+            const weight = (base * (1 + timeFactor * timeScale) * jitter * (1 + lowCorrectBoost)).toFixed(2);
+
+
+
+
+            return Math.round(weight * 100) / 100;
+
+        });
+
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let r_b = Math.random();
+        let r = r_b * totalWeight;
+        let index = 0;
+        for (let i = 0; i < weights.length; i++) {
+            r -= weights[i];
+            // console.log("r", r, "index", i)
+            if (r <= 0) {
+                index = i;
+                break;
+            }
+        }
+
+        const item = remaining.splice(index, 1)[0];
+        currentId = item.id;
+        item.lastReview = now; // 出題時に更新
+
+        let styledQuestion = colorizeNestedParentheses(item.question)
+          .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
+            if (p1 !== undefined) {
+              return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
+            }
+            if (p2 !== undefined) {
+              let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
+              return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
+            }
+            return match;
+          });
+
+        questionArea.innerHTML = `<span style="color: black;">${styledQuestion}</span>`;
+        answerArea.innerHTML = `<span style="color: gray;">ここに答えが表示されます</span>`;
+        highlightCell(item.id, 'blue');
+        setButtonsEnabled(true);
+
+        if (window.MathJax) MathJax.typesetPromise([questionArea]);
+    }
+
+
+
+
+
+    function scrollCellIntoView(cell) {
+      if (!cell) return;
+
+      // セルに最も近いスクロール可能な親を探す（テンプレート複製などでも安全）
+      const container = cell.closest('.status-table-container') || document.getElementById('statusTableContainer');
+      if (!container) return;
+
+      // 安全チェック
+      if (typeof container.getBoundingClientRect !== 'function' || typeof cell.getBoundingClientRect !== 'function') return;
+
+      const cellRect = cell.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      const absoluteTopInContainer = container.scrollTop + (cellRect.top - containerRect.top);
+
+      const targetScrollTop = Math.round( absoluteTopInContainer - (container.clientHeight - cellRect.height) / 2 );
+
+      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+      const boundedTop = Math.min(Math.max(0, targetScrollTop), maxScrollTop);
+
+      container.scrollTo({
+        top: boundedTop,
+        behavior: 'auto' // または 'smooth'
+      });
+    }
+
+    function highlightCell(id, className) {
+      // 前回青セルを元に戻す
+      if (className === 'blue' && lastBlueId !== null && lastBlueId !== id) {
+        restoreCellClass(lastBlueId);
+      }
+      const entry = statusMap.get(id);
+      if (!entry) return;
+
+      entry.cell.className = '';
+
+      if (className) {
+        entry.cell.classList.add(className);
+
+        if (className !== 'blue') {
+          saveCellColor(id, className);
+          lastBlueId = null;
+        } else {
+          lastBlueId = id;
+
+          requestAnimationFrame(() => {
+            scrollCellIntoView(entry.cell);
+          });
+        }
+      } else {
+        removeCellColor(id);
+        if (lastBlueId === id) lastBlueId = null;
+      }
+    }
+
+    function restoreCellClass(id) {
+      const entry = statusMap.get(id);
+      if (!entry) return;
+
+      entry.cell.className = '';
+      const savedClass = getSavedCellColor(id); // ← 1件取得に変更
+      if (savedClass) {
+        entry.cell.classList.add(savedClass);
+      }
+    }
+
+    function saveCellColor(id, className) {
+        if (className !== "blue"){
+            const key = `cellColors-${blockId}`;
+            const saved = localStorage.getItem(key);
+            const colors = saved ? JSON.parse(saved) : {};
+            colors[id] = className;
+            localStorage.setItem(key, JSON.stringify(colors));
+        }
+    }
+
+    function removeCellColor(id) {
+        const key = `cellColors-${blockId}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            const colors = JSON.parse(saved);
+            delete colors[id];
+            localStorage.setItem(key, JSON.stringify(colors));
+        }
+    }
+
+    function loadCellColors() {
+        const key = `cellColors-${blockId}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            const colors = JSON.parse(saved);
+            for (const [idStr, className] of Object.entries(colors)) {
+            const id = parseInt(idStr);
+            const entry = statusMap.get(id);
+            if (entry) {
+                entry.cell.classList.add(className);
+            }
+            }
+        }
+
+        if (lastBlueId !== null) {
+            const entry = statusMap.get(lastBlueId);
+            if (entry) {
+                entry.cell.className = '';
+                entry.cell.classList.add('blue');
+            }
+        }
+    }
+
+    function getSavedCellColor(id) {
+      const key = `cellColors-${blockId}`;
+      const saved = localStorage.getItem(key);
+      if (!saved) return null;
+      const colors = JSON.parse(saved);
+      return colors[id] ?? null;
+    }
+
+    function saveWrongCounts() {
+        const obj = {};
+        for (const [id, count] of wrongCounts.entries()) {
+            obj[id] = count;
+        }
+        localStorage.setItem(`wrongCounts-${blockId}`, JSON.stringify(obj));
+    }
+    function loadWrongCounts() {
+        const saved = localStorage.getItem(`wrongCounts-${blockId}`);
+        if (saved) {
+            const obj = JSON.parse(saved);
+            for (const [idStr, count] of Object.entries(obj)) {
+                const id = parseInt(idStr);
+                wrongCounts.set(id, count);
+
+                // カウントを表示
+                const entry = statusMap.get(id);
+                if (entry && entry.wrongSpan) {
+                    entry.wrongSpan.textContent = `×${count}`;
+                }
+            }
+        }
+    }
+    function saveCorrectCounts() {
+        const obj = {};
+        for (const [id, count] of correctCounts.entries()) {
+            obj[id] = count;
+        }
+        localStorage.setItem(`correctCounts-${blockId}`, JSON.stringify(obj));
+    }
+    function loadCorrectCounts() {
+        const saved = localStorage.getItem(`correctCounts-${blockId}`);
+        if (saved) {
+            const obj = JSON.parse(saved);
+            for (const [idStr, count] of Object.entries(obj)) {
+                const id = parseInt(idStr);
+                correctCounts.set(id, count);
+
+                // カウントを表示
+                const entry = statusMap.get(id);
+                if (entry && entry.correctSpan) {
+                    entry.correctSpan.textContent = `○${count}`;
+                }
+            }
+        }
+    }
+    function saveWeights() {
+        const obj = {};
+        for (const [id, weight] of weights.entries()) {
+            obj[id] = weight;
+        }
+        localStorage.setItem(`weights-${blockId}`, JSON.stringify(obj));
+    }
+    function loadWeights() {
+        const saved = localStorage.getItem(`weights-${blockId}`);
+        if (saved) {
+            const obj = JSON.parse(saved);
+            for (const [idStr, weight] of Object.entries(obj)) {
+                const id = parseInt(idStr);
+                weights.set(id, weight);
+
+                // 表示を更新
+                const entry = statusMap.get(id);
+                if (entry && entry.weightSpan) {
+                    entry.weightSpan.textContent = weight;
+                }
+            }
+        }
+    }
+    function saveLastReviews() {
+        const obj = {};
+        for (const [id, dateStr] of lastReviews.entries()) {
+            obj[id] = dateStr;
+        }
+        localStorage.setItem(`lastReviews-${blockId}`, JSON.stringify(obj));
+    }
+    function loadLastReviews() {
+        const saved = localStorage.getItem(`lastReviews-${blockId}`);
+        if (saved) {
+            const obj = JSON.parse(saved);
+            for (const [idStr, dateStr] of Object.entries(obj)) {
+                const id = parseInt(idStr);
+                lastReviews.set(id, dateStr);
+
+                // 表示を更新
+                const entry = statusMap.get(id);
+                if (entry && entry.cell) {
+                    let reviewSpan = entry.cell.querySelector(".last-review");
+                    if (!reviewSpan) {
+                        reviewSpan = document.createElement("span");
+                        reviewSpan.className = "last-review";
+                        entry.cell.appendChild(reviewSpan);
+                    }
+                    const date = new Date(dateStr);
+                    reviewSpan.textContent = date.toLocaleDateString("ja-JP");
+                }
+            }
+        }
+    }
+
+    // 出題範囲の値が変わったら保存
+    startSelect.addEventListener('change', () => {
+        localStorage.setItem(`startSelect-${blockId}`, startSelect.value);
+    });
+    endSelect.addEventListener('change', () => {
+        localStorage.setItem(`endSelect-${blockId}`, endSelect.value);
+    });
+    // 正解数による出題範囲が変わったら保存
+    excludeCorrectSelect.addEventListener('change', () => {
+        localStorage.setItem(`excludeCorrectSelect-${blockId}`, excludeCorrectSelect.value);
+    });
+
+
+
+    // 出題ボタンを押したとき
+    nextBtn.addEventListener('click', () => {
+        const rangeData = getRangeData();
+        // 出題する問題が無くなったらおわり！
+        if (remaining.length === 0 && questionArea.textContent === "おわり！") {
+            resetState();
+        }
+        remaining = rangeData.slice();
+        pickQuestion();
+        questionArea.scrollTop = 0;
+        updateRemainingCount();  // ← これを追加
+        updateColorCount(); // ← 追加
+    });
+
+
+
+
+    function updateRemainingCount() {
+      remainingCountLabel.textContent = `残り: ${remaining.length}問`;
+    }
+
+    function colorizeParentheses(text) {
+      const colors = [
+        "#FFA500", // 濃いオレンジ
+        "#FFB733", // 少し薄い
+        "#FFCC80", // さらに薄い
+        "#FFE0B3"  // もっと薄い（必要なら増やす）
+      ];
+
+      let result = "";
+      let depth = 0;
+
+      for (let char of text) {
+        if (char === "(" || char === "（") {
+          const color = colors[Math.min(depth, colors.length - 1)];
+          result += `<span style="color: ${color};">` + char;
+          depth++;
+        } else if (char === ")" || char === "）") {
+          depth = Math.max(0, depth - 1);
+          result += char + "</span>";
+        } else {
+          result += char;
+        }
+      }
+
+      return result;
+    }
+
+    // 答えを見るボタンを押したとき
+    showAnswerBtn.addEventListener('click', () => {
+        if (currentId !== null) {
+            const item = data.find(d => d.id === currentId);
+            // answerArea.innerHTML = `<span style="color: black;">${item.answer}</span>`;
+
+          let styledAnswer = colorizeNestedParentheses(item.answer)
+            .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
+              if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
+              if (p2 !== undefined) {
+                let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
+                return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
+              }
+              return match;
+            });
+
+          // 全体黒で囲む
+          answerArea.innerHTML = `<span style="color: black;">${styledAnswer}</span>`;
+        }
+        
+        // MathJaxで数式を再描画
+        if (window.MathJax) {
+            MathJax.typesetPromise([answerArea]);
+        }
+    });
+    // 正解したボタンを押したとき
+    correctBtn.addEventListener('click', () => {
+        if (currentId !== null) {
+            const entry = statusMap.get(currentId);
+            const newCount = (correctCounts.get(currentId) ?? 0) + 1;
+            correctCounts.set(currentId, newCount);
+
+            if (entry && entry.correctSpan) {
+            entry.correctSpan.textContent = `○${newCount}`;
+            }
+
+            // lastReview を更新して保存
+            const nowIso = new Date().toISOString();
+            lastReviews.set(currentId, nowIso);
+            if (entry && entry.lastReviewSpan) entry.lastReviewSpan.textContent = new Date(nowIso).toLocaleString("ja-JP");
+            saveLastReviews();
+
+            // <-- ここで newWeight を「必ず」計算する（未定義参照の防止）
+            const wrong = wrongCounts.get(currentId) ?? 0;
+            const corr = newCount;
+            // days は lastReviews を元に計算（今更新したので 0 日）
+            const days = 0;
+            const base = (wrong + 1) / (corr + 1);
+            const timeFactor = 1 - Math.exp(-days / (5 * (corr + 1)));
+            const timeScale = 2.0;
+            const jitter = 1 + (Math.random() - 0.5) * 0.1;
+            const lowCorrectBoost = 0.12 * (1 / (corr + 1));
+            const newWeight = Number((base * (1 + timeFactor * timeScale) * jitter * (1 + lowCorrectBoost)).toFixed(2));
+
+            weights.set(currentId, newWeight);
+            if (entry && entry.weightSpan) entry.weightSpan.textContent = newWeight;
+            saveWeights();
+
+            questionArea.scrollTop = 0;
+
+            updateRemainingCount(); // ← 残り更新
+            highlightCell(currentId, 'green');
+            saveCorrectCounts();
+            pickQuestion();
+            updateColorCount(); // ← 追加
+        }
+    });
+    // 不正解だったボタンを押したとき
+    wrongBtn.addEventListener('click', () => {
+        if (currentId !== null) {
+            const entry = statusMap.get(currentId);
+            const newCount = (wrongCounts.get(currentId) ?? 0) + 1;
+            wrongCounts.set(currentId, newCount);
+
+            if (entry && entry.wrongSpan) {
+            entry.wrongSpan.textContent = `×${newCount}`;
+            }
+
+            // lastReview を更新して保存
+            const nowIso = new Date().toISOString();
+            lastReviews.set(currentId, nowIso);
+            if (entry && entry.lastReviewSpan) entry.lastReviewSpan.textContent = new Date(nowIso).toLocaleString("ja-JP");
+            saveLastReviews();
+
+            // newWeight を計算して保存
+            const wrong = newCount;
+            const corr = correctCounts.get(currentId) ?? 0;
+            const days = 0;
+            const base = (wrong + 1) / (corr + 1);
+            const timeFactor = 1 - Math.exp(-days / (5 * (corr + 1)));
+            const timeScale = 2.0;
+            const jitter = 1 + (Math.random() - 0.5) * 0.1;
+            const lowCorrectBoost = 0.12 * (1 / (corr + 1));
+            const newWeight = Number((base * (1 + timeFactor * timeScale) * jitter * (1 + lowCorrectBoost)).toFixed(2));
+
+            weights.set(currentId, newWeight);
+            if (entry && entry.weightSpan) entry.weightSpan.textContent = newWeight;
+            saveWeights();
+            
+            questionArea.scrollTop = 0;
+
+            updateRemainingCount(); // ← 残り更新
+            highlightCell(currentId, 'red');
+            saveWrongCounts();
+            pickQuestion();
+            updateColorCount(); // ← 追加
+        }
+    });
+
+    function updateColorFilterBackground() {
+      // まず既存クラスを全削除
+      colorFilterSelect.classList.remove(
+        'color-filter-red',
+        'color-filter-green',
+        'color-filter-white',
+        'color-filter-all'
+      );
+
+      // 現在の値に応じてクラスを追加
+      const value = colorFilterSelect.value;
+      if (value === 'red') {
+        colorFilterSelect.classList.add('color-filter-red');
+      } else if (value === 'green') {
+        colorFilterSelect.classList.add('color-filter-green');
+      } else if (value === 'white') {
+        colorFilterSelect.classList.add('color-filter-white');
+      } else {
+        colorFilterSelect.classList.add('color-filter-all');
+      }
+    }
+
+    // 初期状態の反映
+    updateColorFilterBackground();
+
+    // 変更イベント時に反映
+    // colorFilterSelect.addEventListener('change', updateColorFilterBackground);
+
+    // 3) 選択が変わったら localStorage に保存して自動適用（apply 不要）
+    //    さらに、現在のフィルタで残り件数を更新しておく
+    colorFilterSelect.addEventListener('change', (e) => {
+      const v = e.target.value;
+      localStorage.setItem(`colorFilterSelect-${blockId}`, v);
+      updateColorFilterBackground();
+
+      // 再取得して残り件数を更新（ユーザがすぐ「出題」を押さなくても見た目上の残りを反映）
+      const rangeData = getRangeData();
+      remaining = rangeData.slice();
+      updateRemainingCount();
+      updateColorCount();
+    });
+
+
+
+    init();
+
+
+
+
+
+
+}
+
+
+
+
+async function fetchQuizData(sheetUrl) {
+  const response = await fetch(sheetUrl);
+  return await response.json();
+}
+
+async function initQuiz() {
+  const url = "https://script.google.com/macros/s/AKfycbyzBzGkqdEm5dZwRyaHl4C7PovqihNShxgaQX5N-dF8k4J6Rmmkp-3AZ5vmPx-H7cax/exec";
+
+  const allData = await fetchQuizData(url);
+
+  // 必要に応じて科目別にfilter
+  const quizData0 = allData.filter(d => d.category === "イタリア語");
+  const quizData1 = allData.filter(d => d.category === "音読み");
+
+  createQuiz(0, quizData0);
+  createQuiz(1, quizData1);
+}
+
+initQuiz();
+
+
+
+
+
+// createQuiz(0, quizData0);
+// createQuiz(1, quizData1);
+// createQuiz(2, quizData2);
+// createQuiz(3, quizData3);
+// createQuiz(4, quizData4);
+// createQuiz(5, quizData5);
+// createQuiz(6, quizData6);
+
+
+
+
+
+
+function colorizeNestedParentheses(text) {
+  const colors = [
+    "#ff7f00", //オレンジ
+    "#00ff7f", //薄い青緑
+
+  ];
+  let result = "";
+  let depth = 0;
+
+  for (let char of text) {
+    if (char === "(" || char === "（") {
+      const color = colors[Math.min(depth, colors.length - 1)];
+      result += `<span style="color: ${color};">${char}`;
+      depth++;
+    } else if (char === ")" || char === "）") {
+      depth = Math.max(0, depth - 1);
+      result += `${char}</span>`;   // ← char の後に閉じる
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
+}
+
+
+</script>
+</body>
+
+
+
+</html>
