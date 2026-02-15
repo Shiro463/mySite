@@ -1620,15 +1620,29 @@ function createQuiz(blockId, data) {
 
 
 
-async function fetchQuizData(sheetUrl) {
-  const response = await fetch(sheetUrl);
-  return await response.json();
+async function fetchQuizData() {
+  const url = "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json";
+
+  const response = await fetch(url);
+  const text = await response.text();
+
+  // Google独自フォーマットを除去
+  const json = JSON.parse(text.substr(47).slice(0, -2));
+
+  return json.table.rows.map(row => ({
+    id: row.c[0]?.v,
+    category: row.c[1]?.v,
+    label: row.c[2]?.v,
+    question: row.c[3]?.v,
+    answer: row.c[4]?.v
+  }));
 }
 
-async function initQuiz() {
-  const url = "https://script.google.com/macros/s/AKfycbzxjmwVzybB-5JcQOHFtuqOMfyunl3bwhARTIfJTTX4CgoxoQQeX-p0MS_MrQzYkM8U/exec";
 
-  const allData = await fetchQuizData(url);
+async function initQuiz() {
+  // const url = "https://script.google.com/macros/s/AKfycbzxjmwVzybB-5JcQOHFtuqOMfyunl3bwhARTIfJTTX4CgoxoQQeX-p0MS_MrQzYkM8U/exec";
+
+  // const allData = await fetchQuizData(url);
 
   // 必要に応じて科目別にfilter
   const quizData0 = allData.filter(d => d.category === "イタリア語");
