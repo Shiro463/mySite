@@ -573,26 +573,16 @@
 
 
 async function fetchQuizData(url) {
-  // const url = "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json";
-
   const response = await fetch(url);
   const text = await response.text();
 
-  // Google独自フォーマット除去
   const json = JSON.parse(text.substring(47, text.length - 2));
 
-  const resultString = json.table.rows.map(row => {
-    const values = row.c.map(cell => {
-      const value = cell?.v ?? "";
-      // ダブルクォーテーションと改行をエスケープ
-      return `"${value.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
-    });
-    return `[${values.join(",")}]`;
-  }).join(",\n");
-
-  console.log(resultString);
-  return resultString;
+  return json.table.rows.map(row =>
+    row.c.map(cell => cell?.v ?? "")
+  );
 }
+
 
 
 
@@ -14592,9 +14582,18 @@ const quizData5 = createQuizData([
 // ["チャド","チャド","ンジャメナ"],
 
 // ], 130000)
-const quizData6 = createQuizData([
-  fetchQuizData("https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json")
-], 130000)
+async function initQuiz() {
+  const data = await fetchQuizData(
+    "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json"
+  );
+
+  const quizData6 = createQuizData(data, 130000);
+
+  console.log(quizData6);
+}
+
+initQuiz();
+
 
 
 // クイズブロック作成
