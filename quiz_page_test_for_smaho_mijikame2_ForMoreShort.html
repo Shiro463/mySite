@@ -14584,8 +14584,9 @@ const quizData5 = createQuizData([
 // ], 130000)
 
 let quizData6;
+let data6;
 async function initQuiz() {
-  const data = await fetchQuizData(
+  const data6 = await fetchQuizData(
     "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json"
   );
 
@@ -14595,7 +14596,7 @@ async function initQuiz() {
 initQuiz();
 
 quizData6 = createQuizData([
-  data
+  data6
 ], 130000)
 
 // クイズブロック作成
