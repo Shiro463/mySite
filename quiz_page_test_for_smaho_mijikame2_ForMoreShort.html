@@ -1629,6 +1629,8 @@ async function fetchQuizData() {
   // Google独自フォーマットを除去
   const json = JSON.parse(text.substr(47).slice(0, -2));
 
+  console.log(json)
+
   return json.table.rows.map(row => ({
     id: row.c[0]?.v,
     category: row.c[1]?.v,
