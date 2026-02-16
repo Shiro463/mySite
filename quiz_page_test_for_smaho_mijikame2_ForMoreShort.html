@@ -1642,6 +1642,7 @@ async function fetchQuizData() {
 async function initQuizApp() {
   const allData = await fetchQuizData();
 
+  console.log(allData)
   // 例：ブロック0にデータを入れる
   createQuiz(0, allData);
 }
