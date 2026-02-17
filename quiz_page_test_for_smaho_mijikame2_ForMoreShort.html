@@ -14001,10 +14001,11 @@ async function initQuizBlock({ blockNum, url, idStart }) {
 
 
 async function initAllQuizzes() {
-  await Promise.all(
-    quizConfigs.map(config => initQuizBlock(config))
-  );
+  for (const config of quizConfigs) {
+    await initQuizBlock(config);
+  }
 }
+
 
 initAllQuizzes();
 
