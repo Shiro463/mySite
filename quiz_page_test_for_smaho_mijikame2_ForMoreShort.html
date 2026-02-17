@@ -13975,7 +13975,7 @@ const quizData5 = createQuizData([
 
 const quizConfigs = [
   {
-    blockNum: 0,
+    quizBlockNum: 0,
     url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
     idStart: 10000
   },
@@ -13993,10 +13993,10 @@ const quizConfigs = [
 ];
 
 
-async function initQuizBlock({ blockNum, url, idStart }) {
+async function initQuizBlock({ quizBlockNum, url, idStart }) {
   const GASData = await fetchQuizData(url);
   const quizData = createQuizData(GASData, idStart);
-  createQuiz(blockNum, quizData);
+  createQuiz(quizBlockNum, quizData);
 }
 
 
