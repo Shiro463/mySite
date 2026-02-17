@@ -13992,6 +13992,7 @@ const quizConfigs = [
   // }
 ];
 
+
 async function initQuizBlock({ blockNum, url, idStart }) {
   const GASData = await fetchQuizData(url);
   const quizData = createQuizData(GASData, idStart);
@@ -14000,7 +14001,13 @@ async function initQuizBlock({ blockNum, url, idStart }) {
 
 initQuizBlock(config); // ← 下に置く
 
+async function initAllQuizzes() {
+  await Promise.all(
+    quizConfigs.map(config => initQuizBlock(config))
+  );
+}
 
+initAllQuizzes();
 
 
 // let quizData6;
