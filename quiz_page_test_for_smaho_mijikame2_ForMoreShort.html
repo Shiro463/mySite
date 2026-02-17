@@ -14586,17 +14586,23 @@ const quizData5 = createQuizData([
 let quizData6;
 let data6;
 
-initQuiz();
+
 
 async function initQuiz() {
-  data6 = await fetchQuizData(
+  const data6 = await fetchQuizData(
     "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json"
   );
 
   quizData6 = createQuizData(data6, 130000);
 
   console.log("完成:", quizData6);
+
+  // 🔥 ここで呼ぶ
+  createQuiz(6, quizData6);
 }
+
+initQuiz();
+
 
 
 // クイズブロック作成
@@ -15975,7 +15981,7 @@ createQuiz(2, quizData2);
 createQuiz(3, quizData3);
 createQuiz(4, quizData4);
 createQuiz(5, quizData5);
-createQuiz(6, quizData6);
+// createQuiz(6, quizData6);
 
 // ---------------- LocalStorage表示トグル ----------------
 const toggleBtn = document.getElementById('toggleStorageBtn');
