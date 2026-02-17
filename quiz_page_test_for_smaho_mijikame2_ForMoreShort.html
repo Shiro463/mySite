@@ -13992,13 +13992,14 @@ const quizConfigs = [
   // }
 ];
 
-async function initAllQuizzes() {
-  await Promise.all(
-    quizConfigs.map(config => initQuizBlock(config))
-  );
+async function initQuizBlock({ blockNum, url, idStart }) {
+  const GASData = await fetchQuizData(url);
+  const quizData = createQuizData(GASData, idStart);
+  createQuiz(blockNum, quizData);
 }
 
-initAllQuizzes();
+initQuizBlock(config); // ← 下に置く
+
 
 
 
