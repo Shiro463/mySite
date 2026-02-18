@@ -572,16 +572,7 @@
 //# sourceMappingURL=chart.umd.min.js.map
 
 
-async function fetchQuizData(url) {
-  const response = await fetch(url);
-  const text = await response.text();
 
-  const json = JSON.parse(text.substring(47, text.length - 2));
-
-  return json.table.rows.map(row =>
-    row.c.map(cell => cell?.v ?? "")
-  );
-}
 
 
 
@@ -12952,14 +12943,14 @@ const quizConfigs = [
     // イタリア語
     type: "normal",
     quizBlockNum: 0,
-    url: "https://docs.google.com/spreadsheets/d/1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M/gviz/tq?tqx=out:json",
+    url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
     idStart: 10000
   },
   {
     // 音読み
     type: "normal",
     quizBlockNum: 1,
-    url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
+    url: "https://docs.google.com/spreadsheets/d/1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M/gviz/tq?tqx=out:json",
     idStart: 20000
   },
   {
@@ -12992,6 +12983,25 @@ const quizConfigs = [
   },
 
 ];
+
+async function fetchQuizData(url) {
+  const res = await fetch(url);
+  const text = await res.text();
+
+  const json = JSON.parse(text.substr(47).slice(0, -2));
+  const rows = json.table.rows;
+
+  return rows.map(row =>
+    row.c.map(cell => {
+      if (!cell || !cell.v) return "";
+
+      // ★ ここで \n を本物の改行に変換
+      return String(cell.v).replace(/\\n/g, "\n");
+    })
+  );
+}
+
+
 
 
 // async function initQuizBlock({ quizBlockNum, url, idStart }) {
