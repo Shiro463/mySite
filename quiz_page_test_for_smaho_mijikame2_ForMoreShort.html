@@ -12949,21 +12949,43 @@ const quizData5 = createQuizData([
 
 const quizConfigs = [
   {
+    // イタリア語
+    type: "normal",
     quizBlockNum: 0,
     url: "https://docs.google.com/spreadsheets/d/1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M/gviz/tq?tqx=out:json",
     idStart: 10000
   },
   {
+    // 音読み
+    type: "normal",
     quizBlockNum: 1,
     url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
     idStart: 20000
   },
   {
+    // 熟字、一字訓
+    type: "normal",
     quizBlockNum: 2,
     url: "https://docs.google.com/spreadsheets/d/1TMmiQ2GNG1gBTYttZvfCt3bSH10gcv3aivElEdvCJiY/gviz/tq?tqx=out:json",
     idStart: 80000
   },
   {
+    // 漢字パーツ1
+    type: "kanjiParts",
+    quizBlockNum: 4,
+    url: "https://docs.google.com/spreadsheets/d/1IKzCk457_iKDtTI9A9KH5BhhP5oitlDugwKUvTOonC8/gviz/tq?tqx=out:json",
+    idStart: 110000
+  },
+  {
+    // 漢字パーツ2
+    type: "normal",
+    quizBlockNum: 4,
+    url: "https://docs.google.com/spreadsheets/d/1QqiVcQ01_9RP7RvAPMrRltv1H29iHvODgm-uC8gIUYQ/gviz/tq?tqx=out:json",
+    idStart: 117000
+  },
+  {
+    // 首都
+    type: "normal",
     quizBlockNum: 6,
     url: "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json",
     idStart: 130000
@@ -12972,41 +12994,75 @@ const quizConfigs = [
 ];
 
 
-async function initQuizBlock({ quizBlockNum, url, idStart }) {
+// async function initQuizBlock({ quizBlockNum, url, idStart }) {
+//   const GASData = await fetchQuizData(url);
+//   const quizData = createQuizData(GASData, idStart);
+//   console.log(quizBlockNum, GASData)
+//   createQuiz(quizBlockNum, quizData);
+// }
+
+async function initQuizBlock({ quizBlockNum, url, idStart, type }) {
+
   const GASData = await fetchQuizData(url);
-  const quizData = createQuizData(GASData, idStart);
-  createQuiz(quizBlockNum, quizData);
+
+  let quizData;
+
+  if (type === "kanjiParts") {
+
+    // 漢字パーツ用
+    quizData = createQuizData_kanjiParts(GASData, idStart);
+
+    // answer → question 自動生成
+    quizData.forEach(item => {
+      item.question = transformAnswerToQuestion(item.answer);
+    });
+
+  } else {
+
+    // 通常問題
+    quizData = createQuizData(GASData, idStart);
+
+  }
+
+  return { quizBlockNum, quizData };
 }
 
 
+
+
+
+// async function initAllQuizzes() {
+//   for (const config of quizConfigs) {
+//     await initQuizBlock(config);
+//   }
+// }
+
 async function initAllQuizzes() {
-  for (const config of quizConfigs) {
-    await initQuizBlock(config);
-  }
+
+  const results = await Promise.all(
+    quizConfigs.map(config => initQuizBlock(config))
+  );
+
+  // blockごとにまとめる
+  const grouped = {};
+
+  results.forEach(({ quizBlockNum, quizData }) => {
+    if (!grouped[quizBlockNum]) {
+      grouped[quizBlockNum] = [];
+    }
+    grouped[quizBlockNum].push(...quizData);
+  });
+
+  // createQuiz 実行
+  Object.entries(grouped).forEach(([blockNum, data]) => {
+    createQuiz(Number(blockNum), data);
+  });
+
 }
 
 
 initAllQuizzes();
 
-
-// let quizData6;
-// let GASData6;
-// let url6 = "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json";
-
-
-
-// async function initQuiz(quizData, GASData, url, idNum, quizBlockNum){
-//   GASData = await fetchQuizData(url);
-
-//   quizData = createQuizData(GASData, idNum);
-
-//   console.log("完成:", quizData);
-
-//   // 🔥 ここで呼ぶ
-//   createQuiz(quizBlockNum, quizData);
-// }
-
-// initQuiz(quizData6, GASData6, url6, idNum=130000, quizBlockNum=6);
 
 
 
@@ -14384,7 +14440,7 @@ function createQuiz(blockId, data) {
 // createQuiz(1, quizData1);
 // createQuiz(2, quizData2);
 createQuiz(3, quizData3);
-createQuiz(4, quizData4);
+// createQuiz(4, quizData4);
 createQuiz(5, quizData5);
 // createQuiz(6, quizData6);
 
