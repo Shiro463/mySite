@@ -841,24 +841,24 @@
 
   // return [
 
-  return sources.flatMap((src) =>
-    src.patterns.map((target, idx) => ({
-    id: baseId + 
-        // 先頭からの通し番号を作るために flatMap 全体の index をあとで使う
-        0, // ダミー、あとで書き換え
-    label: src.label,
-    question: src.baseText.replace(new RegExp(target, "g"), "【】"),
-    answer: target,
-    }))
-  ).map((item, idx) => ({
-    ...item,
-    id: baseId + idx,
-  }));
+//   return sources.flatMap((src) =>
+//     src.patterns.map((target, idx) => ({
+//     id: baseId + 
+//         // 先頭からの通し番号を作るために flatMap 全体の index をあとで使う
+//         0, // ダミー、あとで書き換え
+//     label: src.label,
+//     question: src.baseText.replace(new RegExp(target, "g"), "【】"),
+//     answer: target,
+//     }))
+//   ).map((item, idx) => ({
+//     ...item,
+//     id: baseId + idx,
+//   }));
 
   
 
 
-})();
+// })();
 
 
 
