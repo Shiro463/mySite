@@ -1066,43 +1066,89 @@ async function fetchQuizData(url) {
 
 
 
-async function initQuizBlock({ quizBlockNum, url, idStart, type }) {
+// async function initQuizBlock({ quizBlockNum, url, idStart, type }) {
 
-  const GASData = await fetchQuizData(url);
+//   const GASData = await fetchQuizData(url);
+
+//   let quizData;
+
+//   if (type === "kanjiParts") {
+
+//     // 漢字パーツ用
+//     quizData = createQuizData_kanjiParts(GASData, idStart);
+//     // answer → question 自動生成
+//     quizData.forEach(item => {
+//       item.question = transformAnswerToQuestion(item.answer);
+//     });
+
+//   }else if(type === "fourLaw"){
+
+//     const defRows = await fetchQuizData(urlDefs);
+//     const sourceRows = await fetchQuizData(urlSources);
+//     // ★ グローバル defs を再構築
+//     window.defs = buildDefsFromGAS(defRows);
+//     const sources = buildSourcesFromGAS(sourceRows);
+//     const quizData = buildQuizDataFromSourcesWithResolve(
+//       sources,
+//       idStart
+//     );
+//     return { quizBlockNum, quizData };
+
+//   } else {
+
+//     // 通常問題
+//     quizData = createQuizData(GASData, idStart);
+
+//   }
+
+//   return { quizBlockNum, quizData };
+// }
+async function initQuizBlock(config) {
+
+  // 🔥 fourLaw専用処理
+  if (config.type === "fourLaw") {
+
+    const defRows = await fetchQuizData(config.urlDefs);
+    const sourceRows = await fetchQuizData(config.urlSources);
+
+    // defs を再構築（resolveはそのまま）
+    defs = buildDefsFromGAS(defRows);
+
+    const sources = buildSourcesFromGAS(sourceRows);
+
+    const quizData =
+      buildQuizDataFromSourcesWithResolve(
+        sources,
+        config.idStart
+      );
+
+    return { quizBlockNum: config.quizBlockNum, quizData };
+  }
+
+  // 🔹 通常ブロック
+  const GASData = await fetchQuizData(config.url);
 
   let quizData;
 
-  if (type === "kanjiParts") {
+  if (config.type === "kanjiParts") {
 
-    // 漢字パーツ用
-    quizData = createQuizData_kanjiParts(GASData, idStart);
-    // answer → question 自動生成
+    quizData = createQuizData_kanjiParts(GASData, config.idStart);
+
     quizData.forEach(item => {
-      item.question = transformAnswerToQuestion(item.answer);
+      item.question =
+        transformAnswerToQuestion(item.answer);
     });
-
-  }else if(type === "fourLaw"){
-
-    const defRows = await fetchQuizData(urlDefs);
-    const sourceRows = await fetchQuizData(urlSources);
-    // ★ グローバル defs を再構築
-    window.defs = buildDefsFromGAS(defRows);
-    const sources = buildSourcesFromGAS(sourceRows);
-    const quizData = buildQuizDataFromSourcesWithResolve(
-      sources,
-      idStart
-    );
-    return { quizBlockNum, quizData };
 
   } else {
 
-    // 通常問題
-    quizData = createQuizData(GASData, idStart);
+    quizData = createQuizData(GASData, config.idStart);
 
   }
 
-  return { quizBlockNum, quizData };
+  return { quizBlockNum: config.quizBlockNum, quizData };
 }
+
+
 
 // 四法用
 // ========================
