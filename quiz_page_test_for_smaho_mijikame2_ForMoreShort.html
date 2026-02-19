@@ -862,6 +862,100 @@
 
 
 
+// 文字列中から start〜end を抜き出す関数（そのまま使う）
+function extractBetweenRegex(text = "", startStr, endStr) {
+  const regex = new RegExp(`${startStr}[\\s\\S]*?${endStr}`, "g");
+  const matches = text.match(regex);
+  return matches ? matches.join("") : "";
+}
+
+// ヘルパ：トップレベルの + で分割（文字列リテラル内の + は無視）
+function splitTopLevelPlus(expr) {
+  const parts = [];
+  let cur = "";
+  let inSingle = false, inDouble = false, depth = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i];
+    if (ch === "'" && !inDouble) { inSingle = !inSingle; cur += ch; continue; }
+    if (ch === '"' && !inSingle) { inDouble = !inDouble; cur += ch; continue; }
+    if (!inSingle && !inDouble) {
+      if (ch === "(") { depth++; cur += ch; continue; }
+      if (ch === ")") { depth--; cur += ch; continue; }
+      if (ch === "+" && depth === 0) {
+        parts.push(cur.trim());
+        cur = "";
+        continue;
+      }
+    }
+    cur += ch;
+  }
+  if (cur.trim() !== "") parts.push(cur.trim());
+  return parts;
+}
+
+// 許可する式だけを安全に評価する（evalは使わない）
+// expr例： "i3j2k"、 "defs.i38j"、 "extractBetweenRegex(i38j, \"start\", \"end\")"、またはそれらの + 連結
+function safeEvaluate(expr, seen) {
+  const parts = splitTopLevelPlus(expr);
+  let out = "";
+  for (const part of parts) {
+    // 関数呼び出しパターン: extractBetweenRegex(optional defs.)key, "start", "end"
+    const fnRe = /^extractBetweenRegex\(\s*(?:defs\.)?([A-Za-z0-9_]+)\s*,\s*(['"])([\s\S]*?)\2\s*,\s*(['"])([\s\S]*?)\4\s*\)$/;
+    const m = part.match(fnRe);
+    if (m) {
+      const [, key, , startStr, , endStr] = m;
+      // innerText は resolve(key) で展開してから抜き出すのが望ましい
+      const inner = resolve(key, new Set(seen));
+      out += extractBetweenRegex(inner, startStr, endStr);
+      continue;
+    }
+
+    // 単純 key（defs.key または key）
+    const keyRe = /^(?:defs\.)?([A-Za-z0-9_]+)$/;
+    const mk = part.match(keyRe);
+    if (mk) {
+      out += resolve(mk[1], new Set(seen));
+      continue;
+    }
+
+    // 文字列リテラル（"..." または '...'）
+    const strRe = /^(['"])([\s\S]*)\1$/;
+    const ms = part.match(strRe);
+    if (ms) {
+      out += ms[2];
+      continue;
+    }
+
+    // 未対応
+    out += `[未対応:${part}]`;
+  }
+  return out;
+}
+
+// 展開関数（${...} を安全評価）
+function resolve(key, seen = new Set()) {
+  if (seen.has(key)) return `[循環参照:${key}]`;
+  seen.add(key);
+
+  const val = defs[key];
+  if (val === undefined) return `[未定義:${key}]`;
+
+  // ${...} 全体を safeEvaluate で置換
+  return val.replace(/\$\{([^}]+)\}/g, (_, expr) => {
+    try {
+      return safeEvaluate(expr, seen);
+    } catch (e) {
+      console.warn("safeEvaluate error:", e);
+      return `[評価エラー:${expr}]`;
+    }
+  });
+}
+
+// window.resolve = resolve;
+
+
+
+
 
 // id自動割当
 function createQuizData(rawData, startId = 1) {
