@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>クイズアプリ（スマホ最適化版）</title>
 <style>
   body {
@@ -3426,6 +3427,13 @@ const quizConfigs = [
   {
     // 首都
     type: "normal",
+    quizBlockNum: 5,
+    url: "https://docs.google.com/spreadsheets/d/1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0/gviz/tq?tqx=out:json",
+    idStart: 120000
+  },
+  {
+    // 首都
+    type: "normal",
     quizBlockNum: 6,
     url: "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json",
     idStart: 130000
@@ -4859,7 +4867,7 @@ function createQuiz(blockId, data) {
 // createQuiz(2, quizData2);
 createQuiz(3, quizData3);
 // createQuiz(4, quizData4);
-createQuiz(5, quizData5);
+// createQuiz(5, quizData5);
 // createQuiz(6, quizData6);
 
 // ---------------- LocalStorage表示トグル ----------------
