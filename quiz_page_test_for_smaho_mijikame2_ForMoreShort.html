@@ -1257,14 +1257,14 @@ async function initQuizBlock(config) {
 
 // 四法用
 // ========================
-// function buildDefsFromGAS(defRows) {
-//   const obj = {};
-//   defRows.forEach(([key, value]) => {
-//     if (!key) return;
-//     obj[key] = String(value || "").replace(/\\n/g, "\n");
-//   });
-//   return obj;
-// }
+function buildDefsFromGAS(defRows) {
+  const obj = {};
+  defRows.forEach(([key, value]) => {
+    if (!key) return;
+    obj[key] = String(value || "").replace(/\\n/g, "\n");
+  });
+  return obj;
+}
 function buildSourcesFromGAS(sourceRows) {
   return sourceRows.map(([label, baseExpr, patternsText]) => {
 
@@ -1282,17 +1282,17 @@ function buildSourcesFromGAS(sourceRows) {
     };
   });
 }
-function buildSourcesFromGAS(sourceRows) {
-  return sourceRows.map(([label, baseText, patternsText]) => ({
-    label,
-    baseText: String(baseText || "").replace(/\\n/g, "\n"),
-    patterns: String(patternsText || "")
-      .replace(/\\n/g, "\n")
-      .split("\n")
-      .map(s => s.trim())
-      .filter(Boolean)
-  }));
-}
+// function buildSourcesFromGAS(sourceRows) {
+//   return sourceRows.map(([label, baseText, patternsText]) => ({
+//     label,
+//     baseText: String(baseText || "").replace(/\\n/g, "\n"),
+//     patterns: String(patternsText || "")
+//       .replace(/\\n/g, "\n")
+//       .split("\n")
+//       .map(s => s.trim())
+//       .filter(Boolean)
+//   }));
+// }
 function buildQuizDataFromSourcesWithResolve(sources, baseId) {
   return sources.flatMap((src) => {
     // ★ baseText を resolve して展開
