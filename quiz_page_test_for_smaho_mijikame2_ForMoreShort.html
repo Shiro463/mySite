@@ -1257,13 +1257,27 @@ async function initQuizBlock(config) {
 
 // 四法用
 // ========================
-function buildDefsFromGAS(defRows) {
-  const obj = {};
-  defRows.forEach(([key, value]) => {
+// function buildDefsFromGAS(defRows) {
+//   const obj = {};
+//   defRows.forEach(([key, value]) => {
+//     if (!key) return;
+//     obj[key] = String(value || "").replace(/\\n/g, "\n");
+//   });
+//   return obj;
+// }
+function buildDefsFromRows(rows) {
+  const defsObj = {};
+
+  rows.forEach(row => {
+    const key = row[1];      // 2列目（キー）
+    const expr = row[3];     // 4列目（式）
+
     if (!key) return;
-    obj[key] = String(value || "").replace(/\\n/g, "\n");
+
+    defsObj[key] = String(expr || "");
   });
-  return obj;
+
+  return defsObj;
 }
 function buildSourcesFromGAS(sourceRows) {
   return sourceRows.map(([label, baseExpr, patternsText]) => {
