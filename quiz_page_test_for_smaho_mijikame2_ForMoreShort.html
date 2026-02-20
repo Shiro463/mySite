@@ -1295,8 +1295,14 @@ function buildSourcesFromGAS(sourceRows) {
 // }
 function buildQuizDataFromSourcesWithResolve(sources, baseId) {
   return sources.flatMap((src) => {
-    // ★ baseText を resolve して展開
-    const resolvedBaseText = resolve(src.baseText);
+
+    // ❌ これを削除
+    // const resolvedBaseText = resolve(src.baseText);
+
+    // ✅ 正解
+    const resolvedBaseText =
+      safeEvaluate(src.baseText, new Set());
+
 
     return src.patterns.map((target) => ({
       id: 0,
