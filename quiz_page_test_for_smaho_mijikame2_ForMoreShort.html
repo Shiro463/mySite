@@ -926,6 +926,17 @@ function safeEvaluate(expr, seen) {
       continue;
     }
 
+    // resolve("key") パターン
+    const resolveRe =
+      /^resolve\(\s*(['"])([A-Za-z0-9_]+)\1\s*\)$/;
+    const mr = part.match(resolveRe);
+    if (mr) {
+      const key = mr[2];
+      out += resolve(key, new Set(seen));
+      continue;
+    }
+
+
     // 未対応
     out += `[未対応:${part}]`;
   }
@@ -1101,11 +1112,11 @@ const quizConfigs = [
     idStart: 80000
   },
   {
-  type: "fourLaw",
-  quizBlockNum: 3,
-  urlDefs: "https://docs.google.com/spreadsheets/d/1n_-2fxlbZBSi4bWtcX6i3vpAQ1JgxTT994Pn7JbX6GU/gviz/tq?tqx=out:json",
-  urlSources: "https://docs.google.com/spreadsheets/d/1xBH0l3LnXfW55ORwBxhx8rxcvaFHc8QHmbs8YhRpouY/gviz/tq?tqx=out:json",
-  idStart: 50001
+    type: "fourLaw",
+    quizBlockNum: 3,
+    urlDefs: "https://docs.google.com/spreadsheets/d/1n_-2fxlbZBSi4bWtcX6i3vpAQ1JgxTT994Pn7JbX6GU/gviz/tq?tqx=out:json",
+    urlSources: "https://docs.google.com/spreadsheets/d/1xBH0l3LnXfW55ORwBxhx8rxcvaFHc8QHmbs8YhRpouY/gviz/tq?tqx=out:json",
+    idStart: 50001
   },
   {
     // 漢字パーツ1
@@ -1246,13 +1257,30 @@ async function initQuizBlock(config) {
 
 // 四法用
 // ========================
-function buildDefsFromGAS(defRows) {
-  const obj = {};
-  defRows.forEach(([key, value]) => {
-    if (!key) return;
-    obj[key] = String(value || "").replace(/\\n/g, "\n");
+// function buildDefsFromGAS(defRows) {
+//   const obj = {};
+//   defRows.forEach(([key, value]) => {
+//     if (!key) return;
+//     obj[key] = String(value || "").replace(/\\n/g, "\n");
+//   });
+//   return obj;
+// }
+function buildSourcesFromGAS(sourceRows) {
+  return sourceRows.map(([label, baseExpr, patternsText]) => {
+
+    const baseText =
+      safeEvaluate(baseExpr, new Set());
+
+    return {
+      label,
+      baseText,
+      patterns: String(patternsText || "")
+        .replace(/\\n/g, "\n")
+        .split("\n")
+        .map(s => s.trim())
+        .filter(Boolean)
+    };
   });
-  return obj;
 }
 function buildSourcesFromGAS(sourceRows) {
   return sourceRows.map(([label, baseText, patternsText]) => ({
