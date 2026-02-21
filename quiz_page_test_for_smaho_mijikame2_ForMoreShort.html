@@ -1170,45 +1170,6 @@ async function fetchQuizData(url) {
 
 
 
-
-
-// async function initQuizBlock({ quizBlockNum, url, idStart, type }) {
-
-//   const GASData = await fetchQuizData(url);
-
-//   let quizData;
-
-//   if (type === "kanjiParts") {
-
-//     // 漢字パーツ用
-//     quizData = createQuizData_kanjiParts(GASData, idStart);
-//     // answer → question 自動生成
-//     quizData.forEach(item => {
-//       item.question = transformAnswerToQuestion(item.answer);
-//     });
-
-//   }else if(type === "fourLaw"){
-
-//     const defRows = await fetchQuizData(urlDefs);
-//     const sourceRows = await fetchQuizData(urlSources);
-//     // ★ グローバル defs を再構築
-//     window.defs = buildDefsFromGAS(defRows);
-//     const sources = buildSourcesFromGAS(sourceRows);
-//     const quizData = buildQuizDataFromSourcesWithResolve(
-//       sources,
-//       idStart
-//     );
-//     return { quizBlockNum, quizData };
-
-//   } else {
-
-//     // 通常問題
-//     quizData = createQuizData(GASData, idStart);
-
-//   }
-
-//   return { quizBlockNum, quizData };
-// }
 async function initQuizBlock(config) {
 
   // 🔥 fourLaw専用処理
@@ -1263,23 +1224,18 @@ async function initQuizBlock(config) {
 // ========================
 // function buildDefsFromGAS(defRows) {
 //   const obj = {};
-//   defRows.forEach(([key, value]) => {
-//     if (!key) return;
-//     obj[key] = String(value || "").replace(/\\n/g, "\n");
-//   });
-//   return obj;
-// }
-// function buildDefsFromGAS(defRows) {
-//   const obj = {};
 
 //   defRows.forEach(row => {
-//     const key  = row[1]; // ★ 2列目がキー
-//     const expr = row[3]; // ★ 4列目が式
+
+//     const key  = row[1];  // ★ 2列目がキー
+//     const expr = row[3];  // ★ 4列目が式
 
 //     if (!key) return;
 
 //     obj[key] = String(expr || "");
 //   });
+//   console.log(defs.toku1j_jitsu1j_i1j_shou1j);
+
 
 //   return obj;
 // }
@@ -1287,92 +1243,35 @@ function buildDefsFromGAS(defRows) {
   const obj = {};
 
   defRows.forEach(row => {
+    if (!row || row.length < 2) return;
 
-    const key  = row[1];  // ★ 2列目がキー
-    const expr = row[3];  // ★ 4列目が式
+    const key  = String(row[0]).trim();  // ★ A列：変数名
+    const expr = String(row[1]).trim();  // ★ B列：本文
 
     if (!key) return;
 
-    obj[key] = String(expr || "");
+    obj[key] = expr;
   });
-  console.log(defs.toku1j_jitsu1j_i1j_shou1j);
-
 
   return obj;
 }
 // function buildDefsFromRows(rows) {
-//   const defsObj = {};
+//   const obj = {};
 
-//   rows.forEach(row => {
-//     const key = row[1];      // 2列目（キー）
-//     const expr = row[3];     // 4列目（式）
+//   rows.forEach((row, index) => {
+//     if (!row || row.length < 2) return;
+
+//     const key = String(row[0]).trim();   // A列（変数名）
+//     const value = String(row[1]).trim(); // B列（本文）
 
 //     if (!key) return;
 
-//     defsObj[key] = String(expr || "");
-//   });
-
-//   return defsObj;
-// }
-// function buildDefsFromRows(rows) {
-//   const obj = {};
-
-//   rows.forEach(row => {
-//     const key = row[0];    // 1列目 = 変数名
-//     const value = row[1];  // 2列目 = 本文
-
-//     if (key) {
-//       obj[key.trim()] = value ?? "";
-//     }
+//     obj[key] = value;
 //   });
 
 //   return obj;
 // }
-function buildDefsFromRows(rows) {
-  const obj = {};
 
-  rows.forEach((row, index) => {
-    if (!row || row.length < 2) return;
-
-    const key = String(row[0]).trim();   // A列（変数名）
-    const value = String(row[1]).trim(); // B列（本文）
-
-    if (!key) return;
-
-    obj[key] = value;
-  });
-
-  return obj;
-}
-
-// function buildSourcesFromGAS(sourceRows) {
-//   return sourceRows.map(([label, baseExpr, patternsText]) => {
-
-//     const baseText =
-//       safeEvaluate(baseExpr, new Set());
-
-//     return {
-//       label,
-//       baseText,
-//       patterns: String(patternsText || "")
-//         .replace(/\\n/g, "\n")
-//         .split("\n")
-//         .map(s => s.trim())
-//         .filter(Boolean)
-//     };
-//   });
-// }
-// // function buildSourcesFromGAS(sourceRows) {
-//   return sourceRows.map(([label, baseText, patternsText]) => ({
-//     label,
-//     baseText: String(baseText || "").replace(/\\n/g, "\n"),
-//     patterns: String(patternsText || "")
-//       .replace(/\\n/g, "\n")
-//       .split("\n")
-//       .map(s => s.trim())
-//       .filter(Boolean)
-//   }));
-// }
 function buildSourcesFromGAS(sourceRows) {
   return sourceRows.map(([label, baseExpr, patternsText]) => ({
     label,
@@ -1415,7 +1314,7 @@ async function initFourLawQuiz(config) {
   const defsRows = await fetchQuizData(config.urlDefs);
 
   // 🔥 ここで呼ぶ
-  window.defs = buildDefsFromRows(defsRows);
+  defs = buildDefsFromRows(defsRows);
 
   // ② sources取得
   const sourceRows = await fetchQuizData(config.urlSources);
