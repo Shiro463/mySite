@@ -1300,19 +1300,33 @@ function buildDefsFromGAS(defRows) {
 
   return obj;
 }
+// function buildDefsFromRows(rows) {
+//   const defsObj = {};
+
+//   rows.forEach(row => {
+//     const key = row[1];      // 2列目（キー）
+//     const expr = row[3];     // 4列目（式）
+
+//     if (!key) return;
+
+//     defsObj[key] = String(expr || "");
+//   });
+
+//   return defsObj;
+// }
 function buildDefsFromRows(rows) {
-  const defsObj = {};
+  const obj = {};
 
   rows.forEach(row => {
-    const key = row[1];      // 2列目（キー）
-    const expr = row[3];     // 4列目（式）
+    const key = row[0];    // 1列目 = 変数名
+    const value = row[1];  // 2列目 = 本文
 
-    if (!key) return;
-
-    defsObj[key] = String(expr || "");
+    if (key) {
+      obj[key.trim()] = value ?? "";
+    }
   });
 
-  return defsObj;
+  return obj;
 }
 // function buildSourcesFromGAS(sourceRows) {
 //   return sourceRows.map(([label, baseExpr, patternsText]) => {
