@@ -1266,17 +1266,34 @@ async function initQuizBlock(config) {
 //   });
 //   return obj;
 // }
+// function buildDefsFromGAS(defRows) {
+//   const obj = {};
+
+//   defRows.forEach(row => {
+//     const key  = row[1]; // ★ 2列目がキー
+//     const expr = row[3]; // ★ 4列目が式
+
+//     if (!key) return;
+
+//     obj[key] = String(expr || "");
+//   });
+
+//   return obj;
+// }
 function buildDefsFromGAS(defRows) {
   const obj = {};
 
   defRows.forEach(row => {
-    const key  = row[1]; // ★ 2列目がキー
-    const expr = row[3]; // ★ 4列目が式
+
+    const key  = row[1];  // ★ 2列目がキー
+    const expr = row[3];  // ★ 4列目が式
 
     if (!key) return;
 
     obj[key] = String(expr || "");
   });
+  console.log(defs.toku1j_jitsu1j_i1j_shou1j);
+
 
   return obj;
 }
@@ -1380,7 +1397,6 @@ async function initFourLawQuiz(config) {
 
   return quizData;
 }
-
 // ========================
 
 
