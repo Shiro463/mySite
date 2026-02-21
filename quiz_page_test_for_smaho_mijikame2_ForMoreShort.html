@@ -1314,20 +1314,37 @@ function buildDefsFromGAS(defRows) {
 
 //   return defsObj;
 // }
+// function buildDefsFromRows(rows) {
+//   const obj = {};
+
+//   rows.forEach(row => {
+//     const key = row[0];    // 1列目 = 変数名
+//     const value = row[1];  // 2列目 = 本文
+
+//     if (key) {
+//       obj[key.trim()] = value ?? "";
+//     }
+//   });
+
+//   return obj;
+// }
 function buildDefsFromRows(rows) {
   const obj = {};
 
-  rows.forEach(row => {
-    const key = row[0];    // 1列目 = 変数名
-    const value = row[1];  // 2列目 = 本文
+  rows.forEach((row, index) => {
+    if (!row || row.length < 2) return;
 
-    if (key) {
-      obj[key.trim()] = value ?? "";
-    }
+    const key = String(row[0]).trim();   // A列（変数名）
+    const value = String(row[1]).trim(); // B列（本文）
+
+    if (!key) return;
+
+    obj[key] = value;
   });
 
   return obj;
 }
+
 // function buildSourcesFromGAS(sourceRows) {
 //   return sourceRows.map(([label, baseExpr, patternsText]) => {
 
