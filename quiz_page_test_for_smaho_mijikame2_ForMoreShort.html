@@ -1217,7 +1217,8 @@ async function initQuizBlock(config) {
     const sourceRows = await fetchQuizData(config.urlSources);
 
     // defs を再構築（resolveはそのまま）
-    defs = buildDefsFromGAS(defRows);
+    window.defs = buildDefsFromGAS(defRows);
+
 
     const sources = buildSourcesFromGAS(sourceRows);
 
@@ -1265,6 +1266,20 @@ async function initQuizBlock(config) {
 //   });
 //   return obj;
 // }
+function buildDefsFromGAS(defRows) {
+  const obj = {};
+
+  defRows.forEach(row => {
+    const key  = row[1]; // ★ 2列目がキー
+    const expr = row[3]; // ★ 4列目が式
+
+    if (!key) return;
+
+    obj[key] = String(expr || "");
+  });
+
+  return obj;
+}
 function buildDefsFromRows(rows) {
   const defsObj = {};
 
@@ -1279,24 +1294,24 @@ function buildDefsFromRows(rows) {
 
   return defsObj;
 }
-function buildSourcesFromGAS(sourceRows) {
-  return sourceRows.map(([label, baseExpr, patternsText]) => {
-
-    const baseText =
-      safeEvaluate(baseExpr, new Set());
-
-    return {
-      label,
-      baseText,
-      patterns: String(patternsText || "")
-        .replace(/\\n/g, "\n")
-        .split("\n")
-        .map(s => s.trim())
-        .filter(Boolean)
-    };
-  });
-}
 // function buildSourcesFromGAS(sourceRows) {
+//   return sourceRows.map(([label, baseExpr, patternsText]) => {
+
+//     const baseText =
+//       safeEvaluate(baseExpr, new Set());
+
+//     return {
+//       label,
+//       baseText,
+//       patterns: String(patternsText || "")
+//         .replace(/\\n/g, "\n")
+//         .split("\n")
+//         .map(s => s.trim())
+//         .filter(Boolean)
+//     };
+//   });
+// }
+// // function buildSourcesFromGAS(sourceRows) {
 //   return sourceRows.map(([label, baseText, patternsText]) => ({
 //     label,
 //     baseText: String(baseText || "").replace(/\\n/g, "\n"),
@@ -1307,6 +1322,17 @@ function buildSourcesFromGAS(sourceRows) {
 //       .filter(Boolean)
 //   }));
 // }
+function buildSourcesFromGAS(sourceRows) {
+  return sourceRows.map(([label, baseExpr, patternsText]) => ({
+    label,
+    baseText: String(baseExpr || ""), // ← 評価しない
+    patterns: String(patternsText || "")
+      .replace(/\\n/g, "\n")
+      .split("\n")
+      .map(s => s.trim())
+      .filter(Boolean)
+  }));
+}
 function buildQuizDataFromSourcesWithResolve(sources, baseId) {
   return sources.flatMap((src) => {
 
@@ -1332,6 +1358,29 @@ function buildQuizDataFromSourcesWithResolve(sources, baseId) {
     id: baseId + idx,
   }));
 }
+async function initFourLawQuiz(config) {
+
+  // ① defs取得
+  const defsRows = await fetchQuizData(config.urlDefs);
+
+  // 🔥 ここで呼ぶ
+  window.defs = buildDefsFromRows(defsRows);
+
+  // ② sources取得
+  const sourceRows = await fetchQuizData(config.urlSources);
+
+  const sources = buildSourcesFromRows(sourceRows);
+
+  // ③ quiz生成
+  const quizData =
+    buildQuizDataFromSourcesWithResolve(
+      sources,
+      config.idStart
+    );
+
+  return quizData;
+}
+
 // ========================
 
 
@@ -1361,7 +1410,7 @@ async function initAllQuizzes() {
 
 
 initAllQuizzes();
-
+console.log(defs)
 
 
 
