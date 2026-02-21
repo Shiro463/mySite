@@ -1219,7 +1219,7 @@ async function initQuizBlock(config) {
     // defs を再構築（resolveはそのまま）
     window.defs = buildDefsFromGAS(defRows);
 
-
+    console.log(defs)
     const sources = buildSourcesFromGAS(sourceRows);
 
     const quizData =
@@ -1410,7 +1410,6 @@ async function initAllQuizzes() {
 
 
 initAllQuizzes();
-console.log(defs)
 
 
 
