@@ -1272,17 +1272,36 @@ function buildDefsFromGAS(defRows) {
 //   return obj;
 // }
 
+// function buildSourcesFromGAS(sourceRows) {
+//   return sourceRows.map(([label, baseExpr, patternsText]) => ({
+//     label,
+//     baseText: String(baseExpr || ""), // ← 評価しない
+//     patterns: String(patternsText || "")
+//       .replace(/\\n/g, "\n")
+//       .split("\n")
+//       .map(s => s.trim())
+//       .filter(Boolean)
+//   }));
+// }
 function buildSourcesFromGAS(sourceRows) {
-  return sourceRows.map(([label, baseExpr, patternsText]) => ({
-    label,
-    baseText: String(baseExpr || ""), // ← 評価しない
-    patterns: String(patternsText || "")
-      .replace(/\\n/g, "\n")
-      .split("\n")
-      .map(s => s.trim())
-      .filter(Boolean)
-  }));
+  return sourceRows.map(row => {
+    const label = row[0];         // A列
+    const key   = row[1];         // B列（使わない）
+    const patternsText = row[2];  // C列
+    const expr  = row[3];         // D列 ← これが重要
+
+    return {
+      label,
+      baseText: String(expr || ""),   // ★ D列を使う
+      patterns: String(patternsText || "")
+        .replace(/\\n/g, "\n")
+        .split("\n")
+        .map(s => s.trim())
+        .filter(Boolean)
+    };
+  });
 }
+
 function buildQuizDataFromSourcesWithResolve(sources, baseId) {
   return sources.flatMap((src) => {
 
