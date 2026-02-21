@@ -861,6 +861,7 @@
 // })();
 
 
+let defs = {};
 
 // 文字列中から start〜end を抜き出す関数（そのまま使う）
 function extractBetweenRegex(text = "", startStr, endStr) {
@@ -1217,7 +1218,9 @@ async function initQuizBlock(config) {
     const sourceRows = await fetchQuizData(config.urlSources);
 
     // defs を再構築（resolveはそのまま）
-    window.defs = buildDefsFromGAS(defRows);
+    // window.defs = buildDefsFromGAS(defRows);
+    defs = buildDefsFromGAS(defRows);
+
 
     console.log(defs)
     const sources = buildSourcesFromGAS(sourceRows);
