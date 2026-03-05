@@ -855,16 +855,23 @@ const quizConfigs = [
     idStart: 140000
   },
   {
-    // 首都
+    // 四字熟語1
     type: "normal",
     quizBlockNum: 6,
+    url: "https://docs.google.com/spreadsheets/d/1AJ-WAqJi4pw1dnXNVFOi8lDXlmeXjkjCKlPWzhDN91Y/gviz/tq?tqx=out:json",
+    idStart: 170000
+  },
+  {
+    // みんはや
+    type: "normal",
+    quizBlockNum: 7,
     url: "https://docs.google.com/spreadsheets/d/1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0/gviz/tq?tqx=out:json",
     idStart: 120000
   },
   {
     // 首都
     type: "normal",
-    quizBlockNum: 7,
+    quizBlockNum: 8,
     url: "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json",
     idStart: 130000
   },
@@ -1057,7 +1064,7 @@ initAllQuizzes();
 
 
 // クイズブロック作成
-const titles = ["イタリア語", "音読み", "熟字・一字訓", "四法", "漢字パーツ1", "漢字パーツ2", "みんはや", "首都" ]; // 任意の科目名リスト// 任意の科目名リスト
+const titles = ["イタリア語", "音読み", "熟字・一字訓", "四法", "漢字パーツ1", "漢字パーツ2", "四字熟語1", "みんはや", "首都" ]; // 任意の科目名リスト// 任意の科目名リスト
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
 const container = document.createElement('div'); // 全体を包む要素（任意）
 
