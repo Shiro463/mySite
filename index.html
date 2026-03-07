@@ -798,13 +798,13 @@ function transformAnswerToQuestion(text) {
 
 
 const quizConfigs = [
-  // {
-  //   // イタリア語
-  //   type: "normal",
-  //   quizBlockNum: 0,
-  //   url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
-  //   idStart: 10000
-  // },
+  {
+    // イタリア語
+    type: "normal",
+    quizBlockNum: 0,
+    url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
+    idStart: 10000
+  },
   // {
   //   // 音読み
   //   type: "normal",
@@ -1058,7 +1058,7 @@ initAllQuizzes();
 
 // クイズブロック作成
 // const titles = ["イタリア語", "音読み", "熟字・一字訓", "四法", "漢字パーツ1", "漢字パーツ2", "四字熟語1", "四字熟語2", "みんはや", "首都" ]; // 任意の科目名リスト// 任意の科目名リスト
-const titles = ["四字熟語2" ]; // 任意の科目名リスト// 任意の科目名リスト
+const titles = ["イタリア語","四字熟語2" ]; // 任意の科目名リスト// 任意の科目名リスト
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
 const container = document.createElement('div'); // 全体を包む要素（任意）
 
