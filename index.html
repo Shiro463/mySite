@@ -850,7 +850,7 @@ const quizConfigs = [
   {
     // 四字熟語2
     type: "normal",
-    quizBlockNum: 7,
+    quizBlockNum: 1,
     url: "https://docs.google.com/spreadsheets/d/1cKS2dnE8BbIdhxbkNbt-WfOzD7O8t2w9LVy3xpUVVjE/gviz/tq?tqx=out:json",
     idStart: 180000
   },
@@ -1119,7 +1119,7 @@ function createQuiz(blockId, data) {
 
     const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
     const savedColorFilter = localStorage.getItem(`colorFilterSelect-${blockId}`) || 'all';
-    // colorFilterSelect.value = savedColorFilter;
+    colorFilterSelect.value = savedColorFilter;
 
 
     let currentId = null;
