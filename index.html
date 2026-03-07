@@ -1465,7 +1465,7 @@ function createQuiz(blockId, data) {
 
         let styledQuestion = colorizeNestedParentheses(item.question)
 
-        if (![6,7].includes(blockId)) {
+        if (blockId !== 6 && blockId !== 7) {
           styledAnswer = styledAnswer.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
             if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
             if (p2 !== undefined) {
@@ -2452,15 +2452,18 @@ let lawIndex = -1;
 function makeStyledHtmlFromRaw(rawText) {
   const colored = colorizeNestedParentheses(rawText);
   const html = colored.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
-    if (p1 !== undefined) {
-      return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
+    
+    if (blockId !== 6 && blockId !== 7) {
+      if (p1 !== undefined) {
+        return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
+      }
+      if (p2 !== undefined) {
+        const inner = p2.replace(/【(.*?)】/g,
+          '<span style="color: red; font-weight: bold;">【$1】</span>');
+        return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
+      }
+      return match;
     }
-    if (p2 !== undefined) {
-      const inner = p2.replace(/【(.*?)】/g,
-        '<span style="color: red; font-weight: bold;">【$1】</span>');
-      return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
-    }
-    return match;
   });
   return html;
 }
