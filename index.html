@@ -1466,7 +1466,7 @@ function createQuiz(blockId, data) {
         let styledQuestion = colorizeNestedParentheses(item.question)
 
         if (blockId !== 6 && blockId !== 7) {
-          styledAnswer = styledAnswer.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
+          styledQuestion = styledQuestion.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
             if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
             if (p2 !== undefined) {
               let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
