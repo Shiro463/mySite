@@ -1472,6 +1472,7 @@ function createQuiz(blockId, data) {
               let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
               return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
             }
+            console.log(styledAnswer)
             return match;
           });
         }
