@@ -678,7 +678,7 @@ function resolve(key, seen = new Set()) {
 
 // id自動割当
 function createQuizData(rawData, startId = 1) {
-  console.log(rawData)
+  // console.log(rawData)
   return rawData.map(([label, question, answer], index) => ({
 
     id: startId + index,
@@ -904,7 +904,7 @@ async function initQuizBlock(config) {
     defs = buildDefsFromGAS(defRows);
 
 
-    console.log(defs)
+    // console.log(defs)
     const sources = buildSourcesFromGAS(sourceRows);
 
     const quizData =
