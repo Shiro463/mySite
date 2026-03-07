@@ -37,6 +37,7 @@
     font-size: 22px;
   }
 
+
   /* ---------------- 問題・答えエリア ---------------- */
   .question-area, .answer-area {
       border: 1px solid #ccc;
@@ -50,13 +51,9 @@
       white-space: pre-wrap;
       margin: 2px
   }
-  #questionArea-3{
+  #questionArea-1{
       height: 400px;       /* 固定高さを指定 */
   }
-  #questionArea-4{
-      height: 300px;       /* 固定高さを指定 */
-  }
-
   select {
     font-size: 16px;
     padding: 5px 6px;
@@ -805,69 +802,27 @@ const quizConfigs = [
     url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
     idStart: 10000
   },
-  // {
-  //   // 音読み
-  //   type: "normal",
-  //   quizBlockNum: 1,
-  //   url: "https://docs.google.com/spreadsheets/d/1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M/gviz/tq?tqx=out:json",
-  //   idStart: 20000
-  // },
-  // {
-  //   // 熟字、一字訓
-  //   type: "normal",
-  //   quizBlockNum: 2,
-  //   url: "https://docs.google.com/spreadsheets/d/1TMmiQ2GNG1gBTYttZvfCt3bSH10gcv3aivElEdvCJiY/gviz/tq?tqx=out:json",
-  //   idStart: 80000
-  // },
-  // {
-  //   type: "fourLaw",
-  //   quizBlockNum: 3,
-  //   urlDefs: "https://docs.google.com/spreadsheets/d/1n_-2fxlbZBSi4bWtcX6i3vpAQ1JgxTT994Pn7JbX6GU/gviz/tq?tqx=out:json",
-  //   urlSources: "https://docs.google.com/spreadsheets/d/1xBH0l3LnXfW55ORwBxhx8rxcvaFHc8QHmbs8YhRpouY/gviz/tq?tqx=out:json",
-  //   idStart: 50001
-  // },
-  // {
-  //   // 漢字パーツ1
-  //   type: "kanjiParts",
-  //   quizBlockNum: 4,
-  //   url: "https://docs.google.com/spreadsheets/d/1IKzCk457_iKDtTI9A9KH5BhhP5oitlDugwKUvTOonC8/gviz/tq?tqx=out:json",
-  //   idStart: 110000
-  // },
-  // {
-  //   // 漢字パーツ2
-  //   type: "kanjiParts",
-  //   quizBlockNum: 5,
-  //   url: "https://docs.google.com/spreadsheets/d/1QqiVcQ01_9RP7RvAPMrRltv1H29iHvODgm-uC8gIUYQ/gviz/tq?tqx=out:json",
-  //   idStart: 140000
-  // },
-  // {
-  //   // 四字熟語1
-  //   type: "normal",
-  //   quizBlockNum: 6,
-  //   url: "https://docs.google.com/spreadsheets/d/1AJ-WAqJi4pw1dnXNVFOi8lDXlmeXjkjCKlPWzhDN91Y/gviz/tq?tqx=out:json",
-  //   idStart: 170000
-  // },
   {
-    // 四字熟語2
-    type: "normal",
+    type: "fourLaw",
     quizBlockNum: 1,
-    url: "https://docs.google.com/spreadsheets/d/1cKS2dnE8BbIdhxbkNbt-WfOzD7O8t2w9LVy3xpUVVjE/gviz/tq?tqx=out:json",
-    idStart: 180000
+    urlDefs: "https://docs.google.com/spreadsheets/d/1n_-2fxlbZBSi4bWtcX6i3vpAQ1JgxTT994Pn7JbX6GU/gviz/tq?tqx=out:json",
+    urlSources: "https://docs.google.com/spreadsheets/d/1xBH0l3LnXfW55ORwBxhx8rxcvaFHc8QHmbs8YhRpouY/gviz/tq?tqx=out:json",
+    idStart: 50001
   },
-  // {
-  //   // みんはや
-  //   type: "normal",
-  //   quizBlockNum: 8,
-  //   url: "https://docs.google.com/spreadsheets/d/1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0/gviz/tq?tqx=out:json",
-  //   idStart: 120000
-  // },
-  // {
-  //   // 首都
-  //   type: "normal",
-  //   quizBlockNum: 9,
-  //   url: "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json",
-  //   idStart: 130000
-  // },
+  {
+    // みんはや
+    type: "normal",
+    quizBlockNum: 2,
+    url: "https://docs.google.com/spreadsheets/d/1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0/gviz/tq?tqx=out:json",
+    idStart: 120000
+  },
+  {
+    // 首都
+    type: "normal",
+    quizBlockNum: 3,
+    url: "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json",
+    idStart: 130000
+  },
 
 ];
 
@@ -1057,8 +1012,7 @@ initAllQuizzes();
 
 
 // クイズブロック作成
-// const titles = ["イタリア語", "音読み", "熟字・一字訓", "四法", "漢字パーツ1", "漢字パーツ2", "四字熟語1", "四字熟語2", "みんはや", "首都" ]; // 任意の科目名リスト// 任意の科目名リスト
-const titles = ["イタリア語","四字熟語2" ]; // 任意の科目名リスト// 任意の科目名リスト
+const titles = ["イタリア語", "四法", "みんはや", "首都" ]; // 任意の科目名リスト// 任意の科目名リスト
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
 const container = document.createElement('div'); // 全体を包む要素（任意）
 
