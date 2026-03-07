@@ -1464,27 +1464,17 @@ function createQuiz(blockId, data) {
         item.lastReview = now; // 出題時に更新
 
         let styledQuestion = colorizeNestedParentheses(item.question)
-          // .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
-          //   if (p1 !== undefined) {
-          //     return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
-          //   }
-          //   if (p2 !== undefined) {
-          //     let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
-          //     return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
-          //   }
-          //   return match;
-          // });
-        .replace(/【([^】]*)】|{([^}]*)}/g, (match, p1, p2) => {
-            if (p1 !== undefined) {
-              return `<span style="color:red;font-weight:bold;">【${p1}】</span>`;
-            }
+
+        if (![6,7].includes(blockId)) {
+          styledAnswer = styledAnswer.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
+            if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
             if (p2 !== undefined) {
-              let inner = p2.replace(/【([^】]*)】/g,
-                '<span style="color:red;font-weight:bold;">【$1】</span>');
-              return `<span style="color:blue;font-weight:bold;text-decoration:underline;">{${inner}}</span>`;
+              let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
+              return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
             }
             return match;
-        });
+          });
+        }
 
 
 
@@ -1785,26 +1775,18 @@ function createQuiz(blockId, data) {
             const item = data.find(d => d.id === currentId);
             // answerArea.innerHTML = `<span style="color: black;">${item.answer}</span>`;
 
-          let styledAnswer = colorizeNestedParentheses(item.answer)
-            // .replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
-            //   if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
-            //   if (p2 !== undefined) {
-            //     let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
-            //     return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
-            //   }
-            //   return match;
-            // });
-              .replace(/【([^】]*)】|{([^}]*)}/g, (match, p1, p2) => {
-                if (p1 !== undefined) {
-                  return `<span style="color:red;font-weight:bold;">【${p1}】</span>`;
-                }
+            let styledAnswer = colorizeNestedParentheses(item.answer);
+
+            if (![6,7].includes(blockId)) {
+              styledAnswer = styledAnswer.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
+                if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
                 if (p2 !== undefined) {
-                  let inner = p2.replace(/【([^】]*)】/g,
-                    '<span style="color:red;font-weight:bold;">【$1】</span>');
-                  return `<span style="color:blue;font-weight:bold;text-decoration:underline;">{${inner}}</span>`;
+                  let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
+                  return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
                 }
                 return match;
-            });
+              });
+            }
 
           // 全体黒で囲む
           answerArea.innerHTML = `<span style="color: black;">${styledAnswer}</span>`;
