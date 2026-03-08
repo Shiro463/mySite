@@ -1215,12 +1215,9 @@ function createQuiz(blockId, data) {
           reviewSpan.textContent = date.toLocaleDateString("ja-JP"); 
           cell.appendChild(reviewSpan); 
         } 
-        if (reviewSpan === undefined) {
-          console.log(weightSpan, wrongSpan, correctSpan);
-        } else {
-          console.log(weightSpan, wrongSpan, correctSpan, reviewSpan);
-        }
-        
+
+        console.log(weightSpan, wrongSpan, correctSpan);
+ 
         statusMap.set(d.id, { cell, wrongSpan, correctSpan, weightSpan }); 
         
         if (lastBlueId !== null && lastBlueId === d.id) { 
