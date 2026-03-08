@@ -1215,6 +1215,7 @@ function createQuiz(blockId, data) {
           reviewSpan.textContent = date.toLocaleDateString("ja-JP"); 
           cell.appendChild(reviewSpan); 
         } 
+        console.log(weightSpan, wrongSpan, correctSpan, reviewSpan)
         
         statusMap.set(d.id, { cell, wrongSpan, correctSpan, weightSpan }); 
         
