@@ -803,6 +803,7 @@ function transformAnswerToQuestion(text) {
 const quizConfigs = [
   {
     // 音読み
+    title: "音読み",
     type: "normal",
     quizBlockNum: 100,
     url: "https://docs.google.com/spreadsheets/d/1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M/gviz/tq?tqx=out:json",
@@ -810,6 +811,7 @@ const quizConfigs = [
   },
   {
     // 熟字、一字訓
+    title: "熟字、一字訓",
     type: "normal",
     quizBlockNum: 101,
     url: "https://docs.google.com/spreadsheets/d/1TMmiQ2GNG1gBTYttZvfCt3bSH10gcv3aivElEdvCJiY/gviz/tq?tqx=out:json",
@@ -817,6 +819,7 @@ const quizConfigs = [
   },
   {
     // 漢字パーツ1
+    title: "漢字パーツ1",
     type: "kanjiParts",
     quizBlockNum: 102,
     url: "https://docs.google.com/spreadsheets/d/1IKzCk457_iKDtTI9A9KH5BhhP5oitlDugwKUvTOonC8/gviz/tq?tqx=out:json",
@@ -824,6 +827,7 @@ const quizConfigs = [
   },
   {
     // 漢字パーツ2
+    title: "漢字パーツ2",
     type: "normal",
     quizBlockNum: 103,
     url: "https://docs.google.com/spreadsheets/d/1QqiVcQ01_9RP7RvAPMrRltv1H29iHvODgm-uC8gIUYQ/gviz/tq?tqx=out:json",
@@ -831,6 +835,7 @@ const quizConfigs = [
   },
   {
     // 四字熟語1
+    title: "四字熟語1",
     type: "normal",
     quizBlockNum: 104,
     url: "https://docs.google.com/spreadsheets/d/1AJ-WAqJi4pw1dnXNVFOi8lDXlmeXjkjCKlPWzhDN91Y/gviz/tq?tqx=out:json",
@@ -838,6 +843,7 @@ const quizConfigs = [
   },
   {
     // 四字熟語2
+    title: "四字熟語2",
     type: "normal",
     quizBlockNum: 105,
     url: "https://docs.google.com/spreadsheets/d/1cKS2dnE8BbIdhxbkNbt-WfOzD7O8t2w9LVy3xpUVVjE/gviz/tq?tqx=out:json",
@@ -1036,23 +1042,55 @@ const titles = ["音読み", "熟字・一字訓", "漢字パーツ1", "漢字�
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
 const container = document.createElement('div'); // 全体を包む要素（任意）
 
-titles.forEach((title, index) => {
+// titles.forEach((title, index) => {
+//   const newBlock = template.cloneNode(true);
+//   newBlock.id = `quizBlock-${index}`;
+
+//   // タイトル書き換え
+//   newBlock.querySelector('p.title').textContent = title;
+
+//   // ID付き要素のIDをすべて更新
+//   const elementsWithId = newBlock.querySelectorAll('[id]');
+//   elementsWithId.forEach(el => {
+//     const oldId = el.id;
+//     const newId = oldId.replace(/-\d+$/, `-${index}`);
+//     el.id = newId;
+//   });
+
+//   container.appendChild(newBlock);
+// });
+
+
+quizConfigs.forEach((config, index) => {
+
+  const blockNum = config.quizBlockNum;
+
+  // テンプレート複製
   const newBlock = template.cloneNode(true);
-  newBlock.id = `quizBlock-${index}`;
 
-  // タイトル書き換え
-  newBlock.querySelector('p.title').textContent = title;
+  // ブロックID
+  newBlock.id = `quizBlock-${blockNum}`;
 
-  // ID付き要素のIDをすべて更新
+  // タイトル
+  // newBlock.querySelector('p.title').textContent = titles[index];
+  newBlock.querySelector('p.title').textContent = config.title;
+
+  // ID付き要素更新
   const elementsWithId = newBlock.querySelectorAll('[id]');
   elementsWithId.forEach(el => {
+
     const oldId = el.id;
-    const newId = oldId.replace(/-\d+$/, `-${index}`);
+
+    const newId = oldId.replace(/-\d+$/, `-${blockNum}`);
+
     el.id = newId;
+
   });
 
   container.appendChild(newBlock);
+
 });
+
 
 // 元のテンプレートは削除しておく（重複を防ぐ）
 template.remove();
@@ -1445,17 +1483,17 @@ function createQuiz(blockId, data) {
 
         let styledQuestion = colorizeNestedParentheses(item.question)
 
-        if (blockId !== 6 && blockId !== 7) {
-          styledQuestion = styledQuestion.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
-            if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
-            if (p2 !== undefined) {
-              let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
-              return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
-            }
-            console.log(styledQuestion)
-            return match;
-          });
-        }
+
+        styledQuestion = styledQuestion.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
+          if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
+          if (p2 !== undefined) {
+            let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
+            return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
+          }
+          console.log(styledQuestion)
+          return match;
+        });
+
 
 
 
@@ -1758,17 +1796,16 @@ function createQuiz(blockId, data) {
 
             let styledAnswer = colorizeNestedParentheses(item.answer);
 
-            if (![6,7].includes(blockId)) {
-              styledAnswer = styledAnswer.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
-                if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
-                if (p2 !== undefined) {
-                  let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
-                  return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
-                }
-                return match;
-              });
-              console.log(styledAnswer)
-            }
+
+            styledAnswer = styledAnswer.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
+              if (p1 !== undefined) return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
+              if (p2 !== undefined) {
+                let inner = p2.replace(/【(.*?)】/g, '<span style="color: red; font-weight: bold;">【$1】</span>');
+                return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
+              }
+              return match;
+            });
+
             
 
           // 全体黒で囲む
@@ -2435,18 +2472,18 @@ function makeStyledHtmlFromRaw(rawText) {
   const colored = colorizeNestedParentheses(rawText);
   const html = colored.replace(/【(.*?)】|{(.*?)}/g, (match, p1, p2) => {
     
-    if (blockId !== 6 && blockId !== 7) {
-      if (p1 !== undefined) {
-        return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
-      }
-      if (p2 !== undefined) {
-        const inner = p2.replace(/【(.*?)】/g,
-          '<span style="color: red; font-weight: bold;">【$1】</span>');
-        return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
-      }
-      return match;
-      console.log(html)
+
+    if (p1 !== undefined) {
+      return `<span style="color: red; font-weight: bold;">【${p1}】</span>`;
     }
+    if (p2 !== undefined) {
+      const inner = p2.replace(/【(.*?)】/g,
+        '<span style="color: red; font-weight: bold;">【$1】</span>');
+      return `<span style="color: blue; font-weight: bold; text-decoration: underline;">{${inner}}</span>`;
+    }
+    return match;
+    console.log(html)
+
   });
   return html;
 }
