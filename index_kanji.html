@@ -539,7 +539,7 @@
     <table class="status-table" id="statusTable-0"></table>
   </div>
   <div>
-      <button id="toggle-chart-0">グラフ表示/非表示</button>
+      <!-- <button id="toggle-chart-0">グラフ表示/非表示</button> -->
       <button id="save-button-0">データ保存</button>
       <div class="chart-container" id="chartContainer-0" style="display:none;"></div>
   </div>
@@ -2302,17 +2302,17 @@ function createQuiz(blockId, data) {
         }
     }
 
-    /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
-    document.querySelectorAll('.quiz-block').forEach((block, index) => {
-        // try {
-        //     saveDailyColorCounts(index);
-        // } catch (e) {
-        //     // 保険: テーブルが未生成等で失敗する可能性があるので無視
-        //     console.warn('saveDailyColorCounts failed for', index, e);
-        // }
-        // ボタンとコンテナを作っておく（描画は未実行）
-        ensureChartUIForBlock(block, index);
-    });
+    // /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
+    // document.querySelectorAll('.quiz-block').forEach((block, index) => {
+    //     // try {
+    //     //     saveDailyColorCounts(index);
+    //     // } catch (e) {
+    //     //     // 保険: テーブルが未生成等で失敗する可能性があるので無視
+    //     //     console.warn('saveDailyColorCounts failed for', index, e);
+    //     // }
+    //     // ボタンとコンテナを作っておく（描画は未実行）
+    //     ensureChartUIForBlock(block, index);
+    // });
 
     function setSaveButtonListener(blockId) {
         const saveBtn = document.getElementById(`save-button-${blockId}`);
@@ -2406,7 +2406,12 @@ function createQuiz(blockId, data) {
     init();
 
 
+    ensureChartUIForBlock(
+      document.getElementById(`quizBlock-${blockId}`),
+      blockId
+    );
 
+    setSaveButtonListener(blockId);
 
 
 
