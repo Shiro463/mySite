@@ -1234,6 +1234,14 @@ function createQuiz(blockId, data) {
         endSelect.value = localStorage.getItem(`endSelect-${blockId}`) ?? data[data.length - 1].id;
         // excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 100;
 
+        // チェック状態復元
+        const saved = JSON.parse(localStorage.getItem(`colorFilterCheckbox-${blockId}`) || "[]");
+
+        document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`)
+          .forEach(cb => {
+            cb.checked = saved.includes(cb.value);
+          });
+
 
 
         loadWrongCounts();
@@ -1438,16 +1446,7 @@ function createQuiz(blockId, data) {
       //   // "all" の場合はフィルタしない
       // }
 
-      function getCheckedColors(blockId) {
-        const checkboxes = document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`);
-        const selected = [];
 
-        checkboxes.forEach(cb => {
-          if (cb.checked) selected.push(cb.value);
-        });
-
-        return selected; // 例: ["red", "green"]
-      }
 
       return rangeData;
     }
@@ -1761,14 +1760,20 @@ function createQuiz(blockId, data) {
     excludeCorrectSelect.addEventListener('change', () => {
         localStorage.setItem(`excludeCorrectSelect-${blockId}`, excludeCorrectSelect.value);
     });
+    // チェック変更時に保存
     document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`)
-    .forEach(cb => {
-      cb.addEventListener('change', () => {
-        const selected = getCheckedColors(blockId);
-        localStorage.setItem(`colorFilterCheckbox-${blockId}`, JSON.stringify(selected));
-      });
-    });
+      .forEach(cb => {
+        cb.addEventListener('change', () => {
+          const selected = getCheckedColors(blockId);
+          localStorage.setItem(`colorFilterCheckbox-${blockId}`, JSON.stringify(selected));
 
+          // ついでに残り数更新
+          const rangeData = getRangeData();
+          remaining = rangeData.slice();
+          updateRemainingCount();
+          updateColorCount();
+        });
+      });
 
 
     // 出題ボタンを押したとき
@@ -1931,30 +1936,30 @@ function createQuiz(blockId, data) {
         }
     });
 
-    function updateColorFilterBackground() {
-      // まず既存クラスを全削除
-      colorFilterSelect.classList.remove(
-        'color-filter-red',
-        'color-filter-green',
-        'color-filter-white',
-        'color-filter-all'
-      );
+    // function updateColorFilterBackground() {
+    //   // まず既存クラスを全削除
+    //   colorFilterSelect.classList.remove(
+    //     'color-filter-red',
+    //     'color-filter-green',
+    //     'color-filter-white',
+    //     'color-filter-all'
+    //   );
 
-      // 現在の値に応じてクラスを追加
-      const value = colorFilterSelect.value;
-      if (value === 'red') {
-        colorFilterSelect.classList.add('color-filter-red');
-      } else if (value === 'green') {
-        colorFilterSelect.classList.add('color-filter-green');
-      } else if (value === 'white') {
-        colorFilterSelect.classList.add('color-filter-white');
-      } else {
-        colorFilterSelect.classList.add('color-filter-all');
-      }
-    }
+    //   // 現在の値に応じてクラスを追加
+    //   const value = colorFilterSelect.value;
+    //   if (value === 'red') {
+    //     colorFilterSelect.classList.add('color-filter-red');
+    //   } else if (value === 'green') {
+    //     colorFilterSelect.classList.add('color-filter-green');
+    //   } else if (value === 'white') {
+    //     colorFilterSelect.classList.add('color-filter-white');
+    //   } else {
+    //     colorFilterSelect.classList.add('color-filter-all');
+    //   }
+    // }
 
     // 初期状態の反映
-    updateColorFilterBackground();
+    // updateColorFilterBackground();
 
     // 変更イベント時に反映
     // colorFilterSelect.addEventListener('change', updateColorFilterBackground);
@@ -2431,6 +2436,19 @@ function createQuiz(blockId, data) {
 
         // updateDeleteOptions(blockId);
     }
+
+    function getCheckedColors(blockId) {
+      const checkboxes = document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`);
+      const selected = [];
+
+      checkboxes.forEach(cb => {
+        if (cb.checked) selected.push(cb.value);
+      });
+
+      return selected;
+    }
+
+
 
 
 
