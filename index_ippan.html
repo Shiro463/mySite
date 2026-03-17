@@ -455,14 +455,19 @@
         <select id="endSelect-0"></select>
       </label>
 
-      <label class="myLabel">出題色フィルタ:
+      <!-- <label class="myLabel">出題色フィルタ:
         <select id="colorFilterSelect-0">
           <option value="all">問わない</option>
           <option value="green">緑だけ</option>
           <option value="red">赤だけ</option>
           <option value="white">白だけ</option>
         </select>
-      </label>
+      </label> -->
+      <label class="myLabel">出題色フィルタ:</label>
+      <label><input type="checkbox" class="colorFilter" value="red"> 赤</label>
+      <label><input type="checkbox" class="colorFilter" value="green"> 緑</label>
+      <label><input type="checkbox" class="colorFilter" value="white"> 白</label>
+      <!-- 青は常に出題するのでチェック不要 -->
 
       <label class="myLabel">除外する正解数:
         <select id="excludeCorrectSelect-0"></select>
@@ -1117,9 +1122,30 @@ function createQuiz(blockId, data) {
     const blueCountEl  = document.getElementById(`blueCount-${blockId}`);
     const whiteCountEl = document.getElementById(`whiteCount-${blockId}`);
 
-    const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
-    const savedColorFilter = localStorage.getItem(`colorFilterSelect-${blockId}`) || 'all';
-    colorFilterSelect.value = savedColorFilter;
+    // const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+    // const savedColorFilter = localStorage.getItem(`colorFilterSelect-${blockId}`) || 'all';
+    // colorFilterSelect.value = savedColorFilter;
+
+    const selectedColors = getCheckedColors(blockId);
+    const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
+
+    rangeData = rangeData.filter(item => {
+
+      const color = savedColors[item.id] || "white"; // 未設定＝白
+
+      // 青は常に出題（＝フィルタ無視）
+      if (color === "blue") return true;
+
+      // チェックなし → 全てOK
+      if (selectedColors.length === 0) return true;
+
+      // チェックされた色のみ通す
+      return selectedColors.includes(color);
+    });
+
+
+
+
 
 
     let currentId = null;
@@ -1399,17 +1425,28 @@ function createQuiz(blockId, data) {
       });
 
       // ✅ ここからセル色フィルタを追加
-      const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
-      if (colorFilterSelect) {
-        const colorChoice = colorFilterSelect.value; // "all", "green", "red", "white"
-        const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
+      // const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+      // if (colorFilterSelect) {
+      //   const colorChoice = colorFilterSelect.value; // "all", "green", "red", "white"
+      //   const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
 
-        if (colorChoice === "green" || colorChoice === "red") {
-          rangeData = rangeData.filter(item => savedColors[item.id] === colorChoice);
-        } else if (colorChoice === "white") {
-          rangeData = rangeData.filter(item => !savedColors[item.id]);
-        }
-        // "all" の場合はフィルタしない
+      //   if (colorChoice === "green" || colorChoice === "red") {
+      //     rangeData = rangeData.filter(item => savedColors[item.id] === colorChoice);
+      //   } else if (colorChoice === "white") {
+      //     rangeData = rangeData.filter(item => !savedColors[item.id]);
+      //   }
+      //   // "all" の場合はフィルタしない
+      // }
+
+      function getCheckedColors(blockId) {
+        const checkboxes = document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`);
+        const selected = [];
+
+        checkboxes.forEach(cb => {
+          if (cb.checked) selected.push(cb.value);
+        });
+
+        return selected; // 例: ["red", "green"]
       }
 
       return rangeData;
@@ -1724,6 +1761,13 @@ function createQuiz(blockId, data) {
     excludeCorrectSelect.addEventListener('change', () => {
         localStorage.setItem(`excludeCorrectSelect-${blockId}`, excludeCorrectSelect.value);
     });
+    document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`)
+    .forEach(cb => {
+      cb.addEventListener('change', () => {
+        const selected = getCheckedColors(blockId);
+        localStorage.setItem(`colorFilterCheckbox-${blockId}`, JSON.stringify(selected));
+      });
+    });
 
 
 
@@ -1917,17 +1961,23 @@ function createQuiz(blockId, data) {
 
     // 3) 選択が変わったら localStorage に保存して自動適用（apply 不要）
     //    さらに、現在のフィルタで残り件数を更新しておく
-    colorFilterSelect.addEventListener('change', (e) => {
-      const v = e.target.value;
-      localStorage.setItem(`colorFilterSelect-${blockId}`, v);
-      updateColorFilterBackground();
+    // colorFilterSelect.addEventListener('change', (e) => {
+    //   const v = e.target.value;
+    //   localStorage.setItem(`colorFilterSelect-${blockId}`, v);
+    //   updateColorFilterBackground();
 
-      // 再取得して残り件数を更新（ユーザがすぐ「出題」を押さなくても見た目上の残りを反映）
-      const rangeData = getRangeData();
-      remaining = rangeData.slice();
-      updateRemainingCount();
-      updateColorCount();
-    });
+    //   // 再取得して残り件数を更新（ユーザがすぐ「出題」を押さなくても見た目上の残りを反映）
+    //   const rangeData = getRangeData();
+    //   remaining = rangeData.slice();
+    //   updateRemainingCount();
+    //   updateColorCount();
+    // });
+
+    const saved = JSON.parse(localStorage.getItem(`colorFilterCheckbox-${blockId}`) || "[]");
+    document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`)
+      .forEach(cb => {
+        cb.checked = saved.includes(cb.value);
+      });
 
     
     // ---------------- ステータステーブル表示/非表示 ----------------
