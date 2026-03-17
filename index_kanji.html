@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>クイズアプリ_漢字（スマホ最適化版）</title>
+<title>クイズアプリ（スマホ最適化版）</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -37,6 +37,7 @@
     font-size: 22px;
   }
 
+
   /* ---------------- 問題・答えエリア ---------------- */
   .question-area, .answer-area {
       border: 1px solid #ccc;
@@ -50,10 +51,9 @@
       white-space: pre-wrap;
       margin: 2px
   }
-  #questionArea-2{
-      height: 200px;       /* 固定高さを指定 */
+  #questionArea-1{
+      height: 400px;       /* 固定高さを指定 */
   }
-
   select {
     font-size: 16px;
     padding: 5px 6px;
@@ -108,6 +108,60 @@
     margin-bottom: 5px;
   }
 
+
+
+  /* 全体 */
+  .color-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 80px;
+  }
+  /* ラベル */
+  .color-filter-group .myLabel {
+    font-size: 14px;
+    margin-right: 4px;
+  }
+  /* チェックボックスラベル */
+  .color-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 14px;
+    user-select: none;
+    transition: 0.2s;
+  }
+  /* チェックボックスを少し大きく */
+  .color-checkbox input {
+    transform: scale(1.2);
+  }
+
+  /* 色ごとの背景 */
+  .color-checkbox.red {
+    background-color: #f08080;
+  }
+  .color-checkbox.green {
+    background-color: #90ee90;
+  }
+  .color-checkbox.white {
+    background-color: #ffffff;
+  }
+
+  /* ホバー */
+  .color-checkbox:hover {
+    opacity: 0.8;
+  }
+
+  /* チェック時に強調 */
+  .color-checkbox input:checked + span,
+  .color-checkbox input:checked {
+    outline: 2px solid #333;
+  }
   /* 各labelをブロック化して均等に伸ばす */
   .filter-grid label {
     display: flex;
@@ -118,7 +172,7 @@
     flex-wrap: wrap;
     width: 100%;
     background: #f9f9f9;
-    padding: 6px 8px;
+    padding: 6px 0px 6px 0px;
     border-radius: 6px;
     border: 1px solid #ddd;
   }
@@ -455,13 +509,29 @@
         <select id="endSelect-0"></select>
       </label>
 
-      <label class="myLabel">出題色フィルタ:
+      <!-- <label class="myLabel">出題色フィルタ:
         <select id="colorFilterSelect-0">
           <option value="all">問わない</option>
           <option value="green">緑だけ</option>
           <option value="red">赤だけ</option>
           <option value="white">白だけ</option>
         </select>
+      </label> -->
+      <label class="myLabel">出題色フィルタ:
+        <div class="color-filter-group">
+            <label class="color-checkbox red">
+              <input type="checkbox" class="colorFilter" value="red">
+              赤
+            </label>
+            <label class="color-checkbox green">
+              <input type="checkbox" class="colorFilter" value="green">
+              緑
+            </label>
+            <label class="color-checkbox white">
+              <input type="checkbox" class="colorFilter" value="white">
+              白
+            </label>
+        </div>
       </label>
 
       <label class="myLabel">除外する正解数:
@@ -539,7 +609,7 @@
     <table class="status-table" id="statusTable-0"></table>
   </div>
   <div>
-      <!-- <button id="toggle-chart-0">グラフ表示/非表示</button> -->
+      <button id="toggle-chart-0">グラフ表示/非表示</button>
       <button id="save-button-0">データ保存</button>
       <div class="chart-container" id="chartContainer-0" style="display:none;"></div>
   </div>
@@ -1038,7 +1108,7 @@ initAllQuizzes();
 
 
 // クイズブロック作成
-// const titles = ["音読み", "熟字・一字訓", "漢字パーツ1", "漢字パーツ2", "四字熟語1", "四字熟語2" ]; // 任意の科目名リスト// 任意の科目名リスト
+// const titles = ["イタリア語", "四法", "みんはや", "首都" ]; // 任意の科目名リスト// 任意の科目名リスト
 const template = document.querySelector('.quiz-block'); // 最初のブロックをテンプレートに
 const container = document.createElement('div'); // 全体を包む要素（任意）
 
@@ -1132,9 +1202,16 @@ function createQuiz(blockId, data) {
     const blueCountEl  = document.getElementById(`blueCount-${blockId}`);
     const whiteCountEl = document.getElementById(`whiteCount-${blockId}`);
 
-    const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
-    const savedColorFilter = localStorage.getItem(`colorFilterSelect-${blockId}`) || 'all';
-    colorFilterSelect.value = savedColorFilter;
+    // const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+    // const savedColorFilter = localStorage.getItem(`colorFilterSelect-${blockId}`) || 'all';
+    // colorFilterSelect.value = savedColorFilter;
+
+
+
+
+
+
+
 
 
     let currentId = null;
@@ -1222,6 +1299,14 @@ function createQuiz(blockId, data) {
         startSelect.value = localStorage.getItem(`startSelect-${blockId}`) ?? data[0].id;
         endSelect.value = localStorage.getItem(`endSelect-${blockId}`) ?? data[data.length - 1].id;
         // excludeCorrectSelect.value = localStorage.getItem(`excludeCorrectSelect-${blockId}`) ?? 100;
+
+        // チェック状態復元
+        const saved = JSON.parse(localStorage.getItem(`colorFilterCheckbox-${blockId}`) || "[]");
+
+        document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`)
+          .forEach(cb => {
+            cb.checked = saved.includes(cb.value);
+          });
 
 
 
@@ -1414,18 +1499,34 @@ function createQuiz(blockId, data) {
       });
 
       // ✅ ここからセル色フィルタを追加
-      const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
-      if (colorFilterSelect) {
-        const colorChoice = colorFilterSelect.value; // "all", "green", "red", "white"
-        const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
+      // const colorFilterSelect = document.getElementById(`colorFilterSelect-${blockId}`);
+      // if (colorFilterSelect) {
+      //   const colorChoice = colorFilterSelect.value; // "all", "green", "red", "white"
+      //   const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
 
-        if (colorChoice === "green" || colorChoice === "red") {
-          rangeData = rangeData.filter(item => savedColors[item.id] === colorChoice);
-        } else if (colorChoice === "white") {
-          rangeData = rangeData.filter(item => !savedColors[item.id]);
-        }
-        // "all" の場合はフィルタしない
-      }
+      //   if (colorChoice === "green" || colorChoice === "red") {
+      //     rangeData = rangeData.filter(item => savedColors[item.id] === colorChoice);
+      //   } else if (colorChoice === "white") {
+      //     rangeData = rangeData.filter(item => !savedColors[item.id]);
+      //   }
+      //   // "all" の場合はフィルタしない
+      // }
+      const selectedColors = getCheckedColors(blockId);
+      const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
+
+      rangeData = rangeData.filter(item => {
+
+        const color = savedColors[item.id] || "white";
+
+        // 青は常に出題
+        if (color === "blue") return true;
+
+        // チェックなし → 全部
+        if (selectedColors.length === 0) return true;
+
+        return selectedColors.includes(color);
+      });
+
 
       return rangeData;
     }
@@ -1739,7 +1840,20 @@ function createQuiz(blockId, data) {
     excludeCorrectSelect.addEventListener('change', () => {
         localStorage.setItem(`excludeCorrectSelect-${blockId}`, excludeCorrectSelect.value);
     });
+    // チェック変更時に保存
+    document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`)
+      .forEach(cb => {
+        cb.addEventListener('change', () => {
+          const selected = getCheckedColors(blockId);
+          localStorage.setItem(`colorFilterCheckbox-${blockId}`, JSON.stringify(selected));
 
+          // ついでに残り数更新
+          const rangeData = getRangeData();
+          remaining = rangeData.slice();
+          updateRemainingCount();
+          updateColorCount();
+        });
+      });
 
 
     // 出題ボタンを押したとき
@@ -1902,47 +2016,53 @@ function createQuiz(blockId, data) {
         }
     });
 
-    function updateColorFilterBackground() {
-      // まず既存クラスを全削除
-      colorFilterSelect.classList.remove(
-        'color-filter-red',
-        'color-filter-green',
-        'color-filter-white',
-        'color-filter-all'
-      );
+    // function updateColorFilterBackground() {
+    //   // まず既存クラスを全削除
+    //   colorFilterSelect.classList.remove(
+    //     'color-filter-red',
+    //     'color-filter-green',
+    //     'color-filter-white',
+    //     'color-filter-all'
+    //   );
 
-      // 現在の値に応じてクラスを追加
-      const value = colorFilterSelect.value;
-      if (value === 'red') {
-        colorFilterSelect.classList.add('color-filter-red');
-      } else if (value === 'green') {
-        colorFilterSelect.classList.add('color-filter-green');
-      } else if (value === 'white') {
-        colorFilterSelect.classList.add('color-filter-white');
-      } else {
-        colorFilterSelect.classList.add('color-filter-all');
-      }
-    }
+    //   // 現在の値に応じてクラスを追加
+    //   const value = colorFilterSelect.value;
+    //   if (value === 'red') {
+    //     colorFilterSelect.classList.add('color-filter-red');
+    //   } else if (value === 'green') {
+    //     colorFilterSelect.classList.add('color-filter-green');
+    //   } else if (value === 'white') {
+    //     colorFilterSelect.classList.add('color-filter-white');
+    //   } else {
+    //     colorFilterSelect.classList.add('color-filter-all');
+    //   }
+    // }
 
     // 初期状態の反映
-    updateColorFilterBackground();
+    // updateColorFilterBackground();
 
     // 変更イベント時に反映
     // colorFilterSelect.addEventListener('change', updateColorFilterBackground);
 
     // 3) 選択が変わったら localStorage に保存して自動適用（apply 不要）
     //    さらに、現在のフィルタで残り件数を更新しておく
-    colorFilterSelect.addEventListener('change', (e) => {
-      const v = e.target.value;
-      localStorage.setItem(`colorFilterSelect-${blockId}`, v);
-      updateColorFilterBackground();
+    // colorFilterSelect.addEventListener('change', (e) => {
+    //   const v = e.target.value;
+    //   localStorage.setItem(`colorFilterSelect-${blockId}`, v);
+    //   updateColorFilterBackground();
 
-      // 再取得して残り件数を更新（ユーザがすぐ「出題」を押さなくても見た目上の残りを反映）
-      const rangeData = getRangeData();
-      remaining = rangeData.slice();
-      updateRemainingCount();
-      updateColorCount();
-    });
+    //   // 再取得して残り件数を更新（ユーザがすぐ「出題」を押さなくても見た目上の残りを反映）
+    //   const rangeData = getRangeData();
+    //   remaining = rangeData.slice();
+    //   updateRemainingCount();
+    //   updateColorCount();
+    // });
+
+    const saved = JSON.parse(localStorage.getItem(`colorFilterCheckbox-${blockId}`) || "[]");
+    document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`)
+      .forEach(cb => {
+        cb.checked = saved.includes(cb.value);
+      });
 
     
     // ---------------- ステータステーブル表示/非表示 ----------------
@@ -2302,17 +2422,17 @@ function createQuiz(blockId, data) {
         }
     }
 
-    // /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
-    // document.querySelectorAll('.quiz-block').forEach((block, index) => {
-    //     // try {
-    //     //     saveDailyColorCounts(index);
-    //     // } catch (e) {
-    //     //     // 保険: テーブルが未生成等で失敗する可能性があるので無視
-    //     //     console.warn('saveDailyColorCounts failed for', index, e);
-    //     // }
-    //     // ボタンとコンテナを作っておく（描画は未実行）
-    //     ensureChartUIForBlock(block, index);
-    // });
+    /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
+    document.querySelectorAll('.quiz-block').forEach((block, index) => {
+        // try {
+        //     saveDailyColorCounts(index);
+        // } catch (e) {
+        //     // 保険: テーブルが未生成等で失敗する可能性があるので無視
+        //     console.warn('saveDailyColorCounts failed for', index, e);
+        // }
+        // ボタンとコンテナを作っておく（描画は未実行）
+        ensureChartUIForBlock(block, index);
+    });
 
     function setSaveButtonListener(blockId) {
         const saveBtn = document.getElementById(`save-button-${blockId}`);
@@ -2397,6 +2517,19 @@ function createQuiz(blockId, data) {
         // updateDeleteOptions(blockId);
     }
 
+    function getCheckedColors(blockId) {
+      const checkboxes = document.querySelectorAll(`#quizBlock-${blockId} .colorFilter`);
+      const selected = [];
+
+      checkboxes.forEach(cb => {
+        if (cb.checked) selected.push(cb.value);
+      });
+
+      return selected;
+    }
+
+
+
 
 
     setSaveButtonListener(blockId);
@@ -2406,12 +2539,7 @@ function createQuiz(blockId, data) {
     init();
 
 
-    ensureChartUIForBlock(
-      document.getElementById(`quizBlock-${blockId}`),
-      blockId
-    );
 
-    setSaveButtonListener(blockId);
 
 
 
