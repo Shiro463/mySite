@@ -1126,22 +1126,8 @@ function createQuiz(blockId, data) {
     // const savedColorFilter = localStorage.getItem(`colorFilterSelect-${blockId}`) || 'all';
     // colorFilterSelect.value = savedColorFilter;
 
-    const selectedColors = getCheckedColors(blockId);
-    const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
 
-    rangeData = rangeData.filter(item => {
 
-      const color = savedColors[item.id] || "white"; // 未設定＝白
-
-      // 青は常に出題（＝フィルタ無視）
-      if (color === "blue") return true;
-
-      // チェックなし → 全てOK
-      if (selectedColors.length === 0) return true;
-
-      // チェックされた色のみ通す
-      return selectedColors.includes(color);
-    });
 
 
 
@@ -1445,7 +1431,21 @@ function createQuiz(blockId, data) {
       //   }
       //   // "all" の場合はフィルタしない
       // }
+      const selectedColors = getCheckedColors(blockId);
+      const savedColors = JSON.parse(localStorage.getItem(`cellColors-${blockId}`) || '{}');
 
+      rangeData = rangeData.filter(item => {
+
+        const color = savedColors[item.id] || "white";
+
+        // 青は常に出題
+        if (color === "blue") return true;
+
+        // チェックなし → 全部
+        if (selectedColors.length === 0) return true;
+
+        return selectedColors.includes(color);
+      });
 
 
       return rangeData;
