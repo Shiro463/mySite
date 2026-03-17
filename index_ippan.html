@@ -108,6 +108,64 @@
     margin-bottom: 5px;
   }
 
+
+
+  /* 全体 */
+  .color-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* ラベル */
+  .color-filter-group .myLabel {
+    font-size: 14px;
+    margin-right: 4px;
+  }
+
+  /* チェックボックスラベル */
+  .color-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 14px;
+    user-select: none;
+    transition: 0.2s;
+  }
+
+  /* チェックボックスを少し大きく */
+  .color-checkbox input {
+    transform: scale(1.2);
+  }
+
+  /* 色ごとの背景 */
+  .color-checkbox.red {
+    background-color: #f08080;
+  }
+
+  .color-checkbox.green {
+    background-color: #90ee90;
+  }
+
+  .color-checkbox.white {
+    background-color: #ffffff;
+  }
+
+  /* ホバー */
+  .color-checkbox:hover {
+    opacity: 0.8;
+  }
+
+  /* チェック時に強調 */
+  .color-checkbox input:checked + span,
+  .color-checkbox input:checked {
+    outline: 2px solid #333;
+  }
   /* 各labelをブロック化して均等に伸ばす */
   .filter-grid label {
     display: flex;
@@ -463,11 +521,24 @@
           <option value="white">白だけ</option>
         </select>
       </label> -->
-      <label class="myLabel">出題色フィルタ:</label>
-      <label><input type="checkbox" class="colorFilter" value="red"> 赤</label>
-      <label><input type="checkbox" class="colorFilter" value="green"> 緑</label>
-      <label><input type="checkbox" class="colorFilter" value="white"> 白</label>
-      <!-- 青は常に出題するのでチェック不要 -->
+      <div class="color-filter-group">
+        <span class="myLabel">出題色フィルタ:</span>
+
+        <label class="color-checkbox red">
+          <input type="checkbox" class="colorFilter" value="red">
+          赤
+        </label>
+
+        <label class="color-checkbox green">
+          <input type="checkbox" class="colorFilter" value="green">
+          緑
+        </label>
+
+        <label class="color-checkbox white">
+          <input type="checkbox" class="colorFilter" value="white">
+          白
+        </label>
+      </div>
 
       <label class="myLabel">除外する正解数:
         <select id="excludeCorrectSelect-0"></select>
