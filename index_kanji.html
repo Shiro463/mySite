@@ -794,19 +794,26 @@ function isHiragana(ch) {
 function transformAnswerToQuestion(text) {
   let out = String(text);
 
-  // 1) カタカナ見出し行削除
+  // 1) カタカナ見出し削除
   out = out.replace(
     /(^|\n)[ \t　]*[ァ-ヶー]+([、，][ァ-ヶー]+)*[ \t　]*(?=\n|$)/g,
     "$1"
   );
 
-  // 2) ※行：括弧削除
+  // 2) 行単位処理（※・★優先）
   out = out
     .split("\n")
     .map(line => {
+      // ※行：括弧削除
       if (/^[ \t　]*※/.test(line)) {
         return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
       }
+
+      // ★行：括弧削除（重要）
+      if (/^[ \t　]*★/.test(line)) {
+        return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
+      }
+
       return line;
     })
     .join("\n");
@@ -817,12 +824,11 @@ function transformAnswerToQuestion(text) {
     "$1"
   );
 
-  // 4) ひらがな＋(ひらがな) → 全部○にする
+  // 4) ひらがな＋(ひらがな) → 全部○＋括弧残す
   out = out.replace(
     /([\u3040-\u309F]+)[\(\（]([\u3040-\u309F]+)[\)\）]/g,
     (m, hira, inside) => {
-      const masked = "○".repeat(hira.length); // ←ここ変更
-      return masked + `(${inside})`;
+      return "○".repeat(hira.length) + `(${inside})`;
     }
   );
 
@@ -834,24 +840,12 @@ function transformAnswerToQuestion(text) {
     return key;
   });
 
-  // 6) ひらがな単語（どこでも）マスク
+  // 6) ひらがな単語マスク（括弧外のみ）
   out = out.replace(/[\u3040-\u309F]{2,}/g, (m) => {
     return m[0] + "○".repeat(m.length - 1);
   });
 
-  // 7) ★行：特別処理
-  out = out
-    .split("\n")
-    .map(line => {
-      if (/^[ \t　]*★/.test(line)) {
-        // ★付き行はそのまま残す（括弧はすでに処理済）
-        return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
-      }
-      return line;
-    })
-    .join("\n");
-
-  // 8) 括弧復元
+  // 7) 括弧復元
   placeholders.forEach((v, i) => {
     out = out.replace(`@@P${i}@@`, v);
   });
