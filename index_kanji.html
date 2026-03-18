@@ -792,65 +792,68 @@ function isHiragana(ch) {
 }
 
 function transformAnswerToQuestion(text) {
-  let out = String(text);
+  const lines = String(text).split("\n");
+  const out = [];
 
-  // 1) カタカナ見出し削除
-  out = out.replace(
-    /(^|\n)[ \t　]*[ァ-ヶー]+([、，][ァ-ヶー]+)*[ \t　]*(?=\n|$)/g,
-    "$1"
-  );
+  for (const line of lines) {
+    // preserve leading indent (spaces, tabs, fullwidth spaces)
+    const stripped = line.replace(/^[ \t　]+/, "");
+    const indent = line.slice(0, line.length - stripped.length);
 
-  // 2) 行単位処理（※・★優先）
-  out = out
-    .split("\n")
-    .map(line => {
-      // ※行：括弧削除
-      if (/^[ \t　]*※/.test(line)) {
-        return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
-      }
-
-      // ★行：括弧削除（重要）
-      if (/^[ \t　]*★/.test(line)) {
-        return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
-      }
-
-      return line;
-    })
-    .join("\n");
-
-  // 3) 漢字＋(読み) → 括弧削除
-  out = out.replace(
-    /([\u4E00-\u9FFF][^\n\(\（]*)[\(\（][\u3040-\u309Fー]+[\)\）]/g,
-    "$1"
-  );
-
-  // 4) ひらがな＋(ひらがな) → 全部○＋括弧残す
-  out = out.replace(
-    /([\u3040-\u309F]+)[\(\（]([\u3040-\u309F]+)[\)\）]/g,
-    (m, hira, inside) => {
-      return "○".repeat(hira.length) + `(${inside})`;
+    // 1) カタカナ見出し行を削除（空行に）
+    if (/^[ァ-ヶー]+(?:[、，][ァ-ヶー]+)*$/.test(stripped)) {
+      out.push("");
+      continue;
     }
-  );
 
-  // 5) 括弧保護
-  const placeholders = [];
-  out = out.replace(/[\(\（][^\)\）]*[\)\）]/g, (m) => {
-    const key = `@@P${placeholders.length}@@`;
-    placeholders.push(m);
-    return key;
-  });
+    // 2) ※行 -> 括弧を削除してそれ以上のマスクはしない
+    if (/^[ \t　]*※/.test(line)) {
+      out.push(line.replace(/[\(\（][^\)\）]*[\)\）]/g, ""));
+      continue;
+    }
 
-  // 6) ひらがな単語マスク（括弧外のみ）
-  out = out.replace(/[\u3040-\u309F]{2,}/g, (m) => {
-    return m[0] + "○".repeat(m.length - 1);
-  });
+    // 3) ★行 -> 括弧を削除してそれ以上のマスクはしない（例: ★裳とる(きとる) -> ★裳とる）
+    if (/^[ \t　]*★/.test(line)) {
+      out.push(line.replace(/[\(\（][^\)\）]*[\)\）]/g, ""));
+      continue;
+    }
 
-  // 7) 括弧復元
-  placeholders.forEach((v, i) => {
-    out = out.replace(`@@P${i}@@`, v);
-  });
+    // 通常行の処理 ----------------------------------------------------
+    let s = line;
 
-  return out.trim();
+    // 4) ひらがな+(ひらがな) -> 前のひらがな部分は全て ○ に（括弧内はそのまま）
+    s = s.replace(/([\u3040-\u309F]+)[\(\（]([\u3040-\u309F]+)[\)\）]/g,
+                  (m, beforeHira, inside) => "○".repeat(beforeHira.length) + `(${inside})`);
+
+    // 5) 漢字＋(読み)（読みは仮名など） -> 括弧を削除（前の語はそのまま残す）
+    s = s.replace(/([\u4E00-\u9FFF][^\n\(\（]*)[\(\（][\u3040-\u30FFー]+[\)\）]/g, "$1");
+
+    // 6) 括弧部分を一時保護（復元用配列）
+    const placeholders = [];
+    let idx = 0;
+    s = s.replace(/[\(\（][^\)\）]*[\)\）]/g, (m) => {
+      placeholders.push(m);
+      const token = `@@P${idx}@@`;
+      idx += 1;
+      return token;
+    });
+
+    // 7) ひらがなだけの連続（括弧外） -> 先頭1文字を残して残りを ○ に
+    s = s.replace(/[\u3040-\u309F]{2,}/g, (m) => m[0] + "○".repeat(m.length - 1));
+
+    // 8) 残りのカタカナは削除（中点 '・' は残す）
+    s = s.replace(/[ァ-ヶー]+/g, "");
+
+    // 9) プレースホルダを復元（括弧は保護されたまま戻る）
+    for (let i = 0; i < placeholders.length; i++) {
+      s = s.replace(`@@P${i}@@`, placeholders[i]);
+    }
+
+    out.push(s);
+  }
+
+  // 改行はそのまま保持して返す（先頭末尾の trim はしない）
+  return out.join("\n");
 }
 
 
