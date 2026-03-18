@@ -794,25 +794,13 @@ function isHiragana(ch) {
 function transformAnswerToQuestion(text) {
   let out = String(text);
 
-  // 1) カタカナ見出し行を削除
+  // 1) カタカナ見出し行削除
   out = out.replace(
     /(^|\n)[ \t　]*[ァ-ヶー]+([、，][ァ-ヶー]+)*[ \t　]*(?=\n|$)/g,
     "$1"
   );
 
-  // 2) 送り仮名（ひらがな1字 + (ひらがな1字)）
-  out = out.replace(
-    /([\u3040-\u309F])[\(\（]([\u3040-\u309F])[\)\）]/g,
-    "$1○"
-  );
-
-  // 3) 漢字語の読み括弧削除（仮名全般対応）
-  out = out.replace(
-    /([\u4E00-\u9FFF][^\n\(\（]*)[\(\（][\u3040-\u30FFー]+([、，][\u3040-\u30FFー]+)*[\)\）]/g,
-    "$1"
-  );
-
-  // 4) ※行の括弧全削除
+  // 2) ※行：括弧削除
   out = out
     .split("\n")
     .map(line => {
@@ -823,43 +811,49 @@ function transformAnswerToQuestion(text) {
     })
     .join("\n");
 
-  // 5) 残り括弧保護
+  // 3) 漢字＋(読み) → 括弧削除
+  out = out.replace(
+    /([\u4E00-\u9FFF][^\n\(\（]*)[\(\（][\u3040-\u309Fー]+[\)\）]/g,
+    "$1"
+  );
+
+  // 4) ひらがな＋(ひらがな) → 全部○にする
+  out = out.replace(
+    /([\u3040-\u309F]+)[\(\（]([\u3040-\u309F]+)[\)\）]/g,
+    (m, hira, inside) => {
+      const masked = "○".repeat(hira.length); // ←ここ変更
+      return masked + `(${inside})`;
+    }
+  );
+
+  // 5) 括弧保護
   const placeholders = [];
   out = out.replace(/[\(\（][^\)\）]*[\)\）]/g, (m) => {
-    const token = `@@P${placeholders.length}@@`;
+    const key = `@@P${placeholders.length}@@`;
     placeholders.push(m);
-    return token;
+    return key;
   });
 
-  // 6) 行全体ひらがなだけマスク
+  // 6) ひらがな単語（どこでも）マスク
+  out = out.replace(/[\u3040-\u309F]{2,}/g, (m) => {
+    return m[0] + "○".repeat(m.length - 1);
+  });
+
+  // 7) ★行：特別処理
   out = out
     .split("\n")
     .map(line => {
-
-      if (/^[ \t　]*※/.test(line)) return line;
-
-      const trimmed = line.trim();
-
-      if (/^[\u3040-\u309F]+([、，][\u3040-\u309F]+)*$/.test(trimmed)) {
-        return line.replace(/([\u3040-\u309F]+)/g, m =>
-          m[0] + "○".repeat(m.length - 1)
-        );
+      if (/^[ \t　]*★/.test(line)) {
+        // ★付き行はそのまま残す（括弧はすでに処理済）
+        return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
       }
-
       return line;
     })
     .join("\n");
 
-  // 7) カタカナ単語行マスク
-  out = out.replace(
-    /(^|\n)([ \t　]*)([ァ-ヶー]{2,})(?=\n|$)/g,
-    (_, br, indent, word) =>
-      br + indent + word[0] + "○".repeat(word.length - 1)
-  );
-
   // 8) 括弧復元
-  placeholders.forEach((orig, i) => {
-    out = out.replace(`@@P${i}@@`, orig);
+  placeholders.forEach((v, i) => {
+    out = out.replace(`@@P${i}@@`, v);
   });
 
   return out.trim();
