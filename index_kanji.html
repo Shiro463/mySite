@@ -792,9 +792,21 @@ function isHiragana(ch) {
 }
 
 function transformAnswerToQuestion(text) {
-  const src = String(text).replace(/\r\n?/g, "\n");
+  let src = String(text).replace(/\r\n?/g, "\n");
 
-  // ひらがな/カタカナ/長音/反復記号を「かな扱い」する
+  const lines = src.split("\n");
+
+  // ★追加：先頭行が「ひらがなのみ」なら削除
+  if (
+    lines.length > 0 &&
+    /^[ぁ-ゖゝゞー]+$/.test(lines[0].trim())
+  ) {
+    lines.shift();
+  }
+
+  src = lines.join("\n");
+
+  // ひらがな/カタカナ判定
   const isKanaChar = (ch) => /[ぁ-ゖゝゞァ-ヶヽヾー]/.test(ch);
   const isKanaOnly = (s) => s.length > 0 && [...s].every(isKanaChar);
 
@@ -805,9 +817,7 @@ function transformAnswerToQuestion(text) {
     return chars[0] + "○".repeat(chars.length - 1);
   };
 
-  // 1トークンを変換する
   const transformToken = (token) => {
-    // 先頭の ※ / ★ は保持したまま処理
     const m = token.match(/^([※★]?)(.*)$/);
     if (!m) return token;
 
@@ -815,22 +825,18 @@ function transformAnswerToQuestion(text) {
     const body = m[2];
     if (!body) return token;
 
-    // 読み括弧を末尾から外す
     const readingMatch = body.match(/^(.*?)[(（]([^()（）]+)[)）]$/);
     if (readingMatch) {
       const surface = readingMatch[1];
       const reading = readingMatch[2];
 
-      // かなだけなら表記を○にして読みは残す
       if (isKanaOnly(surface)) {
-        return mark + circleAll(surface) + "（".replace("（", "(") + reading + "）".replace("）", ")");
+        return mark + circleAll(surface) + "(" + reading + ")";
       }
 
-      // 漢字を含むなら読みは削除
       return mark + surface;
     }
 
-    // 読み括弧がないかなだけの語は、先頭1文字だけ残してあとは○
     if (isKanaOnly(body)) {
       return mark + circleAfterFirst(body);
     }
@@ -838,12 +844,6 @@ function transformAnswerToQuestion(text) {
     return token;
   };
 
-  // 変換対象の行かどうか
-  // - インデントがある
-  // - ※ / ★ がある
-  // - 読み括弧がある
-  // - 行内に空白区切りがある
-  // これらの行だけを処理し、単独の「ハイ」「めかぶ」は残す
   const shouldTransformLine = (line) => {
     return (
       /^[ \t　]/.test(line) ||
@@ -858,7 +858,6 @@ function transformAnswerToQuestion(text) {
     .map((line) => {
       if (!shouldTransformLine(line)) return line;
 
-      // 空白は保ったまま、空白以外の部分だけ変換
       return line
         .split(/([ \t　]+)/)
         .map((part) => (/^[ \t　]+$/.test(part) ? part : transformToken(part)))
