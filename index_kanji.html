@@ -2440,7 +2440,7 @@ function createQuiz(blockId, data) {
     }
 
     /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
-    document.querySelectorAll('.quiz-block').forEach((block, index) => {
+    document.querySelectorAll(`#quizBlock-${blockId}`).forEach((block, index) => {
         // try {
         //     saveDailyColorCounts(index);
         // } catch (e) {
@@ -2448,7 +2448,7 @@ function createQuiz(blockId, data) {
         //     console.warn('saveDailyColorCounts failed for', index, e);
         // }
         // ボタンとコンテナを作っておく（描画は未実行）
-        console.log(block, index)
+        console.log("block", block, "index", index)
         ensureChartUIForBlock(block, index);
     });
 
