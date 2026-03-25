@@ -873,52 +873,37 @@ function transformAnswerToQuestion(text) {
 
 const quizConfigs = [
   {
-    // 音読み
-    title: "音読み",
+    // イタリア語
+    title: "イタリア語",
     type: "normal",
-    quizBlockNum: 100,
-    url: "https://docs.google.com/spreadsheets/d/1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M/gviz/tq?tqx=out:json",
-    idStart: 20000
+    quizBlockNum: 0,
+    url: "https://docs.google.com/spreadsheets/d/1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w/gviz/tq?tqx=out:json",
+    idStart: 10000
   },
   {
-    // 熟字、一字訓
-    title: "熟字、一字訓",
-    type: "normal",
-    quizBlockNum: 101,
-    url: "https://docs.google.com/spreadsheets/d/1TMmiQ2GNG1gBTYttZvfCt3bSH10gcv3aivElEdvCJiY/gviz/tq?tqx=out:json",
-    idStart: 80000
+    // 四法
+    title: "四法",
+    type: "fourLaw",
+    quizBlockNum: 1,
+    urlDefs: "https://docs.google.com/spreadsheets/d/1n_-2fxlbZBSi4bWtcX6i3vpAQ1JgxTT994Pn7JbX6GU/gviz/tq?tqx=out:json",
+    urlSources: "https://docs.google.com/spreadsheets/d/1xBH0l3LnXfW55ORwBxhx8rxcvaFHc8QHmbs8YhRpouY/gviz/tq?tqx=out:json",
+    idStart: 50001
   },
   {
-    // 漢字パーツ1
-    title: "漢字パーツ1",
-    type: "kanjiParts",
-    quizBlockNum: 102,
-    url: "https://docs.google.com/spreadsheets/d/1IKzCk457_iKDtTI9A9KH5BhhP5oitlDugwKUvTOonC8/gviz/tq?tqx=out:json",
-    idStart: 110000
+    // みんはや
+    title: "みんはや",
+    type: "normal",
+    quizBlockNum: 2,
+    url: "https://docs.google.com/spreadsheets/d/1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0/gviz/tq?tqx=out:json",
+    idStart: 120000
   },
   {
-    // 漢字パーツ2
-    title: "漢字パーツ2",
+    // 首都
+    title: "首都",
     type: "normal",
-    quizBlockNum: 103,
-    url: "https://docs.google.com/spreadsheets/d/1QqiVcQ01_9RP7RvAPMrRltv1H29iHvODgm-uC8gIUYQ/gviz/tq?tqx=out:json",
-    idStart: 140000
-  },
-  {
-    // 四字熟語1
-    title: "四字熟語1",
-    type: "normal",
-    quizBlockNum: 104,
-    url: "https://docs.google.com/spreadsheets/d/1AJ-WAqJi4pw1dnXNVFOi8lDXlmeXjkjCKlPWzhDN91Y/gviz/tq?tqx=out:json",
-    idStart: 170000
-  },
-  {
-    // 四字熟語2
-    title: "四字熟語2",
-    type: "normal",
-    quizBlockNum: 105,
-    url: "https://docs.google.com/spreadsheets/d/1cKS2dnE8BbIdhxbkNbt-WfOzD7O8t2w9LVy3xpUVVjE/gviz/tq?tqx=out:json",
-    idStart: 180000
+    quizBlockNum: 3,
+    url: "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json",
+    idStart: 130000
   },
 
 ];
