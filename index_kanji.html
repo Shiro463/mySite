@@ -2440,16 +2440,12 @@ function createQuiz(blockId, data) {
     }
 
     /* ====== ページロード時に各クイズブロックごとに日次保存だけ行い、UIを準備 ====== */
-    document.querySelectorAll(`#quizBlock-${blockId}`).forEach((block, index) => {
-        // try {
-        //     saveDailyColorCounts(index);
-        // } catch (e) {
-        //     // 保険: テーブルが未生成等で失敗する可能性があるので無視
-        //     console.warn('saveDailyColorCounts failed for', index, e);
-        // }
-        // ボタンとコンテナを作っておく（描画は未実行）
-        console.log("block", block, "index", index)
-        ensureChartUIForBlock(block, index);
+    document.querySelectorAll('.quiz-block').forEach((block) => {
+
+        const blockId = block.id.replace('quizBlock-', '');
+
+        ensureChartUIForBlock(block, blockId);
+
     });
 
     function setSaveButtonListener(blockId) {
