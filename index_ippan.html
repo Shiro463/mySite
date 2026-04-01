@@ -59,6 +59,14 @@
     padding: 5px 6px;
   }
 
+  .quiz-image {
+    max-width: 100%;
+    max-height: 350px;
+    object-fit: contain;
+    display: block;
+    margin: auto;
+  }
+
 
   .myLabel{
     margin: 2px;
@@ -792,77 +800,78 @@ function isHiragana(ch) {
 }
 
 function transformAnswerToQuestion(text) {
-  let out = String(text);
+  let src = String(text).replace(/\r\n?/g, "\n");
 
-  // 1) カタカナ見出し行を削除
-  out = out.replace(
-    /(^|\n)[ \t　]*[ァ-ヶー]+([、，][ァ-ヶー]+)*[ \t　]*(?=\n|$)/g,
-    "$1"
-  );
+  const lines = src.split("\n");
 
-  // 2) 送り仮名（ひらがな1字 + (ひらがな1字)）
-  out = out.replace(
-    /([\u3040-\u309F])[\(\（]([\u3040-\u309F])[\)\）]/g,
-    "$1○"
-  );
+  // ★常に1行目を削除
+  if (lines.length > 0) {
+    lines.shift();
+  }
 
-  // 3) 漢字語の読み括弧削除（仮名全般対応）
-  out = out.replace(
-    /([\u4E00-\u9FFF][^\n\(\（]*)[\(\（][\u3040-\u30FFー]+([、，][\u3040-\u30FFー]+)*[\)\）]/g,
-    "$1"
-  );
 
-  // 4) ※行の括弧全削除
-  out = out
-    .split("\n")
-    .map(line => {
-      if (/^[ \t　]*※/.test(line)) {
-        return line.replace(/[\(\（][^\)\）]*[\)\）]/g, "");
+  src = lines.join("\n");
+
+  // ひらがな/カタカナ判定
+  const isKanaChar = (ch) => /[ぁ-ゖゝゞァ-ヶヽヾー]/.test(ch);
+  const isKanaOnly = (s) => s.length > 0 && [...s].every(isKanaChar);
+
+  const circleAll = (s) => "○".repeat([...s].length);
+  const circleAfterFirst = (s) => {
+    const chars = [...s];
+    if (chars.length <= 1) return s;
+    return chars[0] + "○".repeat(chars.length - 1);
+  };
+
+  const transformToken = (token) => {
+    const m = token.match(/^([※★]?)(.*)$/);
+    if (!m) return token;
+
+    const mark = m[1];
+    const body = m[2];
+    if (!body) return token;
+
+    const readingMatch = body.match(/^(.*?)[(（]([^()（）]+)[)）]$/);
+    if (readingMatch) {
+      const surface = readingMatch[1];
+      const reading = readingMatch[2];
+
+      if (isKanaOnly(surface)) {
+        return mark + circleAll(surface) + "(" + reading + ")";
       }
-      return line;
-    })
-    .join("\n");
 
-  // 5) 残り括弧保護
-  const placeholders = [];
-  out = out.replace(/[\(\（][^\)\）]*[\)\）]/g, (m) => {
-    const token = `@@P${placeholders.length}@@`;
-    placeholders.push(m);
+      return mark + surface;
+    }
+
+    if (isKanaOnly(body)) {
+      return mark + circleAfterFirst(body);
+    }
+
     return token;
-  });
+  };
 
-  // 6) 行全体ひらがなだけマスク
-  out = out
+  const shouldTransformLine = (line) => {
+    return (
+      /^[ \t　]/.test(line) ||
+      /[※★]/.test(line) ||
+      /[()（）]/.test(line) ||
+      /[ \t　]/.test(line)
+    );
+  };
+
+  const out = src
     .split("\n")
-    .map(line => {
+    .map((line) => {
+      if (!shouldTransformLine(line)) return line;
 
-      if (/^[ \t　]*※/.test(line)) return line;
-
-      const trimmed = line.trim();
-
-      if (/^[\u3040-\u309F]+([、，][\u3040-\u309F]+)*$/.test(trimmed)) {
-        return line.replace(/([\u3040-\u309F]+)/g, m =>
-          m[0] + "○".repeat(m.length - 1)
-        );
-      }
-
-      return line;
+      return line
+        .split(/([ \t　]+)/)
+        .map((part) => (/^[ \t　]+$/.test(part) ? part : transformToken(part)))
+        .join("");
     })
     .join("\n");
 
-  // 7) カタカナ単語行マスク
-  out = out.replace(
-    /(^|\n)([ \t　]*)([ァ-ヶー]{2,})(?=\n|$)/g,
-    (_, br, indent, word) =>
-      br + indent + word[0] + "○".repeat(word.length - 1)
-  );
-
-  // 8) 括弧復元
-  placeholders.forEach((orig, i) => {
-    out = out.replace(`@@P${i}@@`, orig);
-  });
-
-  return out.trim();
+  return out;
 }
 
 
@@ -904,8 +913,32 @@ const quizConfigs = [
     url: "https://docs.google.com/spreadsheets/d/1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA/gviz/tq?tqx=out:json",
     idStart: 130000
   },
+  {
+    // 国旗
+    title: "国旗画像",
+    type: "normal",
+    quizBlockNum: 4,
+    url: "https://docs.google.com/spreadsheets/d/1FyumiU_TNaEWdALaeesi3imCn6MkMquwDQiO68RgMv4/gviz/tq?tqx=out:json",
+    idStart: 140000
+  },
 
 ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 async function fetchQuizData(url) {
   const res = await fetch(url);
@@ -1585,7 +1618,14 @@ function createQuiz(blockId, data) {
 
 
 
-        questionArea.innerHTML = `<span style="color: black;">${styledQuestion}</span>`;
+        if (item.question.startsWith("img:")) {
+          const url = item.question.replace("img:", "").trim();
+          questionArea.innerHTML =
+            `<img src="${url}" class="quiz-image">`;
+        } else {
+          questionArea.innerHTML =
+            `<span style="color: black;">${styledQuestion}</span>`;
+        }
         answerArea.innerHTML = `<span style="color: gray;">ここに答えが表示されます</span>`;
         highlightCell(item.id, 'blue');
         setButtonsEnabled(true);
