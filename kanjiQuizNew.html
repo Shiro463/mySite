@@ -41,19 +41,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0
 <div class='card small' id='status'></div>
 </div>
 <script>
-let allQuestions=[], queue=[], current=null, countdown=null, remain=5;
+let allQuestions=[],queue=[],current=null,countdown=null,remain=5;
 const $=id=>document.getElementById(id);
-function loadCfg(){['sheetId','sheetName','maxMemory','maxCorrect','maxWrong'].forEach(k=>$(k).value=localStorage.getItem('cfg_'+k)||$(k).value); $('wrongOnly').checked=localStorage.getItem('cfg_wrongOnly')==='1';}
+function loadCfg(){['sheetId','sheetName','maxMemory','maxCorrect','maxWrong'].forEach(k=>{const el=$(k); const v=localStorage.getItem('cfg_'+k); if(v!==null) el.value=v;}); $('wrongOnly').checked=localStorage.getItem('cfg_wrongOnly')==='1';}
 function saveCfg(){['sheetId','sheetName','maxMemory','maxCorrect','maxWrong'].forEach(k=>localStorage.setItem('cfg_'+k,$(k).value)); localStorage.setItem('cfg_wrongOnly',$('wrongOnly').checked?'1':'0');}
-function key(q){return 'stat_'+q}
-function getStat(q){return JSON.parse(localStorage.getItem(key(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}')}
-function setStat(q,s){localStorage.setItem(key(q),JSON.stringify(s))}
-async function fetchSheet(){saveCfg(); const id=$('sheetId').value.trim(); const sheet=$('sheetName').value.trim(); const url=`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?sheet=${encodeURIComponent(sheet)}`; const res=await fetch(url); const txt=await res.text(); const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\((.*)\);/s)[1]); const rows=(json.table.rows||[]); allQuestions=rows.map(r=>{const cells=r.c||[]; const q=(cells[0]&&cells[0].v!=null)?String(cells[0].v):''; const c=(cells[2]&&cells[2].v!=null)?String(cells[2].v):''; const lines=c.split(//); return {q:q.trim(),a:(lines[0]||'').trim(),exp:lines.slice(1).join('').trim()};}).filter(x=>x.q&&x.a); $('status').textContent=`${allQuestions.length}件読込`; }
-function filtered(){return allQuestions.filter(item=>{const s=getStat(item.q); const mm=$('maxMemory').value.trim(), mc=$('maxCorrect').value.trim(), mw=$('maxWrong').value.trim(); if(mm!=='' && s.memory>+mm) return false; if(mc!=='' && s.correct>+mc) return false; if(mw!=='' && s.wrong>+mw) return false; if($('wrongOnly').checked && s.last!=='wrong') return false; return true;}).sort((a,b)=>getStat(a.q).memory-getStat(b.q).memory);}
-function startGame(){queue=filtered(); if(!queue.length){$('status').textContent='対象問題なし'; return;} nextQ();}
-function nextQ(){clearInterval(countdown); if(!queue.length){$('question').textContent='全問題終了！'; $('answer').textContent=''; $('exp').textContent=''; $('timer').textContent='0'; return;} current=queue.shift(); $('question').textContent=current.q; $('answer').textContent=''; $('exp').textContent=''; remain=5; $('timer').textContent=remain; countdown=setInterval(()=>{remain--; $('timer').textContent=remain; if(remain<=0){showAns();}},1000); $('status').textContent=`残り ${queue.length+1}問`;}
+function statKey(q){return 'stat_'+q;}
+function getStat(q){try{return JSON.parse(localStorage.getItem(statKey(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}');}catch(e){return {correct:0,wrong:0,memory:0,last:''};}}
+function setStat(q,s){localStorage.setItem(statKey(q),JSON.stringify(s));}
+async function fetchSheet(){saveCfg(); const id=$('sheetId').value.trim(); const sheet=$('sheetName').value.trim(); if(!id||!sheet) throw new Error('ID/シート名未入力'); const url='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?sheet='+encodeURIComponent(sheet); const res=await fetch(url); const txt=await res.text(); const m=txt.match(/setResponse\((.*)\);/s); if(!m) throw new Error('取得失敗'); const json=JSON.parse(m[1]); const rows=(json.table&&json.table.rows)||[]; allQuestions=rows.map(r=>{const c=r.c||[]; const q=c[0]&&c[0].v!=null?String(c[0].v).trim():''; const raw=c[2]&&c[2].v!=null?String(c[2].v):''; const lines=raw.split(/\n/); return {q:q,a:(lines[0]||'').trim(),exp:lines.slice(1).join('\n').trim()};}).filter(x=>x.q&&x.a); $('status').textContent=allQuestions.length+'件読込';}
+function filtered(){return allQuestions.filter(item=>{const s=getStat(item.q); const mm=$('maxMemory').value.trim(); const mc=$('maxCorrect').value.trim(); const mw=$('maxWrong').value.trim(); if(mm!=='' && s.memory>Number(mm)) return false; if(mc!=='' && s.correct>Number(mc)) return false; if(mw!=='' && s.wrong>Number(mw)) return false; if($('wrongOnly').checked && s.last!=='wrong') return false; return true;}).sort((a,b)=>getStat(a.q).memory-getStat(b.q).memory);}
 function showAns(){clearInterval(countdown); if(!current) return; $('answer').textContent=current.a; $('exp').textContent=current.exp||'解説なし';}
-function mark(ok){if(!current) return; const s=getStat(current.q); if(ok){s.correct++; s.memory+=8; s.last='correct';} else {s.wrong++; s.memory=Math.max(0,s.memory-12); s.last='wrong';} setStat(current.q,s); nextQ();}
-$('start').onclick=async()=>{try{if(!allQuestions.length) await fetchSheet(); startGame();}catch(e){$('status').textContent='取得失敗。ID/シート名確認';}};
-$('next').onclick=nextQ; $('show').onclick=showAns; $('correct').onclick=()=>mark(true); $('wrong').onclick=()=>mark(false); loadCfg();
+function nextQ(){clearInterval(countdown); if(queue.length===0){$('question').textContent='全問題終了！'; $('answer').textContent=''; $('exp').textContent=''; $('timer').textContent='0'; return;} current=queue.shift(); $('question').textContent=current.q; $('answer').textContent=''; $('exp').textContent=''; remain=5; $('timer').textContent='5'; $('status').textContent='残り '+(queue.length+1)+'問'; countdown=setInterval(()=>{remain--; $('timer').textContent=String(remain); if(remain<=0) showAns();},1000);}
+function startGame(){queue=filtered(); if(queue.length===0){$('status').textContent='対象問題無し'; return;} nextQ();}
+function mark(ok){if(!current) return; const s=getStat(current.q); if(ok){s.correct++; s.memory+=8; s.last='correct';}else{s.wrong++; s.memory=Math.max(0,s.memory-12); s.last='wrong';} setStat(current.q,s); nextQ();}
+$('start').onclick=async()=>{try{await fetchSheet(); startGame();}catch(e){$('status').textContent=e.message;}};
+$('next').onclick=nextQ; $('show').onclick=showAns; $('correct').onclick=()=>mark(true); $('wrong').onclick=()=>mark(false);
+loadCfg();
 </script></body></html>
