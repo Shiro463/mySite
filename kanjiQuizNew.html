@@ -3,58 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>単語記憶シューティング</title>
+<title>Memory Shooting V2</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;background:#0b1020;color:#fff;padding:12px} .wrap{max-width:760px;margin:auto}.card{background:#16203a;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.25);margin-bottom:12px}.row{display:flex;gap:8px;flex-wrap:wrap}.btn{flex:1;min-width:120px;padding:14px;border:0;border-radius:14px;font-size:16px;font-weight:700}.primary{background:#3b82f6;color:#fff}.good{background:#16a34a;color:#fff}.bad{background:#dc2626;color:#fff}.sub{background:#334155;color:#fff}.area{min-height:72px;background:#0f172a;border-radius:14px;padding:12px;font-size:22px;display:flex;align-items:center;justify-content:center;text-align:center}.small{font-size:14px;color:#cbd5e1}.timer{font-size:28px;font-weight:800;text-align:center}.hidden{display:none} input{width:100%;padding:10px;border-radius:10px;border:1px solid #475569;background:#0f172a;color:#fff} label{font-size:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:600px){.grid{grid-template-columns:1fr}}</style>
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#14213d,#020617);color:#fff;overflow-x:hidden} .wrap{max-width:900px;margin:auto;padding:12px}.panel{background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:14px;margin:10px 0;box-shadow:0 10px 30px rgba(0,0,0,.35)} h1{text-align:center;margin:8px 0;font-size:28px}.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{text-align:center;padding:10px;border-radius:16px;background:rgba(255,255,255,.08)} .arena{position:relative;height:260px;border-radius:22px;background:linear-gradient(#0f172a,#111827);overflow:hidden}.enemy{position:absolute;top:-60px;left:50%;transform:translateX(-50%);font-size:54px;animation:drop 5s linear forwards}.blast{animation:boom .5s ease-out}.question{position:absolute;bottom:12px;left:12px;right:12px;text-align:center;font-size:28px;font-weight:700}.ans{font-size:24px;text-align:center;min-height:40px}.exp{white-space:pre-wrap;color:#cbd5e1}.row{display:flex;gap:8px;flex-wrap:wrap}.btn{flex:1;padding:14px;border:0;border-radius:16px;font-size:16px;font-weight:700;color:#fff}.b1{background:#2563eb}.b2{background:#475569}.b3{background:#16a34a}.b4{background:#dc2626} input{width:100%;padding:10px;border-radius:12px;border:1px solid #475569;background:#0f172a;color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}@keyframes drop{from{top:-60px}to{top:180px}}@keyframes boom{0%{transform:translateX(-50%) scale(1)}100%{transform:translateX(-50%) scale(2);opacity:0}}@media(max-width:700px){.hud{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.question{font-size:22px}}
+</style>
 </head>
 <body><div class='wrap'>
-<div class='card'>
-<h2>単語記憶シューティング</h2>
-<div class='small'>GoogleスプレッドシートID / シート名を入力</div>
-<div class='grid'>
-<div><label>ID</label><input id='sheetId'></div>
-<div><label>シート名</label><input id='sheetName' value='Sheet1'></div>
+<h1>🚀 Memory Shooting V2</h1>
+<div class='panel grid'>
+<input id='sheetId' placeholder='GoogleスプレッドシートID'>
+<input id='sheetName' placeholder='シート名 (Sheet1)'>
 </div>
+<div class='panel hud'>
+<div class='stat'>⏱<div id='timer'>5</div></div>
+<div class='stat'>⭐<div id='score'>0</div></div>
+<div class='stat'>❤️<div id='hp'>3</div></div>
+<div class='stat'>📚<div id='left'>0</div></div>
 </div>
-<div class='card'>
-<h3>絞り込み</h3>
-<div class='grid'>
-<div><label>定着度 以下</label><input id='maxMemory' type='number' placeholder='未入力で無制限'></div>
-<div><label>正解数 以下</label><input id='maxCorrect' type='number'></div>
-<div><label>不正解数 以下</label><input id='maxWrong' type='number'></div>
-<div><label><input id='wrongOnly' type='checkbox'> 直近不正解のみ</label></div>
+<div class='panel arena' id='arena'>
+<div class='enemy' id='enemy'>👾</div>
+<div class='question' id='question'>START!</div>
 </div>
+<div class='panel ans' id='answer'></div>
+<div class='panel exp' id='exp'></div>
+<div class='panel row'>
+<button class='btn b1' id='start'>出題開始</button>
+<button class='btn b2' id='show'>答えを見る</button>
+<button class='btn b3' id='correct'>撃破(正解)</button>
+<button class='btn b4' id='wrong'>被弾(不正解)</button>
 </div>
-<div class='card'>
-<div class='timer' id='timer'>5</div>
-<div class='small'>問題</div><div class='area' id='question'>開始してください</div>
-<div class='small'>答え</div><div class='area' id='answer'></div>
-<div class='small'>解説</div><div class='area' id='exp'></div>
-</div>
-<div class='card row'>
-<button class='btn primary' id='start'>出題開始</button>
-<button class='btn sub' id='next'>次の問題</button>
-<button class='btn sub' id='show'>答えを見る</button>
-<button class='btn good' id='correct'>正解した</button>
-<button class='btn bad' id='wrong'>間違えた</button>
-</div>
-<div class='card small' id='status'></div>
+<div class='panel' id='status'>準備完了</div>
 </div>
 <script>
-let allQuestions=[],queue=[],current=null,countdown=null,remain=5;
-const $=id=>document.getElementById(id);
-function loadCfg(){['sheetId','sheetName','maxMemory','maxCorrect','maxWrong'].forEach(k=>{const el=$(k); const v=localStorage.getItem('cfg_'+k); if(v!==null) el.value=v;}); $('wrongOnly').checked=localStorage.getItem('cfg_wrongOnly')==='1';}
-function saveCfg(){['sheetId','sheetName','maxMemory','maxCorrect','maxWrong'].forEach(k=>localStorage.setItem('cfg_'+k,$(k).value)); localStorage.setItem('cfg_wrongOnly',$('wrongOnly').checked?'1':'0');}
-function statKey(q){return 'stat_'+q;}
-function getStat(q){try{return JSON.parse(localStorage.getItem(statKey(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}');}catch(e){return {correct:0,wrong:0,memory:0,last:''};}}
-function setStat(q,s){localStorage.setItem(statKey(q),JSON.stringify(s));}
-async function fetchSheet(){saveCfg(); const id=$('sheetId').value.trim(); const sheet=$('sheetName').value.trim(); if(!id||!sheet) throw new Error('ID/シート名未入力'); const url='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?sheet='+encodeURIComponent(sheet); const res=await fetch(url); const txt=await res.text(); const m=txt.match(/setResponse\((.*)\);/s); if(!m) throw new Error('取得失敗'); const json=JSON.parse(m[1]); const rows=(json.table&&json.table.rows)||[]; allQuestions=rows.map(r=>{const c=r.c||[]; const q=c[0]&&c[0].v!=null?String(c[0].v).trim():''; const raw=c[2]&&c[2].v!=null?String(c[2].v):''; const lines=raw.split(/\n/); return {q:q,a:(lines[0]||'').trim(),exp:lines.slice(1).join('\n').trim()};}).filter(x=>x.q&&x.a); $('status').textContent=allQuestions.length+'件読込';}
-function filtered(){return allQuestions.filter(item=>{const s=getStat(item.q); const mm=$('maxMemory').value.trim(); const mc=$('maxCorrect').value.trim(); const mw=$('maxWrong').value.trim(); if(mm!=='' && s.memory>Number(mm)) return false; if(mc!=='' && s.correct>Number(mc)) return false; if(mw!=='' && s.wrong>Number(mw)) return false; if($('wrongOnly').checked && s.last!=='wrong') return false; return true;}).sort((a,b)=>getStat(a.q).memory-getStat(b.q).memory);}
-function showAns(){clearInterval(countdown); if(!current) return; $('answer').textContent=current.a; $('exp').textContent=current.exp||'解説なし';}
-function nextQ(){clearInterval(countdown); if(queue.length===0){$('question').textContent='全問題終了！'; $('answer').textContent=''; $('exp').textContent=''; $('timer').textContent='0'; return;} current=queue.shift(); $('question').textContent=current.q; $('answer').textContent=''; $('exp').textContent=''; remain=5; $('timer').textContent='5'; $('status').textContent='残り '+(queue.length+1)+'問'; countdown=setInterval(()=>{remain--; $('timer').textContent=String(remain); if(remain<=0) showAns();},1000);}
-function startGame(){queue=filtered(); if(queue.length===0){$('status').textContent='対象問題無し'; return;} nextQ();}
-function mark(ok){if(!current) return; const s=getStat(current.q); if(ok){s.correct++; s.memory+=8; s.last='correct';}else{s.wrong++; s.memory=Math.max(0,s.memory-12); s.last='wrong';} setStat(current.q,s); nextQ();}
-$('start').onclick=async()=>{try{await fetchSheet(); startGame();}catch(e){$('status').textContent=e.message;}};
-$('next').onclick=nextQ; $('show').onclick=showAns; $('correct').onclick=()=>mark(true); $('wrong').onclick=()=>mark(false);
-loadCfg();
+let data=[],queue=[],cur=null,timer=5,intv=null,score=0,hp=3;
+const $=x=>document.getElementById(x);
+function statKey(q){return 'stat_'+q}
+function getS(q){return JSON.parse(localStorage.getItem(statKey(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}')}
+function setS(q,s){localStorage.setItem(statKey(q),JSON.stringify(s))}
+async function load(){const id=$('sheetId').value.trim();const sh=$('sheetName').value.trim()||'Sheet1';const url='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?sheet='+encodeURIComponent(sh);const t=await(await fetch(url)).text();const m=t.match(/setResponse\((.*)\);/s);const j=JSON.parse(m[1]);data=j.table.rows.map(r=>{const c=r.c||[];const q=c[0]&&c[0].v?c[0].v:'';const raw=c[2]&&c[2].v?c[2].v:'';const L=String(raw).split(/\n/);return{q:q,a:L[0]||'',e:L.slice(1).join('\n')}}).filter(x=>x.q&&x.a)}
+function build(){queue=[...data].sort((a,b)=>getS(a.q).memory-getS(b.q).memory);$('left').textContent=queue.length;}
+function next(){clearInterval(intv);if(queue.length===0){$('question').textContent='🏆 CLEAR!';$('status').textContent='全問題終了';return;}cur=queue.shift();$('left').textContent=queue.length+1;$('question').textContent=cur.q;$('answer').textContent='';$('exp').textContent='';$('enemy').className='enemy';timer=5;$('timer').textContent=5;intv=setInterval(()=>{timer--; $('timer').textContent=timer; if(timer<=0)show();},1000)}
+function show(){clearInterval(intv);$('answer').textContent='答え：'+cur.a;$('exp').textContent=cur.e||'解説なし';}
+function hit(ok){if(!cur)return;let s=getS(cur.q);if(ok){score+=100;s.correct++;s.memory+=10;s.last='correct';$('enemy').className='enemy blast';$('status').textContent='撃破！ +100';}else{hp--;s.wrong++;s.memory=Math.max(0,s.memory-15);s.last='wrong';$('status').textContent='被弾！';if(hp<=0){$('question').textContent='💀 GAME OVER';$('hp').textContent=0;clearInterval(intv);return;}}setS(cur.q,s);$('score').textContent=score;$('hp').textContent=hp;setTimeout(next,500)}
+$('start').onclick=async()=>{try{score=0;hp=3;$('score').textContent=0;$('hp').textContent=3;await load();build();next();$('status').textContent='START!';}catch(e){$('status').textContent='読込失敗';}};$('show').onclick=show;$('correct').onclick=()=>hit(true);$('wrong').onclick=()=>hit(false);
 </script></body></html>
