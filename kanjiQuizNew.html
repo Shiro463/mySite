@@ -2,72 +2,663 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Memory Shooting V3 Deluxe</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Memory Shooting V3.1 安定完成版</title>
+
 <style>
-html,body{margin:0;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#67c8ff}
-#game{position:relative;width:100%;height:100%;background:linear-gradient(#7dd3fc,#1d4ed8 65%,#1e293b);color:#fff}
-.cloud{position:absolute;background:rgba(255,255,255,.8);border-radius:999px;filter:blur(2px);animation:float 30s linear infinite}.cloud:before,.cloud:after{content:'';position:absolute;background:inherit;border-radius:999px}
-.cloud:before{width:60%;height:80%;left:10%;top:-20px}.cloud:after{width:50%;height:70%;right:10%;top:-10px}
-#enemy{position:absolute;top:-80px;left:50%;transform:translateX(-50%);font-size:72px;animation:drop 5s linear forwards;filter:drop-shadow(0 8px 10px rgba(0,0,0,.3))}
-#question{position:absolute;top:14%;left:50%;transform:translateX(-50%);width:min(94vw,1100px);max-height:26vh;overflow-y:auto;word-break:break-word;overflow-wrap:anywhere;line-height:1.25;text-align:center;font-size:clamp(22px,4.6vw,54px);font-weight:900;text-shadow:0 4px 10px rgba(0,0,0,.35);padding:10px 20px}
-#answer{position:absolute;top:38%;left:50%;transform:translateX(-50%);width:min(92vw,900px);text-align:center;word-break:break-word;overflow-wrap:anywhere;font-size:clamp(20px,3.8vw,42px);font-weight:800;color:#fff176;text-shadow:0 3px 8px rgba(0,0,0,.5)}
-#exp{position:absolute;top:52%;left:50%;transform:translateX(-50%);width:min(92vw,920px);max-height:22vh;overflow-y:auto;text-align:center;font-size:clamp(15px,2.3vw,28px);line-height:1.5;text-shadow:0 2px 6px rgba(0,0,0,.45);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
-#hud{position:absolute;right:12px;bottom:12px;text-align:right;font-weight:800;font-size:18px;background:rgba(0,0,0,.25);padding:12px 14px;border-radius:18px;backdrop-filter:blur(6px)}
-#topHud{position:absolute;left:12px;top:12px;font-size:20px;font-weight:900;background:rgba(0,0,0,.2);padding:10px 14px;border-radius:16px}
-#controls{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:min(96%,900px)}
-button{border:0;border-radius:999px;padding:14px 18px;font-size:16px;font-weight:900;color:#fff;box-shadow:0 8px 18px rgba(0,0,0,.25)}
-.start{background:#2563eb}.show{background:#64748b}.ok{background:#22c55e}.ng{background:#ef4444}
-.flash{animation:flash .35s}.boom{animation:boom .6s forwards}.laser{position:absolute;bottom:80px;left:50%;width:8px;height:0;background:#fff;box-shadow:0 0 18px #fff,0 0 30px #38bdf8;transform:translateX(-50%);animation:laser .35s forwards}
-#status{position:absolute;left:50%;top:8%;transform:translateX(-50%);font-size:28px;font-weight:900;text-shadow:0 3px 8px rgba(0,0,0,.4)}
-@keyframes drop{from{top:-80px}to{top:70%}}
-@keyframes boom{0%{transform:translateX(-50%) scale(1)}100%{transform:translateX(-50%) scale(2.6);opacity:0}}
-@keyframes laser{0%{height:0}100%{height:70%;bottom:80px}}
-@keyframes flash{0%,100%{filter:none}50%{filter:brightness(1.5)}}
-@keyframes float{from{transform:translateX(-20vw)}to{transform:translateX(120vw)}}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
+}
+
+body{
+  background:#0f172a;
+}
+
+#game{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  color:#fff;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.15), transparent 25%),
+    radial-gradient(circle at 80% 30%, rgba(255,255,255,.10), transparent 25%),
+    linear-gradient(180deg,#38bdf8 0%,#1d4ed8 55%,#0f172a 100%);
+}
+
+/* 雲 */
+.cloud{
+  position:absolute;
+  background:rgba(255,255,255,.8);
+  border-radius:999px;
+  filter:blur(2px);
+  animation:cloudMove linear infinite;
+}
+.cloud::before,.cloud::after{
+  content:"";
+  position:absolute;
+  background:inherit;
+  border-radius:999px;
+}
+.cloud::before{width:60%;height:90%;left:10%;top:-20px}
+.cloud::after{width:50%;height:80%;right:10%;top:-12px}
+
+@keyframes cloudMove{
+  from{transform:translateX(-30vw)}
+  to{transform:translateX(130vw)}
+}
+
+/* HUD */
+#topHud{
+  position:absolute;
+  left:10px;
+  top:10px;
+  z-index:50;
+  background:rgba(0,0,0,.28);
+  padding:10px 14px;
+  border-radius:16px;
+  font-weight:800;
+  backdrop-filter:blur(6px);
+}
+
+#hud{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  z-index:50;
+  background:rgba(0,0,0,.28);
+  padding:12px;
+  border-radius:16px;
+  text-align:right;
+  font-weight:800;
+  backdrop-filter:blur(6px);
+}
+
+/* 中央UI */
+#status{
+  position:absolute;
+  top:6%;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  font-size:clamp(20px,4vw,34px);
+  font-weight:900;
+  text-shadow:0 4px 10px rgba(0,0,0,.4);
+}
+
+#enemy{
+  position:absolute;
+  top:-90px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10;
+  font-size:72px;
+  filter:drop-shadow(0 8px 10px rgba(0,0,0,.35));
+}
+
+@keyframes enemyDrop{
+  from{top:-90px}
+  to{top:68%}
+}
+
+#question{
+  position:absolute;
+  top:14%;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  width:min(94vw,1100px);
+  max-height:24vh;
+  overflow:auto;
+  text-align:center;
+  line-height:1.25;
+  padding:8px 12px;
+  font-size:clamp(22px,4.6vw,54px);
+  font-weight:900;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  text-shadow:0 4px 10px rgba(0,0,0,.4);
+}
+
+#answer{
+  position:absolute;
+  top:38%;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  width:min(92vw,900px);
+  text-align:center;
+  font-size:clamp(20px,3.8vw,42px);
+  font-weight:900;
+  color:#fde047;
+  text-shadow:0 3px 8px rgba(0,0,0,.45);
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+#exp{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  width:min(92vw,920px);
+  max-height:20vh;
+  overflow:auto;
+  text-align:center;
+  white-space:pre-wrap;
+  line-height:1.45;
+  font-size:clamp(15px,2.4vw,26px);
+  text-shadow:0 2px 6px rgba(0,0,0,.45);
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+/* ボタン */
+#controls{
+  position:absolute;
+  left:50%;
+  bottom:12px;
+  transform:translateX(-50%);
+  z-index:60;
+  width:min(96vw,980px);
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+button,select{
+  border:none;
+  border-radius:999px;
+  padding:12px 16px;
+  font-size:15px;
+  font-weight:900;
+}
+
+button{
+  color:#fff;
+  box-shadow:0 8px 18px rgba(0,0,0,.25);
+}
+
+.start{background:#2563eb}
+.show{background:#64748b}
+.ok{background:#16a34a}
+.ng{background:#dc2626}
+.misc{background:#7c3aed}
+
+/* 演出 */
+.flash{
+  animation:flash .35s;
+}
+@keyframes flash{
+  0%,100%{filter:none}
+  50%{filter:brightness(1.45)}
+}
+
+.boom{
+  animation:boom .55s forwards;
+}
+@keyframes boom{
+  0%{transform:translateX(-50%) scale(1)}
+  100%{transform:translateX(-50%) scale(2.6);opacity:0}
+}
+
+.laser{
+  position:absolute;
+  left:50%;
+  bottom:80px;
+  transform:translateX(-50%);
+  width:8px;
+  height:0;
+  z-index:30;
+  background:#fff;
+  box-shadow:0 0 18px #fff,0 0 30px #38bdf8;
+  animation:laser .35s forwards;
+}
+@keyframes laser{
+  from{height:0}
+  to{height:72%}
+}
+
+/* 統計 */
+#statsWrap{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.65);
+  display:none;
+  padding:12px;
+}
+
+#statsPanel{
+  width:min(100%,900px);
+  height:min(100%,760px);
+  margin:auto;
+  background:#fff;
+  color:#111;
+  border-radius:20px;
+  overflow:auto;
+  padding:16px;
+}
+
+#statsPanel h2{
+  margin:0 0 10px;
+}
+
+#list{
+  font-size:14px;
+  line-height:1.5;
+  margin-top:10px;
+}
+.row{
+  padding:6px 0;
+  border-bottom:1px solid #ddd;
+}
+.small{
+  font-size:13px;
+  opacity:.75;
+}
 </style>
 </head>
+
 <body>
-<div id='game'>
-<div class='cloud' style='width:120px;height:50px;top:10%;left:-20%;animation-duration:35s'></div>
-<div class='cloud' style='width:180px;height:70px;top:24%;left:-30%;animation-duration:48s'></div>
-<div class='cloud' style='width:140px;height:60px;top:40%;left:-25%;animation-duration:40s'></div>
-<div id='topHud'>⏱ <span id='timer'>5</span>　❤️ <span id='hp'>3</span></div>
-<div id='status'>READY</div>
-<div id='enemy'>👾</div>
-<div id='question'>START!</div>
-<div id='answer'></div>
-<div id='exp'></div>
-<div id='hud'>⭐ SCORE <span id='score'>0</span><br>📚 LEFT <span id='left'>0</span><br><button id='statsBtn' style='margin-top:8px;border:0;border-radius:12px;padding:6px 10px;font-weight:900'>統計</button></div>
-<canvas id='stats' width='340' height='320' style='display:none;position:absolute;right:10px;top:70px;background:rgba(255,255,255,.92);border-radius:18px;padding:8px'></canvas>
-<div id='list' style='display:none;position:absolute;left:10px;right:10px;bottom:90px;max-height:34%;overflow:auto;background:rgba(255,255,255,.92);color:#111;padding:10px;border-radius:18px;font-size:14px'></div>
-<div id='controls'>
-<select id='dataset' style='border-radius:999px;padding:12px;font-weight:900;border:0'></select>
-<button class='start' id='start'>START</button>
-<button class='show' id='show'>答え</button>
-<button class='ok' id='correct'>撃破</button>
-<button class='ng' id='wrong'>被弾</button>
+<div id="game">
+
+  <!-- 雲 -->
+  <div class="cloud" style="width:140px;height:56px;top:12%;left:-20%;animation-duration:34s"></div>
+  <div class="cloud" style="width:180px;height:70px;top:28%;left:-30%;animation-duration:48s"></div>
+  <div class="cloud" style="width:120px;height:50px;top:44%;left:-25%;animation-duration:40s"></div>
+
+  <div id="topHud">⏱ <span id="timer">5</span>　❤️ <span id="hp">3</span></div>
+
+  <div id="status">READY</div>
+  <div id="enemy">👾</div>
+
+  <div id="question">START を押してください</div>
+  <div id="answer"></div>
+  <div id="exp"></div>
+
+  <div id="hud">
+    ⭐ SCORE <span id="score">0</span><br>
+    📚 LEFT <span id="left">0</span>
+  </div>
+
+  <div id="controls">
+    <select id="dataset"></select>
+    <button class="start" id="start">START</button>
+    <button class="show" id="show">答え</button>
+    <button class="ok" id="correct">撃破</button>
+    <button class="ng" id="wrong">被弾</button>
+    <button class="misc" id="statsBtn">統計</button>
+  </div>
+
 </div>
+
+<!-- 統計 -->
+<div id="statsWrap">
+  <div id="statsPanel">
+    <button class="misc" id="closeStats">閉じる</button>
+    <h2>学習統計</h2>
+    <canvas id="chart" width="320" height="260"></canvas>
+    <div class="small">定着度が低い順に表示</div>
+    <div id="list"></div>
+  </div>
 </div>
+
 <script>
-const DATASETS=[{name:'音読み',id:'1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M',sheet:'シート1'},{name:'みんはや',id:'1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0',sheet:'シート1'}];
-let data=[],queue=[],cur=null,timer=5,intv=null,score=0,hp=3,gameOver=false;
-const $=id=>document.getElementById(id);
-function k(q){return 'stat_'+q}
-function gs(q){try{return JSON.parse(localStorage.getItem(k(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}')}catch(e){return {correct:0,wrong:0,memory:0,last:''}}}
-function ss(q,s){localStorage.setItem(k(q),JSON.stringify(s))}
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-async function load(){const ds=DATASETS[$('dataset').value||0];const url='https://docs.google.com/spreadsheets/d/'+ds.id+'/gviz/tq?sheet='+encodeURIComponent(ds.sheet);const txt=await (await fetch(url)).text();const m=txt.match(/setResponse\((.*)\);/s);const j=JSON.parse(m[1]);data=(j.table.rows||[]).map(r=>{const c=r.c||[];const q=c[0]&&c[0].v!=null?String(c[0].v).trim():'';const raw=c[2]&&c[2].v!=null?String(c[2].v):'';const lines=raw.split(/\n|||/);const a=(lines.shift()||'').trim();const e=lines.join('').trim();return {q,a,e};}).filter(x=>x.q&&x.a);}
-function build(){const unseen=data.filter(x=>{const s=gs(x.q);return s.correct===0&&s.wrong===0;});const seen=data.filter(x=>{const s=gs(x.q);return !(s.correct===0&&s.wrong===0);});shuffle(unseen);seen.sort((a,b)=>gs(a.q).memory-gs(b.q).memory);queue=[...unseen,...seen];$('left').textContent=queue.length;}
-function next(){if(gameOver)return;clearInterval(intv);if(queue.length===0){$('status').textContent='🏆 CLEAR!';$('question').textContent='MISSION COMPLETE';$('enemy').style.display='none';return;}cur=queue.shift();$('left').textContent=queue.length+1;$('enemy').style.display='block';$('enemy').className='';$('enemy').id='enemy';$('question').textContent=cur.q;$('answer').textContent='';$('exp').textContent='';$('status').textContent='THINK!';timer=5;$('timer').textContent='5';$('enemy').style.animation='none';void $('enemy').offsetWidth;$('enemy').style.animation='drop 5s linear forwards';intv=setInterval(()=>{timer--; $('timer').textContent=timer; if(timer<=0)show();},1000)}
-function show(){clearInterval(intv);if(!cur)return;$('answer').textContent=cur.a;$('exp').textContent=cur.e||'解説なし';$('status').textContent='JUDGE!';}
-function laser(){const l=document.createElement('div');l.className='laser';$('game').appendChild(l);setTimeout(()=>l.remove(),350)}
-function hit(ok){if(!cur)return;let s=gs(cur.q);if(ok){laser();score+=100;s.correct++;s.memory+=10;s.last='correct';$('enemy').className='boom';$('status').textContent='撃破 +100';}else{hp--;s.wrong++;s.memory=Math.max(0,s.memory-15);s.last='wrong';$('game').classList.add('flash');setTimeout(()=>$('game').classList.remove('flash'),350);$('status').textContent='被弾!';if(hp<=0){gameOver=true;$('hp').textContent='0';$('question').textContent='GAME OVER';$('status').textContent='RETRY TO PLAY';clearInterval(intv);return;}}ss(cur.q,s);$('score').textContent=score;$('hp').textContent=hp;setTimeout(next,700)}
-function drawStats(){const c=$('stats');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);let correct=0,wrong=0,unseen=0;data.forEach(x=>{const s=gs(x.q);correct+=s.correct;wrong+=s.wrong;if(s.correct===0&&s.wrong===0)unseen++;});const total=Math.max(correct+wrong+unseen,1);const vals=[correct,wrong,unseen],cols=['#22c55e','#ef4444','#3b82f6'];let st=-Math.PI/2;vals.forEach((v,i)=>{const ang=v/total*Math.PI*2;ctx.beginPath();ctx.moveTo(90,90);ctx.fillStyle=cols[i];ctx.arc(90,90,70,st,st+ang);ctx.fill();st+=ang;});ctx.fillStyle='#111';ctx.font='14px Arial';ctx.fillText('正解 '+correct,180,40);ctx.fillText('不正解 '+wrong,180,65);ctx.fillText('未出題 '+unseen,180,90);const list=[...data].sort((a,b)=>gs(a.q).memory-gs(b.q).memory).map(x=>{const s=gs(x.q);return x.q+' | 定着'+s.memory+' 正'+s.correct+' 誤'+s.wrong;}).join('<br>');$('list').innerHTML=list;}
-$('statsBtn').onclick=()=>{const show=$('stats').style.display==='none';$('stats').style.display=show?'block':'none';$('list').style.display=show?'block':'none';if(show)drawStats();};
-DATASETS.forEach((d,i)=>{const o=document.createElement('option');o.value=i;o.textContent=d.name;$('dataset').appendChild(o);});
-$('start').onclick=async()=>{gameOver=false;score=0;hp=3;$('score').textContent='0';$('hp').textContent='3';$('status').textContent='LOADING...';await load();build();next();};
-$('show').onclick=show;$('correct').onclick=()=>hit(true);$('wrong').onclick=()=>hit(false);
+/* =============================
+   設定（ここだけ編集すればOK）
+============================= */
+const DATASETS = [
+  {
+    name:"音読み",
+    id:"1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M",
+    sheet:"シート1"
+  },
+  {
+    name:"みんはや",
+    id:"1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0",
+    sheet:"シート1"
+  }
+];
+
+/* ============================= */
+
+const $ = id => document.getElementById(id);
+
+let data = [];
+let queue = [];
+let cur = null;
+let timer = 5;
+let intv = null;
+let score = 0;
+let hp = 3;
+let gameOver = false;
+
+/* 初期化 */
+DATASETS.forEach((d,i)=>{
+  const op = document.createElement("option");
+  op.value = i;
+  op.textContent = d.name;
+  $("dataset").appendChild(op);
+});
+
+/* localStorage */
+function keyName(datasetName,q){
+  return "ms_" + datasetName + "_" + q;
+}
+
+function getStat(datasetName,q){
+  try{
+    return JSON.parse(
+      localStorage.getItem(keyName(datasetName,q)) ||
+      '{"correct":0,"wrong":0,"memory":0,"last":""}'
+    );
+  }catch(e){
+    return {correct:0,wrong:0,memory:0,last:""};
+  }
+}
+
+function setStat(datasetName,q,obj){
+  localStorage.setItem(keyName(datasetName,q), JSON.stringify(obj));
+}
+
+/* utility */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* データ読込 */
+async function loadSheet(){
+  const ds = DATASETS[$("dataset").value || 0];
+
+  const url =
+    "https://docs.google.com/spreadsheets/d/" +
+    ds.id +
+    "/gviz/tq?sheet=" +
+    encodeURIComponent(ds.sheet);
+
+  const txt = await (await fetch(url)).text();
+  const m = txt.match(/setResponse\((.*)\);/s);
+
+  if(!m) throw new Error("シート取得失敗");
+
+  const json = JSON.parse(m[1]);
+
+  data = (json.table.rows || []).map(r=>{
+    const c = r.c || [];
+
+    const q =
+      c[0] && c[0].v != null
+      ? String(c[0].v).trim()
+      : "";
+
+    const raw =
+      c[2] && c[2].v != null
+      ? String(c[2].v)
+      : "";
+
+    /* ===== 修正版：\nだけで分割 ===== */
+    const idx = raw.indexOf("\n");
+
+    const a =
+      idx >= 0
+      ? raw.slice(0,idx).trim()
+      : raw.trim();
+
+    const e =
+      idx >= 0
+      ? raw.slice(idx+1).trim()
+      : "";
+
+    return {q,a,e};
+  }).filter(x=>x.q && x.a);
+}
+
+/* 出題順 */
+function buildQueue(){
+  const ds = DATASETS[$("dataset").value || 0];
+
+  const unseen = data.filter(x=>{
+    const s = getStat(ds.name,x.q);
+    return s.correct===0 && s.wrong===0;
+  });
+
+  const seen = data.filter(x=>{
+    const s = getStat(ds.name,x.q);
+    return !(s.correct===0 && s.wrong===0);
+  });
+
+  shuffle(unseen);
+
+  seen.sort((a,b)=>{
+    return getStat(ds.name,a.q).memory - getStat(ds.name,b.q).memory;
+  });
+
+  queue = [...unseen,...seen];
+  $("left").textContent = queue.length;
+}
+
+/* 次の問題 */
+function nextQuestion(){
+  if(gameOver) return;
+
+  clearInterval(intv);
+
+  if(queue.length===0){
+    $("status").textContent = "🏆 CLEAR!";
+    $("question").textContent = "MISSION COMPLETE";
+    $("enemy").style.display = "none";
+    $("answer").textContent = "";
+    $("exp").textContent = "";
+    return;
+  }
+
+  cur = queue.shift();
+
+  $("left").textContent = queue.length + 1;
+  $("enemy").style.display = "block";
+  $("enemy").className = "";
+  $("enemy").textContent = "👾";
+
+  $("question").textContent = cur.q;
+  $("answer").textContent = "";
+  $("exp").textContent = "";
+  $("status").textContent = "THINK!";
+
+  timer = 5;
+  $("timer").textContent = timer;
+
+  $("enemy").style.animation = "none";
+  void $("enemy").offsetWidth;
+  $("enemy").style.animation = "enemyDrop 5s linear forwards";
+
+  intv = setInterval(()=>{
+    timer--;
+    $("timer").textContent = timer;
+
+    if(timer<=0){
+      showAnswer();
+    }
+  },1000);
+}
+
+/* 答え表示 */
+function showAnswer(){
+  clearInterval(intv);
+  if(!cur || gameOver) return;
+
+  $("answer").textContent = cur.a;
+  $("exp").textContent = cur.e || "解説なし";
+  $("status").textContent = "JUDGE!";
+}
+
+/* レーザー */
+function laser(){
+  const l = document.createElement("div");
+  l.className = "laser";
+  $("game").appendChild(l);
+  setTimeout(()=>l.remove(),350);
+}
+
+/* 判定 */
+function hit(ok){
+  if(!cur || gameOver) return;
+
+  const ds = DATASETS[$("dataset").value || 0];
+  let s = getStat(ds.name,cur.q);
+
+  if(ok){
+    laser();
+    score += 100;
+    s.correct++;
+    s.memory += 10;
+    s.last = "correct";
+
+    $("enemy").className = "boom";
+    $("status").textContent = "撃破 +100";
+
+  }else{
+    hp--;
+    s.wrong++;
+    s.memory = Math.max(0, s.memory-15);
+    s.last = "wrong";
+
+    $("game").classList.add("flash");
+    setTimeout(()=>$("game").classList.remove("flash"),350);
+
+    $("status").textContent = "被弾!";
+
+    if(hp<=0){
+      gameOver = true;
+      $("hp").textContent = 0;
+      $("question").textContent = "GAME OVER";
+      $("answer").textContent = "";
+      $("exp").textContent = "";
+      $("status").textContent = "STARTで再挑戦";
+      clearInterval(intv);
+
+      setStat(ds.name,cur.q,s);
+      return;
+    }
+  }
+
+  setStat(ds.name,cur.q,s);
+
+  $("score").textContent = score;
+  $("hp").textContent = hp;
+
+  setTimeout(nextQuestion,650);
+}
+
+/* 統計 */
+function drawStats(){
+  const wrap = $("statsWrap");
+  wrap.style.display = "block";
+
+  const ds = DATASETS[$("dataset").value || 0];
+
+  let correct=0, wrong=0, unseen=0;
+
+  data.forEach(x=>{
+    const s = getStat(ds.name,x.q);
+    correct += s.correct;
+    wrong += s.wrong;
+    if(s.correct===0 && s.wrong===0) unseen++;
+  });
+
+  const cvs = $("chart");
+  const ctx = cvs.getContext("2d");
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+
+  const vals = [correct,wrong,unseen];
+  const cols = ["#22c55e","#ef4444","#3b82f6"];
+  const total = Math.max(vals.reduce((a,b)=>a+b,0),1);
+
+  let start = -Math.PI/2;
+
+  vals.forEach((v,i)=>{
+    const ang = v/total*Math.PI*2;
+
+    ctx.beginPath();
+    ctx.moveTo(120,120);
+    ctx.fillStyle = cols[i];
+    ctx.arc(120,120,90,start,start+ang);
+    ctx.fill();
+
+    start += ang;
+  });
+
+  ctx.fillStyle="#111";
+  ctx.font="16px sans-serif";
+  ctx.fillText("正解 "+correct,240,70);
+  ctx.fillText("不正解 "+wrong,240,100);
+  ctx.fillText("未出題 "+unseen,240,130);
+
+  const sorted = [...data].sort((a,b)=>{
+    return getStat(ds.name,a.q).memory - getStat(ds.name,b.q).memory;
+  });
+
+  $("list").innerHTML = sorted.map(x=>{
+    const s = getStat(ds.name,x.q);
+    return `
+      <div class="row">
+        <b>${escapeHtml(x.q)}</b><br>
+        定着:${s.memory} / 正解:${s.correct} / 不正解:${s.wrong}
+      </div>
+    `;
+  }).join("");
+}
+
+function escapeHtml(str){
+  return str
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+/* イベント */
+$("start").onclick = async ()=>{
+  try{
+    clearInterval(intv);
+
+    gameOver = false;
+    score = 0;
+    hp = 3;
+
+    $("score").textContent = 0;
+    $("hp").textContent = 3;
+    $("status").textContent = "LOADING...";
+    $("enemy").style.display = "block";
+
+    await loadSheet();
+    buildQueue();
+    nextQuestion();
+
+  }catch(e){
+    $("status").textContent = "読込失敗";
+    console.error(e);
+  }
+};
+
+$("show").onclick = showAnswer;
+$("correct").onclick = ()=>hit(true);
+$("wrong").onclick = ()=>hit(false);
+
+$("statsBtn").onclick = drawStats;
+$("closeStats").onclick = ()=>{
+  $("statsWrap").style.display = "none";
+};
 </script>
 </body>
 </html>
