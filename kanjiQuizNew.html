@@ -487,7 +487,7 @@ function buildQueue(){
   const limit =
     Number($("memoryFilter").value || 0);
 
-  /* 条件通過問題 */
+  /* フィルタ */
   let target = data.filter(x=>{
 
     const s = getStat(ds.name,x.q);
@@ -495,10 +495,20 @@ function buildQueue(){
     return s.memory >= limit;
   });
 
-  /* 全件0件防止
-     もし limit>0 で0件なら全件出題 */
+  /* 0件なら停止 */
   if(target.length===0){
-    target=[...data];
+
+    queue = [];
+    $("left").textContent = "0";
+
+    $("question").textContent = "";
+    $("answer").textContent = "";
+    $("exp").textContent = "";
+
+    $("status").textContent =
+      `定着度${limit}以上の問題無し！`;
+
+    return;
   }
 
   const unseen = target.filter(x=>{
@@ -526,7 +536,7 @@ function buildQueue(){
       sb.memory +
       diffDays(sb.lastDate)*2;
 
-    return pb-pa;
+    return pb - pa;
   });
 
   queue = [
@@ -841,7 +851,23 @@ $("start").onclick=async()=>{
 
 $("show").onclick=showAnswer;
 $("correct").onclick=()=>hit(true);
-$("wrong").onclick=()=>hit(false);
+$("wrong").onclick = ()=>{
+
+  if(!cur || gameOver) return;
+
+  /* タイマー停止 */
+  clearInterval(intv);
+
+  /* 答え表示 */
+  $("answer").textContent = cur.a;
+  $("exp").textContent = cur.e || "解説なし";
+  $("status").textContent = "被弾!";
+
+  /* 少し見せてから判定処理 */
+  setTimeout(()=>{
+    hit(false);
+  },700);
+};
 
 $("statsBtn").onclick=drawStats;
 $("closeStats").onclick=()=>{
