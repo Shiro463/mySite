@@ -258,14 +258,59 @@ background:rgba(0,0,0,.65);
 padding:12px;
 }
 #statsPanel{
-width:min(100%,960px);
-height:min(100%,760px);
-margin:auto;
-background:#fff;
-color:#111;
-border-radius:18px;
-padding:16px;
-overflow:auto;
+  width:min(100%,960px);
+  height:min(100%,760px);
+  margin:auto;
+  background:#fff;
+  color:#111;
+  border-radius:18px;
+  overflow:hidden;          /* 外側固定 */
+  display:flex;
+  flex-direction:column;
+}
+/* 上部固定ヘッダー */
+#statsHeader{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:#ffffffee;
+  backdrop-filter:blur(8px);
+  padding:12px;
+  border-bottom:1px solid #ddd;
+}
+/* 中身スクロール */
+#statsBody{
+  flex:1;
+  overflow:auto;
+  padding:16px;
+}
+
+/* 閉じるボタン */
+#closeStats{
+  position:relative;
+  z-index:60;
+}
+#sortMode{
+  margin-top:14px;
+  margin-bottom:18px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-weight:700;
+}
+/* 円グラフ */
+#chart{
+  display:block;
+  margin:0 auto 18px auto;
+  max-width:100%;
+  background:#fff;
+}
+
+/* 日別グラフも余白 */
+#dailyChart{
+  display:block;
+  margin:0 auto 20px auto;
+  max-width:100%;
 }
 .row{
 padding:7px 0;
@@ -332,37 +377,50 @@ z-index:10;
 
 <!-- 統計 -->
 <div id="statsWrap">
-<div id="statsPanel">
+  <div id="statsPanel">
 
-<button class="misc" id="closeStats">閉じる</button>
+    <!-- 固定ヘッダー -->
+    <div id="statsHeader">
+      <button class="misc" id="closeStats">閉じる</button>
+    </div>
 
-<div style="margin:12px 0;padding:12px;border:1px solid #ddd;border-radius:12px">
-  <b>学習データ削除</b><br><br>
+    <!-- スクロール本体 -->
+    <div id="statsBody">
 
-  <button class="ng" id="delCorrect">正解数だけ削除</button>
-  <button class="ng" id="delWrong">不正解数だけ削除</button>
-  <button class="ng" id="delMemory">定着度だけ削除</button>
-  <button class="ng" id="delDate">最終回答日だけ削除</button>
-  <button class="ng" id="delDaily">日別データ削除</button>
-  <button class="ng" id="delAll">全項目削除</button>
+      <div style="margin:12px 0;padding:12px;border:1px solid #ddd;border-radius:12px">
+        <b>学習データ削除</b><br><br>
+
+        <button class="ng" id="delCorrect">正解数だけ削除</button>
+        <button class="ng" id="delWrong">不正解数だけ削除</button>
+        <button class="ng" id="delMemory">定着度だけ削除</button>
+        <button class="ng" id="delDate">最終回答日だけ削除</button>
+        <button class="ng" id="delDaily">日別データ削除</button>
+        <button class="ng" id="delAll">全項目削除</button>
+      </div>
+
+      <h2>学習統計</h2>
+
+      <h3>日別学習グラフ</h3>
+      <canvas id="dailyChart" width="860" height="320"></canvas>
+
+      <select id="sortMode">
+        <option value="memory_desc">定着度▼</option>
+        <option value="memory_asc">定着度▲</option>
+        <option value="correct_desc">正解数▼</option>
+        <option value="correct_asc">正解数▲</option>
+        <option value="wrong_desc">不正解数▼</option>
+        <option value="wrong_asc">不正解数▲</option>
+        <option value="date_desc">最終回答日▼</option>
+        <option value="date_asc">最終回答日▲</option>
+      </select>
+
+      <canvas id="chart" width="420" height="320"></canvas>
+
+      <div id="list"></div>
+
+    </div>
+  </div>
 </div>
-
-
-<h2>学習統計</h2>
-
-<h3>日別学習グラフ</h3>
-<canvas id="dailyChart" width="860" height="320"></canvas>
-
-<select id="sortMode">
-<option value="memory_desc">定着度▼</option>
-<option value="memory_asc">定着度▲</option>
-<option value="correct_desc">正解数▼</option>
-<option value="correct_asc">正解数▲</option>
-<option value="wrong_desc">不正解数▼</option>
-<option value="wrong_asc">不正解数▲</option>
-<option value="date_desc">最終回答日▼</option>
-<option value="date_asc">最終回答日▲</option>
-</select>
 
 <canvas id="chart" width="300" height="200"></canvas>
 
@@ -487,62 +545,73 @@ function buildQueue(){
   const limit =
     Number($("memoryFilter").value || 0);
 
-  /* フィルタ */
   let target = data.filter(x=>{
-
     const s = getStat(ds.name,x.q);
-
     return s.memory >= limit;
   });
 
-  /* 0件なら停止 */
+  /* 該当なし */
   if(target.length===0){
 
-    queue = [];
-    $("left").textContent = "0";
+    queue=[];
+    $("left").textContent="0";
 
-    $("question").textContent = "";
-    $("answer").textContent = "";
-    $("exp").textContent = "";
+    $("question").textContent="";
+    $("answer").textContent="";
+    $("exp").textContent="";
 
-    $("status").textContent =
+    $("status").textContent=
       `定着度${limit}以上の問題無し！`;
 
     return;
   }
 
-  const unseen = target.filter(x=>{
-    const s=getStat(ds.name,x.q);
-    return s.correct===0 && s.wrong===0;
-  });
+  /* -------------------------
+     重み付きランダム抽選
+     memory高いほど選ばれやすい
+  ------------------------- */
 
-  const seen = target.filter(x=>{
-    const s=getStat(ds.name,x.q);
-    return !(s.correct===0 && s.wrong===0);
-  });
+  queue=[];
 
-  shuffle(unseen);
+  let pool=[...target];
 
-  seen.sort((a,b)=>{
+  while(pool.length){
 
-    const sa=getStat(ds.name,a.q);
-    const sb=getStat(ds.name,b.q);
+    const weights = pool.map(x=>{
 
-    const pa =
-      sa.memory +
-      diffDays(sa.lastDate)*2;
+      const s = getStat(ds.name,x.q);
 
-    const pb =
-      sb.memory +
-      diffDays(sb.lastDate)*2;
+      /* 未出題は少し優遇 */
+      const unseen =
+        (s.correct===0 && s.wrong===0) ? 8 : 0;
 
-    return pb - pa;
-  });
+      /* 最低1保証 */
+      return Math.max(
+        1,
+        s.memory + unseen
+      );
+    });
 
-  queue = [
-    ...seen,
-    ...unseen
-  ];
+    const total =
+      weights.reduce((a,b)=>a+b,0);
+
+    let r=Math.random()*total;
+
+    let pickIndex=0;
+
+    for(let i=0;i<weights.length;i++){
+
+      r-=weights[i];
+
+      if(r<=0){
+        pickIndex=i;
+        break;
+      }
+    }
+
+    queue.push(pool[pickIndex]);
+    pool.splice(pickIndex,1);
+  }
 
   $("left").textContent = queue.length;
 }
