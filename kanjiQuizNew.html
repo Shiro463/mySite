@@ -38,8 +38,11 @@ button{border:0;border-radius:999px;padding:14px 18px;font-size:16px;font-weight
 <div id='question'>START!</div>
 <div id='answer'></div>
 <div id='exp'></div>
-<div id='hud'>⭐ SCORE <span id='score'>0</span><br>📚 LEFT <span id='left'>0</span></div>
+<div id='hud'>⭐ SCORE <span id='score'>0</span><br>📚 LEFT <span id='left'>0</span><br><button id='statsBtn' style='margin-top:8px;border:0;border-radius:12px;padding:6px 10px;font-weight:900'>統計</button></div>
+<canvas id='stats' width='340' height='320' style='display:none;position:absolute;right:10px;top:70px;background:rgba(255,255,255,.92);border-radius:18px;padding:8px'></canvas>
+<div id='list' style='display:none;position:absolute;left:10px;right:10px;bottom:90px;max-height:34%;overflow:auto;background:rgba(255,255,255,.92);color:#111;padding:10px;border-radius:18px;font-size:14px'></div>
 <div id='controls'>
+<select id='dataset' style='border-radius:999px;padding:12px;font-weight:900;border:0'></select>
 <button class='start' id='start'>START</button>
 <button class='show' id='show'>答え</button>
 <button class='ok' id='correct'>撃破</button>
@@ -47,21 +50,23 @@ button{border:0;border-radius:999px;padding:14px 18px;font-size:16px;font-weight
 </div>
 </div>
 <script>
-const DEFAULT_SHEET_ID='1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M';
-const DEFAULT_SHEET_NAME='シート1';
-let data=[],queue=[],cur=null,timer=5,intv=null,score=0,hp=3;
+const DATASETS=[{name:'メイン',id:'YOUR_SHEET_ID',sheet:'Sheet1'},{name:'サブ',id:'YOUR_OTHER_SHEET_ID',sheet:'Sheet1'}];
+let data=[],queue=[],cur=null,timer=5,intv=null,score=0,hp=3,gameOver=false;
 const $=id=>document.getElementById(id);
 function k(q){return 'stat_'+q}
 function gs(q){try{return JSON.parse(localStorage.getItem(k(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}')}catch(e){return {correct:0,wrong:0,memory:0,last:''}}}
 function ss(q,s){localStorage.setItem(k(q),JSON.stringify(s))}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-async function load(){const url='https://docs.google.com/spreadsheets/d/'+DEFAULT_SHEET_ID+'/gviz/tq?sheet='+encodeURIComponent(DEFAULT_SHEET_NAME);const txt=await (await fetch(url)).text();const m=txt.match(/setResponse\((.*)\);/s);const j=JSON.parse(m[1]);data=(j.table.rows||[]).map(r=>{const c=r.c||[];const q=c[0]&&c[0].v!=null?String(c[0].v).trim():'';const raw=c[2]&&c[2].v!=null?String(c[2].v):'';const norm=raw.replace(/\\n/g,'\n').replace(/\r\n/g,'\n').replace(/\r/g,'\n');const parts=norm.split('\n');const a=(parts.shift()||'').trim();const e=parts.join('\n').trim();return {q,a,e};}).filter(x=>x.q&&x.a);}
+async function load(){const ds=DATASETS[$('dataset').value||0];const url='https://docs.google.com/spreadsheets/d/'+ds.id+'/gviz/tq?sheet='+encodeURIComponent(ds.sheet);const txt=await (await fetch(url)).text();const m=txt.match(/setResponse\((.*)\);/s);const j=JSON.parse(m[1]);data=(j.table.rows||[]).map(r=>{const c=r.c||[];const q=c[0]&&c[0].v!=null?String(c[0].v).trim():'';const raw=c[2]&&c[2].v!=null?String(c[2].v):'';const norm=raw.replace(/\\n/g,'').replace(/\r\n/g,'').replace(/\r/g,'');const parts=norm.split('');const a=(parts.shift()||'').trim();const e=parts.join('').trim();return {q,a,e};}).filter(x=>x.q&&x.a);}
 function build(){const unseen=data.filter(x=>{const s=gs(x.q);return s.correct===0&&s.wrong===0;});const seen=data.filter(x=>{const s=gs(x.q);return !(s.correct===0&&s.wrong===0);});shuffle(unseen);seen.sort((a,b)=>gs(a.q).memory-gs(b.q).memory);queue=[...unseen,...seen];$('left').textContent=queue.length;}
-function next(){clearInterval(intv);if(queue.length===0){$('status').textContent='🏆 CLEAR!';$('question').textContent='MISSION COMPLETE';$('enemy').style.display='none';return;}cur=queue.shift();$('left').textContent=queue.length+1;$('enemy').style.display='block';$('enemy').className='';$('enemy').id='enemy';$('question').textContent=cur.q;$('answer').textContent='';$('exp').textContent='';$('status').textContent='THINK!';timer=5;$('timer').textContent='5';$('enemy').style.animation='none';void $('enemy').offsetWidth;$('enemy').style.animation='drop 5s linear forwards';intv=setInterval(()=>{timer--; $('timer').textContent=timer; if(timer<=0)show();},1000)}
+function next(){if(gameOver)return;clearInterval(intv);if(queue.length===0){$('status').textContent='🏆 CLEAR!';$('question').textContent='MISSION COMPLETE';$('enemy').style.display='none';return;}cur=queue.shift();$('left').textContent=queue.length+1;$('enemy').style.display='block';$('enemy').className='';$('enemy').id='enemy';$('question').textContent=cur.q;$('answer').textContent='';$('exp').textContent='';$('status').textContent='THINK!';timer=5;$('timer').textContent='5';$('enemy').style.animation='none';void $('enemy').offsetWidth;$('enemy').style.animation='drop 5s linear forwards';intv=setInterval(()=>{timer--; $('timer').textContent=timer; if(timer<=0)show();},1000)}
 function show(){clearInterval(intv);if(!cur)return;$('answer').textContent=cur.a;$('exp').textContent=cur.e||'解説なし';$('status').textContent='JUDGE!';}
 function laser(){const l=document.createElement('div');l.className='laser';$('game').appendChild(l);setTimeout(()=>l.remove(),350)}
-function hit(ok){if(!cur)return;let s=gs(cur.q);if(ok){laser();score+=100;s.correct++;s.memory+=10;s.last='correct';$('enemy').className='boom';$('status').textContent='撃破 +100';}else{hp--;s.wrong++;s.memory=Math.max(0,s.memory-15);s.last='wrong';$('game').classList.add('flash');setTimeout(()=>$('game').classList.remove('flash'),350);$('status').textContent='被弾!';if(hp<=0){$('hp').textContent='0';$('question').textContent='GAME OVER';clearInterval(intv);return;}}ss(cur.q,s);$('score').textContent=score;$('hp').textContent=hp;setTimeout(next,700)}
-$('start').onclick=async()=>{score=0;hp=3;$('score').textContent='0';$('hp').textContent='3';$('status').textContent='LOADING...';await load();build();next();};
+function hit(ok){if(!cur)return;let s=gs(cur.q);if(ok){laser();score+=100;s.correct++;s.memory+=10;s.last='correct';$('enemy').className='boom';$('status').textContent='撃破 +100';}else{hp--;s.wrong++;s.memory=Math.max(0,s.memory-15);s.last='wrong';$('game').classList.add('flash');setTimeout(()=>$('game').classList.remove('flash'),350);$('status').textContent='被弾!';if(hp<=0){gameOver=true;$('hp').textContent='0';$('question').textContent='GAME OVER';$('status').textContent='RETRY TO PLAY';clearInterval(intv);return;}}ss(cur.q,s);$('score').textContent=score;$('hp').textContent=hp;setTimeout(next,700)}
+function drawStats(){const c=$('stats');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);let correct=0,wrong=0,unseen=0;data.forEach(x=>{const s=gs(x.q);correct+=s.correct;wrong+=s.wrong;if(s.correct===0&&s.wrong===0)unseen++;});const total=Math.max(correct+wrong+unseen,1);const vals=[correct,wrong,unseen],cols=['#22c55e','#ef4444','#3b82f6'];let st=-Math.PI/2;vals.forEach((v,i)=>{const ang=v/total*Math.PI*2;ctx.beginPath();ctx.moveTo(90,90);ctx.fillStyle=cols[i];ctx.arc(90,90,70,st,st+ang);ctx.fill();st+=ang;});ctx.fillStyle='#111';ctx.font='14px Arial';ctx.fillText('正解 '+correct,180,40);ctx.fillText('不正解 '+wrong,180,65);ctx.fillText('未出題 '+unseen,180,90);const list=[...data].sort((a,b)=>gs(a.q).memory-gs(b.q).memory).map(x=>{const s=gs(x.q);return x.q+' | 定着'+s.memory+' 正'+s.correct+' 誤'+s.wrong;}).join('<br>');$('list').innerHTML=list;}
+$('statsBtn').onclick=()=>{const show=$('stats').style.display==='none';$('stats').style.display=show?'block':'none';$('list').style.display=show?'block':'none';if(show)drawStats();};
+DATASETS.forEach((d,i)=>{const o=document.createElement('option');o.value=i;o.textContent=d.name;$('dataset').appendChild(o);});
+$('start').onclick=async()=>{gameOver=false;score=0;hp=3;$('score').textContent='0';$('hp').textContent='3';$('status').textContent='LOADING...';await load();build();next();};
 $('show').onclick=show;$('correct').onclick=()=>hit(true);$('wrong').onclick=()=>hit(false);
 </script>
 </body>
