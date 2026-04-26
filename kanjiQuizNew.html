@@ -229,15 +229,23 @@ to{height:72%}
 }
 
 #centerTimer{
-position:absolute;
-top:26%;
-left:50%;
-transform:translateX(-50%);
-font-size:72px;
-font-weight:900;
-color:#fff;
-text-shadow:0 0 20px rgba(0,0,0,.9);
-z-index:50;
+  position:absolute;
+  top:26%;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:72px;
+  font-weight:900;
+  z-index:50;
+
+  color:#ffd6ef;   /* 薄いピンク */
+
+  text-shadow:
+    -2px -2px 0 #dc2626,
+     2px -2px 0 #dc2626,
+    -2px  2px 0 #dc2626,
+     2px  2px 0 #dc2626,
+     0 0 14px rgba(255,80,120,.55),
+     0 0 28px rgba(255,120,160,.35);
 }
 
 /* 統計 */
@@ -275,7 +283,7 @@ font-size:14px;
 <div class="cloud" style="width:180px;height:70px;top:26%;left:-30%;animation-duration:48s"></div>
 <div class="cloud" style="width:120px;height:50px;top:42%;left:-25%;animation-duration:40s"></div>
 
-<div id="topHud">⏱ <span id="timer">5</span> ❤️ <span id="hp">3</span></div>
+<div id="topHud"> ❤️ <span id="hp">3</span></div>
 
 <div id="status">READY</div>
 <!-- <div id="enemy">👾</div> -->
@@ -305,6 +313,14 @@ z-index:10;
 
 <div id="controls">
     <select id="dataset"></select>
+    <select id="memoryFilter">
+    <option value="0">全問題</option>
+    <option value="20">定着度20以上</option>
+    <option value="40">定着度40以上</option>
+    <option value="60">定着度60以上</option>
+    <option value="80">定着度80以上</option>
+    <option value="100">定着度100以上</option>
+    </select>
     <button class="start" id="start">START</button>
         <button class="show" id="show">答え</button>
     <div class="break"></div>
@@ -468,20 +484,35 @@ async function loadSheet(){
 function buildQueue(){
 
   const ds = DATASETS[$("dataset").value || 0];
+  const limit =
+    Number($("memoryFilter").value || 0);
 
-  const unseen = data.filter(x=>{
+  /* 条件通過問題 */
+  let target = data.filter(x=>{
+
+    const s = getStat(ds.name,x.q);
+
+    return s.memory >= limit;
+  });
+
+  /* 全件0件防止
+     もし limit>0 で0件なら全件出題 */
+  if(target.length===0){
+    target=[...data];
+  }
+
+  const unseen = target.filter(x=>{
     const s=getStat(ds.name,x.q);
     return s.correct===0 && s.wrong===0;
   });
 
-  const seen = data.filter(x=>{
+  const seen = target.filter(x=>{
     const s=getStat(ds.name,x.q);
     return !(s.correct===0 && s.wrong===0);
   });
 
   shuffle(unseen);
 
-  /* 高定着度ほど優先 */
   seen.sort((a,b)=>{
 
     const sa=getStat(ds.name,a.q);
@@ -498,12 +529,12 @@ function buildQueue(){
     return pb-pa;
   });
 
-  queue=[
+  queue = [
     ...seen,
     ...unseen
   ];
 
-  $("left").textContent=queue.length;
+  $("left").textContent = queue.length;
 }
 
 /* next */
@@ -1075,7 +1106,6 @@ function startTimer(){
   remain = 5;
   timerStart = Date.now();
 
-  $("timer").textContent = "5.00";
   $("centerTimer").textContent = "5.00";
 
   intv = setInterval(()=>{
@@ -1083,8 +1113,8 @@ function startTimer(){
     const diff = (Date.now() - timerStart) / 1000;
     remain = Math.max(0, 5 - diff);
 
-    $("timer").textContent = remain.toFixed(2);
-    $("centerTimer").textContent = remain.toFixed(2);
+    $("centerTimer").textContent =
+      remain.toFixed(2);
 
     if(remain <= 0){
       showAnswer();
