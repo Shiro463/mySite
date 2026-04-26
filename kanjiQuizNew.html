@@ -71,14 +71,14 @@ body{
   font-size:30px;
   font-weight:900;
 }
-#enemy{
+/* #enemy{
   position:absolute;
   top:-90px;
   left:50%;
   transform:translateX(-50%);
   z-index:10;
   font-size:72px;
-}
+} */
 /* @keyframes enemyDrop{
   from{top:-90px}
   to{top:68%}
@@ -265,7 +265,7 @@ font-size:14px;
 <div id="status">READY</div>
 <!-- <div id="enemy">👾</div> -->
 
-<img id="enemy"
+<!-- <img id="enemy"
 style="
 position:absolute;
 top:-90px;
@@ -275,7 +275,7 @@ width:96px;
 height:96px;
 object-fit:contain;
 z-index:10;
-">
+"> -->
 
 <div id="centerTimer">5.00</div>
 
@@ -502,10 +502,10 @@ function nextQuestion(){
 
   $("left").textContent = queue.length + 1;
 
-  $("enemy").src =
-    ENEMY_IMAGES[
-      Math.floor(Math.random()*ENEMY_IMAGES.length)
-    ];
+//   $("enemy").src =
+//     ENEMY_IMAGES[
+//       Math.floor(Math.random()*ENEMY_IMAGES.length)
+//     ];
 
   $("question").textContent = cur.q;
   $("answer").textContent = "";
@@ -594,7 +594,7 @@ function hit(ok){
     s.memory=Math.max(1,s.memory-8);
     s.last="correct";
 
-    $("enemy").className="boom";
+    // $("enemy").className="boom";
     $("status").textContent="撃破 +100";
 
     }else{
@@ -761,7 +761,7 @@ $("start").onclick=async()=>{
     $("score").textContent=0;
     $("hp").textContent=3;
     $("status").textContent="LOADING...";
-    $("enemy").style.display="block";
+    // $("enemy").style.display="block";
 
     await loadSheet();
     buildQueue();
