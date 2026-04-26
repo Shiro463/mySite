@@ -420,6 +420,7 @@ async function loadSheet(){
 
 /* 出題順 */
 function buildQueue(){
+
   const ds = DATASETS[$("dataset").value || 0];
 
   const unseen = data.filter(x=>{
@@ -432,15 +433,24 @@ function buildQueue(){
     return !(s.correct===0 && s.wrong===0);
   });
 
+  /* 未出題はランダム */
   shuffle(unseen);
 
+  /* 出題済みは memory高い順（苦手優先） */
   seen.sort((a,b)=>{
-    return getStat(ds.name,a.q).memory - getStat(ds.name,b.q).memory;
+    return getStat(ds.name,b.q).memory
+         - getStat(ds.name,a.q).memory;
   });
 
-  queue = [...unseen,...seen];
+  queue = [...unseen, ...seen];
+
   $("left").textContent = queue.length;
 }
+
+const ENEMIES = [
+  "👾","👹","🤖","👻","🐉"
+];
+
 
 /* 次の問題 */
 function nextQuestion(){
@@ -449,20 +459,24 @@ function nextQuestion(){
   clearInterval(intv);
 
   if(queue.length===0){
-    $("status").textContent = "🏆 CLEAR!";
-    $("question").textContent = "MISSION COMPLETE";
-    $("enemy").style.display = "none";
-    $("answer").textContent = "";
-    $("exp").textContent = "";
+    $("status").textContent="🏆 CLEAR!";
+    $("question").textContent="MISSION COMPLETE";
+    $("enemy").style.display="none";
+    $("answer").textContent="";
+    $("exp").textContent="";
     return;
   }
 
   cur = queue.shift();
 
   $("left").textContent = queue.length + 1;
-  $("enemy").style.display = "block";
-  $("enemy").className = "";
-  $("enemy").textContent = "👾";
+
+  $("enemy").style.display="block";
+  $("enemy").className="";
+
+  /* ランダム敵 */
+  $("enemy").textContent =
+    ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
 
   $("question").textContent = cur.q;
   $("answer").textContent = "";
@@ -472,13 +486,13 @@ function nextQuestion(){
   timer = 5;
   $("timer").textContent = timer;
 
-  $("enemy").style.animation = "none";
+  $("enemy").style.animation="none";
   void $("enemy").offsetWidth;
-  $("enemy").style.animation = "enemyDrop 5s linear forwards";
+  $("enemy").style.animation="enemyDrop 5s linear forwards";
 
-  intv = setInterval(()=>{
+  intv=setInterval(()=>{
     timer--;
-    $("timer").textContent = timer;
+    $("timer").textContent=timer;
 
     if(timer<=0){
       showAnswer();
@@ -509,50 +523,64 @@ function hit(ok){
   if(!cur || gameOver) return;
 
   const ds = DATASETS[$("dataset").value || 0];
-  let s = getStat(ds.name,cur.q);
+  let s = getStat(ds.name, cur.q);
 
   if(ok){
+
     laser();
+
     score += 100;
     s.correct++;
-    s.memory += 10;
+
+    /* 正解したら下がる（最低1） */
+    s.memory = Math.max(1, s.memory - 8);
+
     s.last = "correct";
 
     $("enemy").className = "boom";
     $("status").textContent = "撃破 +100";
 
   }else{
+
     hp--;
     s.wrong++;
-    s.memory = Math.max(0, s.memory-15);
+
+    /* 不正解なら上がる */
+    s.memory += 15;
+
     s.last = "wrong";
 
     $("game").classList.add("flash");
-    setTimeout(()=>$("game").classList.remove("flash"),350);
+    setTimeout(()=>{
+      $("game").classList.remove("flash");
+    },350);
 
     $("status").textContent = "被弾!";
 
     if(hp<=0){
-      gameOver = true;
-      $("hp").textContent = 0;
-      $("question").textContent = "GAME OVER";
-      $("answer").textContent = "";
-      $("exp").textContent = "";
-      $("status").textContent = "STARTで再挑戦";
+      gameOver=true;
+
+      $("hp").textContent=0;
+      $("question").textContent="GAME OVER";
+      $("answer").textContent="";
+      $("exp").textContent="";
+      $("status").textContent="STARTで再挑戦";
+
       clearInterval(intv);
 
-      setStat(ds.name,cur.q,s);
+      setStat(ds.name, cur.q, s);
       return;
     }
   }
 
-  setStat(ds.name,cur.q,s);
+  setStat(ds.name, cur.q, s);
 
   $("score").textContent = score;
   $("hp").textContent = hp;
 
   setTimeout(nextQuestion,650);
 }
+
 
 /* 統計 */
 function drawStats(){
