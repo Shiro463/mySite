@@ -585,24 +585,40 @@ const rows=[...data];
 
 rows.sort((a,b)=>{
 
-const sa=getStat(ds.name,a.q);
-const sb=getStat(ds.name,b.q);
+  const sa = getStat(ds.name,a.q);
+  const sb = getStat(ds.name,b.q);
 
-switch(mode){
+  switch(mode){
 
-case "correct_desc": return sb.correct-sa.correct;
-case "correct_asc": return sa.correct-sb.correct;
+    case "correct_desc":
+      return sb.correct - sa.correct;
 
-case "wrong_desc": return sb.wrong-sa.wrong;
-case "wrong_asc": return sa.wrong-sb.wrong;
+    case "correct_asc":
+      return sa.correct - sb.correct;
 
-case "memory_desc": return sb.memory-sa.memory;
-case "memory_asc": return sa.memory-sb.memory;
+    case "wrong_desc":
+      return sb.wrong - sa.wrong;
 
-case "date_desc": return sb.lastDate.localeCompare(sa.lastDate);
-case "date_asc": return sa.lastDate.localeCompare(sb.lastDate);
-}
-return 0;
+    case "wrong_asc":
+      return sa.wrong - sb.wrong;
+
+    case "memory_desc":
+      return sb.memory - sa.memory;
+
+    case "memory_asc":
+      return sa.memory - sb.memory;
+
+    /* ▼ 修正版：日付文字列比較ではなく Date比較 */
+    case "date_desc":
+      return new Date(sb.lastDate || "1900-01-01")
+           - new Date(sa.lastDate || "1900-01-01");
+
+    case "date_asc":
+      return new Date(sa.lastDate || "1900-01-01")
+           - new Date(sb.lastDate || "1900-01-01");
+  }
+
+  return 0;
 });
 
 $("list").innerHTML=rows.map(x=>{
