@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Memory Shooting V3.1 安定完成版</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memory Shooting V4 Complete</title>
 
 <style>
 *{box-sizing:border-box}
@@ -12,13 +12,11 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-family:Arial,sans-serif;
 }
-
 body{
   background:#0f172a;
 }
-
 #game{
   position:relative;
   width:100%;
@@ -26,9 +24,9 @@ body{
   overflow:hidden;
   color:#fff;
   background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,.15), transparent 25%),
-    radial-gradient(circle at 80% 30%, rgba(255,255,255,.10), transparent 25%),
-    linear-gradient(180deg,#38bdf8 0%,#1d4ed8 55%,#0f172a 100%);
+  radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 25%),
+  radial-gradient(circle at 80% 30%,rgba(255,255,255,.12),transparent 25%),
+  linear-gradient(#38bdf8,#1d4ed8 55%,#0f172a);
 }
 
 /* 雲 */
@@ -37,18 +35,17 @@ body{
   background:rgba(255,255,255,.8);
   border-radius:999px;
   filter:blur(2px);
-  animation:cloudMove linear infinite;
+  animation:cloud linear infinite;
 }
-.cloud::before,.cloud::after{
+.cloud:before,.cloud:after{
   content:"";
   position:absolute;
   background:inherit;
   border-radius:999px;
 }
-.cloud::before{width:60%;height:90%;left:10%;top:-20px}
-.cloud::after{width:50%;height:80%;right:10%;top:-12px}
-
-@keyframes cloudMove{
+.cloud:before{width:60%;height:90%;left:10%;top:-20px}
+.cloud:after{width:50%;height:80%;right:10%;top:-10px}
+@keyframes cloud{
   from{transform:translateX(-30vw)}
   to{transform:translateX(130vw)}
 }
@@ -58,39 +55,34 @@ body{
   position:absolute;
   left:10px;
   top:10px;
-  z-index:50;
-  background:rgba(0,0,0,.28);
+  z-index:30;
+  background:rgba(0,0,0,.25);
   padding:10px 14px;
-  border-radius:16px;
-  font-weight:800;
-  backdrop-filter:blur(6px);
+  border-radius:14px;
+  font-weight:900;
 }
-
 #hud{
   position:absolute;
   right:10px;
   bottom:10px;
-  z-index:50;
-  background:rgba(0,0,0,.28);
+  z-index:30;
+  background:rgba(0,0,0,.25);
   padding:12px;
-  border-radius:16px;
+  border-radius:14px;
   text-align:right;
-  font-weight:800;
-  backdrop-filter:blur(6px);
+  font-weight:900;
 }
 
-/* 中央UI */
+/* 中央 */
 #status{
   position:absolute;
-  top:6%;
+  top:5%;
   left:50%;
   transform:translateX(-50%);
   z-index:20;
-  font-size:clamp(20px,4vw,34px);
+  font-size:30px;
   font-weight:900;
-  text-shadow:0 4px 10px rgba(0,0,0,.4);
 }
-
 #enemy{
   position:absolute;
   top:-90px;
@@ -98,9 +90,7 @@ body{
   transform:translateX(-50%);
   z-index:10;
   font-size:72px;
-  filter:drop-shadow(0 8px 10px rgba(0,0,0,.35));
 }
-
 @keyframes enemyDrop{
   from{top:-90px}
   to{top:68%}
@@ -114,12 +104,12 @@ body{
   width:min(94vw,1100px);
   max-height:22vh;
   overflow:auto;
-  padding:10px;
   text-align:center;
+  padding:10px;
   line-height:1.35;
   font-size:clamp(20px,4vw,52px);
+  font-weight:900;
   word-break:break-word;
-  overflow-wrap:anywhere;
 }
 
 #answer{
@@ -127,16 +117,16 @@ body{
   top:38%;
   left:50%;
   transform:translateX(-50%);
-  width:min(92vw,950px);
+  width:min(92vw,920px);
   max-height:14vh;
   overflow:auto;
-  padding:8px;
   text-align:center;
+  padding:8px;
   line-height:1.35;
   font-size:clamp(18px,3.4vw,38px);
   color:#fde047;
+  font-weight:900;
   word-break:break-word;
-  overflow-wrap:anywhere;
 }
 
 #exp{
@@ -144,25 +134,24 @@ body{
   top:56%;
   left:50%;
   transform:translateX(-50%);
-  width:min(92vw,980px);
+  width:min(92vw,950px);
   max-height:20vh;
   overflow:auto;
-  padding:8px;
   text-align:center;
+  padding:8px;
   line-height:1.45;
   white-space:pre-wrap;
-  font-size:clamp(15px,2.4vw,26px);
+  font-size:clamp(15px,2.3vw,25px);
   word-break:break-word;
-  overflow-wrap:anywhere;
 }
 
-/* ボタン */
+/* controls */
 #controls{
   position:absolute;
   left:50%;
   bottom:12px;
   transform:translateX(-50%);
-  z-index:60;
+  z-index:40;
   width:min(96vw,980px);
   display:flex;
   gap:8px;
@@ -178,10 +167,7 @@ button,select{
   font-weight:900;
 }
 
-button{
-  color:#fff;
-  box-shadow:0 8px 18px rgba(0,0,0,.25);
-}
+button{color:#fff}
 
 .start{background:#2563eb}
 .show{background:#64748b}
@@ -190,496 +176,494 @@ button{
 .misc{background:#7c3aed}
 
 /* 演出 */
-.flash{
-  animation:flash .35s;
-}
+.flash{animation:flash .35s}
 @keyframes flash{
-  0%,100%{filter:none}
-  50%{filter:brightness(1.45)}
+0%,100%{filter:none}
+50%{filter:brightness(1.45)}
 }
-
-.boom{
-  animation:boom .55s forwards;
-}
+.boom{animation:boom .55s forwards}
 @keyframes boom{
-  0%{transform:translateX(-50%) scale(1)}
-  100%{transform:translateX(-50%) scale(2.6);opacity:0}
+0%{transform:translateX(-50%) scale(1)}
+100%{transform:translateX(-50%) scale(2.5);opacity:0}
 }
-
 .laser{
-  position:absolute;
-  left:50%;
-  bottom:80px;
-  transform:translateX(-50%);
-  width:8px;
-  height:0;
-  z-index:30;
-  background:#fff;
-  box-shadow:0 0 18px #fff,0 0 30px #38bdf8;
-  animation:laser .35s forwards;
+position:absolute;
+left:50%;
+bottom:80px;
+transform:translateX(-50%);
+width:8px;
+height:0;
+background:#fff;
+box-shadow:0 0 18px #fff,0 0 28px #38bdf8;
+animation:laser .35s forwards;
+z-index:20;
 }
 @keyframes laser{
-  from{height:0}
-  to{height:72%}
+from{height:0}
+to{height:72%}
 }
 
 /* 統計 */
 #statsWrap{
-  position:absolute;
-  inset:0;
-  z-index:100;
-  background:rgba(0,0,0,.65);
-  display:none;
-  padding:12px;
+position:absolute;
+inset:0;
+display:none;
+z-index:100;
+background:rgba(0,0,0,.65);
+padding:12px;
 }
-
 #statsPanel{
-  width:min(100%,900px);
-  height:min(100%,760px);
-  margin:auto;
-  background:#fff;
-  color:#111;
-  border-radius:20px;
-  overflow:auto;
-  padding:16px;
-}
-
-#statsPanel h2{
-  margin:0 0 10px;
-}
-
-#list{
-  font-size:14px;
-  line-height:1.5;
-  margin-top:10px;
+width:min(100%,960px);
+height:min(100%,760px);
+margin:auto;
+background:#fff;
+color:#111;
+border-radius:18px;
+padding:16px;
+overflow:auto;
 }
 .row{
-  padding:6px 0;
-  border-bottom:1px solid #ddd;
-}
-.small{
-  font-size:13px;
-  opacity:.75;
+padding:7px 0;
+border-bottom:1px solid #ddd;
+font-size:14px;
 }
 </style>
 </head>
 
 <body>
+
 <div id="game">
 
-  <!-- 雲 -->
-  <div class="cloud" style="width:140px;height:56px;top:12%;left:-20%;animation-duration:34s"></div>
-  <div class="cloud" style="width:180px;height:70px;top:28%;left:-30%;animation-duration:48s"></div>
-  <div class="cloud" style="width:120px;height:50px;top:44%;left:-25%;animation-duration:40s"></div>
+<div class="cloud" style="width:140px;height:56px;top:10%;left:-20%;animation-duration:34s"></div>
+<div class="cloud" style="width:180px;height:70px;top:26%;left:-30%;animation-duration:48s"></div>
+<div class="cloud" style="width:120px;height:50px;top:42%;left:-25%;animation-duration:40s"></div>
 
-  <div id="topHud">⏱ <span id="timer">5</span>　❤️ <span id="hp">3</span></div>
+<div id="topHud">⏱ <span id="timer">5</span> ❤️ <span id="hp">3</span></div>
 
-  <div id="status">READY</div>
-  <div id="enemy">👾</div>
+<div id="status">READY</div>
+<div id="enemy">👾</div>
 
-  <div id="question">START を押してください</div>
-  <div id="answer"></div>
-  <div id="exp"></div>
+<div id="question">STARTを押してください</div>
+<div id="answer"></div>
+<div id="exp"></div>
 
-  <div id="hud">
-    ⭐ SCORE <span id="score">0</span><br>
-    📚 LEFT <span id="left">0</span>
-  </div>
+<div id="hud">
+⭐ SCORE <span id="score">0</span><br>
+📚 LEFT <span id="left">0</span>
+</div>
 
-  <div id="controls">
-    <select id="dataset"></select>
-    <button class="start" id="start">START</button>
-    <button class="show" id="show">答え</button>
-    <button class="ok" id="correct">撃破</button>
-    <button class="ng" id="wrong">被弾</button>
-    <button class="misc" id="statsBtn">統計</button>
-  </div>
+<div id="controls">
+<select id="dataset"></select>
+<button class="start" id="start">START</button>
+<button class="show" id="show">答え</button>
+<button class="ok" id="correct">撃破</button>
+<button class="ng" id="wrong">被弾</button>
+<button class="misc" id="statsBtn">統計</button>
+</div>
 
 </div>
 
 <!-- 統計 -->
 <div id="statsWrap">
-  <div id="statsPanel">
-    <button class="misc" id="closeStats">閉じる</button>
-    <h2>学習統計</h2>
-    <canvas id="chart" width="320" height="260"></canvas>
-    <div class="small">定着度が低い順に表示</div>
-    <div id="list"></div>
-  </div>
+<div id="statsPanel">
+
+<button class="misc" id="closeStats">閉じる</button>
+
+<h2>学習統計</h2>
+
+<select id="sortMode">
+<option value="memory_desc">定着度▼</option>
+<option value="memory_asc">定着度▲</option>
+<option value="correct_desc">正解数▼</option>
+<option value="correct_asc">正解数▲</option>
+<option value="wrong_desc">不正解数▼</option>
+<option value="wrong_asc">不正解数▲</option>
+<option value="date_desc">最終回答日▼</option>
+<option value="date_asc">最終回答日▲</option>
+</select>
+
+<canvas id="chart" width="420" height="260"></canvas>
+
+<div id="list"></div>
+
+</div>
 </div>
 
 <script>
-/* =============================
-   設定（ここだけ編集すればOK）
-============================= */
-const DATASETS = [
-  {
-    name:"音読み",
-    id:"1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M",
-    sheet:"シート1"
-  },
-  {
-    name:"みんはや",
-    id:"1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0",
-    sheet:"シート1"
-  }
+const DATASETS=[
+{name:"音読み",id:"1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M",sheet:"シート1"},
+{name:"みんはや",id:"1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0",sheet:"シート1"}
 ];
 
-/* ============================= */
+const ENEMIES=["👾","👹","🤖","👻","🐉","🦖","😈","💀","🛸","🔥","🧟","👽"];
 
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
-let data = [];
-let queue = [];
-let cur = null;
-let timer = 5;
-let intv = null;
-let score = 0;
-let hp = 3;
-let gameOver = false;
+let data=[];
+let queue=[];
+let cur=null;
+let timer=5;
+let intv=null;
+let score=0;
+let hp=3;
+let gameOver=false;
 
 /* 初期化 */
 DATASETS.forEach((d,i)=>{
-  const op = document.createElement("option");
-  op.value = i;
-  op.textContent = d.name;
-  $("dataset").appendChild(op);
+const op=document.createElement("option");
+op.value=i;
+op.textContent=d.name;
+$("dataset").appendChild(op);
 });
 
-/* localStorage */
-function keyName(datasetName,q){
-  return "ms_" + datasetName + "_" + q;
+function keyName(dataset,q){
+return "ms_"+dataset+"_"+q;
 }
 
-function getStat(datasetName,q){
-  try{
-    return JSON.parse(
-      localStorage.getItem(keyName(datasetName,q)) ||
-      '{"correct":0,"wrong":0,"memory":0,"last":""}'
-    );
-  }catch(e){
-    return {correct:0,wrong:0,memory:0,last:""};
-  }
+function getStat(dataset,q){
+try{
+return JSON.parse(localStorage.getItem(keyName(dataset,q))||
+'{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":""}');
+}catch(e){
+return {correct:0,wrong:0,memory:0,last:"",lastDate:""};
+}
 }
 
-function setStat(datasetName,q,obj){
-  localStorage.setItem(keyName(datasetName,q), JSON.stringify(obj));
+function setStat(dataset,q,obj){
+localStorage.setItem(keyName(dataset,q),JSON.stringify(obj));
 }
 
-/* utility */
-function shuffle(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+return a;
 }
 
-/* データ読込 */
+function todayStr(){
+const d=new Date();
+const y=d.getFullYear();
+const m=String(d.getMonth()+1).padStart(2,"0");
+const da=String(d.getDate()).padStart(2,"0");
+return `${y}-${m}-${da}`;
+}
+
+function diffDays(dateStr){
+if(!dateStr)return 9999;
+const t1=new Date(dateStr);
+const t2=new Date(todayStr());
+return Math.floor((t2-t1)/(1000*60*60*24));
+}
+
+/* load */
 async function loadSheet(){
-  const ds = DATASETS[$("dataset").value || 0];
 
-  const url =
-    "https://docs.google.com/spreadsheets/d/" +
-    ds.id +
-    "/gviz/tq?sheet=" +
-    encodeURIComponent(ds.sheet);
+const ds=DATASETS[$("dataset").value||0];
 
-  const txt = await (await fetch(url)).text();
-  const m = txt.match(/setResponse\((.*)\);/s);
-  const json = JSON.parse(m[1]);
+const url=
+"https://docs.google.com/spreadsheets/d/"
++ds.id+
+"/gviz/tq?sheet="+encodeURIComponent(ds.sheet);
 
-  data = (json.table.rows || []).map(r=>{
-    const c = r.c || [];
+const txt=await (await fetch(url)).text();
 
-    const q =
-      c[0] && c[0].v != null
-      ? String(c[0].v).trim()
-      : "";
+const m=txt.match(/setResponse\((.*)\);/s);
+const json=JSON.parse(m[1]);
 
-    const raw =
-      c[2] && c[2].v != null
-      ? String(c[2].v)
-      : "";
+data=(json.table.rows||[]).map(r=>{
 
-    /* ★重要修正
-       Google Sheets では \\n 文字列で入る場合があるので、
-       まず文字列 \\n を実改行へ変換する
-    */
-    const normalized = raw.replace(/\\n/g, "\n");
+const c=r.c||[];
 
-    /* 最初の改行で分割 */
-    const lines = normalized.split("\n");
+const q=c[0]&&c[0].v!=null?String(c[0].v).trim():"";
+const raw=c[2]&&c[2].v!=null?String(c[2].v):"";
 
-    const a = (lines.shift() || "").trim();
-    const e = lines.join("\n").trim();
+const normalized=raw.replace(/\\n/g,"\n");
+const lines=normalized.split("\n");
 
-    return { q, a, e };
-  }).filter(x => x.q && x.a);
+const a=(lines.shift()||"").trim();
+const e=lines.join("\n").trim();
+
+return {q,a,e};
+
+}).filter(x=>x.q&&x.a);
 }
 
-/* 出題順 */
+/* queue */
 function buildQueue(){
 
-  const ds = DATASETS[$("dataset").value || 0];
+const ds=DATASETS[$("dataset").value||0];
 
-  const unseen = data.filter(x=>{
-    const s = getStat(ds.name,x.q);
-    return s.correct===0 && s.wrong===0;
-  });
+const unseen=data.filter(x=>{
+const s=getStat(ds.name,x.q);
+return s.correct===0&&s.wrong===0;
+});
 
-  const seen = data.filter(x=>{
-    const s = getStat(ds.name,x.q);
-    return !(s.correct===0 && s.wrong===0);
-  });
+const seen=data.filter(x=>{
+const s=getStat(ds.name,x.q);
+return !(s.correct===0&&s.wrong===0);
+});
 
-  /* 未出題はランダム */
-  shuffle(unseen);
+shuffle(unseen);
 
-  /* 出題済みは memory高い順（苦手優先） */
-  seen.sort((a,b)=>{
-    return getStat(ds.name,b.q).memory
-         - getStat(ds.name,a.q).memory;
-  });
+seen.sort((a,b)=>{
 
-  queue = [...unseen, ...seen];
+const sa=getStat(ds.name,a.q);
+const sb=getStat(ds.name,b.q);
 
-  $("left").textContent = queue.length;
+const ma=sa.memory + diffDays(sa.lastDate)*2;
+const mb=sb.memory + diffDays(sb.lastDate)*2;
+
+return mb-ma;
+});
+
+queue=[...unseen,...seen];
+
+$("left").textContent=queue.length;
 }
 
-const ENEMIES = [
-  "👾","👹","🤖","👻","🐉"
-];
-
-
-/* 次の問題 */
+/* next */
 function nextQuestion(){
-  if(gameOver) return;
 
-  clearInterval(intv);
+if(gameOver)return;
 
-  if(queue.length===0){
-    $("status").textContent="🏆 CLEAR!";
-    $("question").textContent="MISSION COMPLETE";
-    $("enemy").style.display="none";
-    $("answer").textContent="";
-    $("exp").textContent="";
-    return;
-  }
+clearInterval(intv);
 
-  cur = queue.shift();
-
-  $("left").textContent = queue.length + 1;
-
-  $("enemy").style.display="block";
-  $("enemy").className="";
-
-  /* ランダム敵 */
-  $("enemy").textContent =
-    ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
-
-  $("question").textContent = cur.q;
-  $("answer").textContent = "";
-  $("exp").textContent = "";
-  $("status").textContent = "THINK!";
-
-  timer = 5;
-  $("timer").textContent = timer;
-
-  $("enemy").style.animation="none";
-  void $("enemy").offsetWidth;
-  $("enemy").style.animation="enemyDrop 5s linear forwards";
-
-  intv=setInterval(()=>{
-    timer--;
-    $("timer").textContent=timer;
-
-    if(timer<=0){
-      showAnswer();
-    }
-  },1000);
+if(queue.length===0){
+$("status").textContent="🏆 CLEAR!";
+$("question").textContent="MISSION COMPLETE";
+$("enemy").style.display="none";
+return;
 }
 
-/* 答え表示 */
+cur=queue.shift();
+
+$("left").textContent=queue.length+1;
+
+$("enemy").style.display="block";
+$("enemy").className="";
+$("enemy").textContent=
+ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
+
+$("question").textContent=cur.q;
+$("answer").textContent="";
+$("exp").textContent="";
+$("status").textContent="THINK!";
+
+timer=5;
+$("timer").textContent=timer;
+
+$("enemy").style.animation="none";
+void $("enemy").offsetWidth;
+$("enemy").style.animation="enemyDrop 5s linear forwards";
+
+intv=setInterval(()=>{
+timer--;
+$("timer").textContent=timer;
+if(timer<=0)showAnswer();
+},1000);
+}
+
+/* show */
 function showAnswer(){
-  clearInterval(intv);
-  if(!cur || gameOver) return;
+clearInterval(intv);
+if(!cur||gameOver)return;
 
-  $("answer").textContent = cur.a;
-  $("exp").textContent = cur.e || "解説なし";
-  $("status").textContent = "JUDGE!";
+$("answer").textContent=cur.a;
+$("exp").textContent=cur.e||"解説なし";
+$("status").textContent="JUDGE!";
 }
 
-/* レーザー */
+/* laser */
 function laser(){
-  const l = document.createElement("div");
-  l.className = "laser";
-  $("game").appendChild(l);
-  setTimeout(()=>l.remove(),350);
+const l=document.createElement("div");
+l.className="laser";
+$("game").appendChild(l);
+setTimeout(()=>l.remove(),350);
 }
 
-/* 判定 */
+/* hit */
 function hit(ok){
-  if(!cur || gameOver) return;
 
-  const ds = DATASETS[$("dataset").value || 0];
-  let s = getStat(ds.name, cur.q);
+if(!cur||gameOver)return;
 
-  if(ok){
+const ds=DATASETS[$("dataset").value||0];
+let s=getStat(ds.name,cur.q);
 
-    laser();
+if(ok){
 
-    score += 100;
-    s.correct++;
+laser();
 
-    /* 正解したら下がる（最低1） */
-    s.memory = Math.max(1, s.memory - 8);
+score+=100;
+s.correct++;
+s.memory=Math.max(1,s.memory-8);
+s.last="correct";
 
-    s.last = "correct";
+$("enemy").className="boom";
+$("status").textContent="撃破 +100";
 
-    $("enemy").className = "boom";
-    $("status").textContent = "撃破 +100";
+}else{
 
-  }else{
+hp--;
+s.wrong++;
+s.memory+=15;
+s.last="wrong";
 
-    hp--;
-    s.wrong++;
+$("game").classList.add("flash");
+setTimeout(()=>$("game").classList.remove("flash"),350);
 
-    /* 不正解なら上がる */
-    s.memory += 15;
+$("status").textContent="被弾!";
 
-    s.last = "wrong";
-
-    $("game").classList.add("flash");
-    setTimeout(()=>{
-      $("game").classList.remove("flash");
-    },350);
-
-    $("status").textContent = "被弾!";
-
-    if(hp<=0){
-      gameOver=true;
-
-      $("hp").textContent=0;
-      $("question").textContent="GAME OVER";
-      $("answer").textContent="";
-      $("exp").textContent="";
-      $("status").textContent="STARTで再挑戦";
-
-      clearInterval(intv);
-
-      setStat(ds.name, cur.q, s);
-      return;
-    }
-  }
-
-  setStat(ds.name, cur.q, s);
-
-  $("score").textContent = score;
-  $("hp").textContent = hp;
-
-  setTimeout(nextQuestion,650);
+if(hp<=0){
+gameOver=true;
+$("hp").textContent=0;
+$("question").textContent="GAME OVER";
+$("answer").textContent="";
+$("exp").textContent="";
+$("status").textContent="STARTで再挑戦";
+clearInterval(intv);
+}
 }
 
+s.lastDate=todayStr();
+
+setStat(ds.name,cur.q,s);
+
+$("score").textContent=score;
+$("hp").textContent=hp;
+
+if(!gameOver)setTimeout(nextQuestion,650);
+}
 
 /* 統計 */
 function drawStats(){
-  const wrap = $("statsWrap");
-  wrap.style.display = "block";
 
-  const ds = DATASETS[$("dataset").value || 0];
+$("statsWrap").style.display="block";
 
-  let correct=0, wrong=0, unseen=0;
+const ds=DATASETS[$("dataset").value||0];
 
-  data.forEach(x=>{
-    const s = getStat(ds.name,x.q);
-    correct += s.correct;
-    wrong += s.wrong;
-    if(s.correct===0 && s.wrong===0) unseen++;
-  });
+let correct=0,wrong=0,unseen=0;
 
-  const cvs = $("chart");
-  const ctx = cvs.getContext("2d");
-  ctx.clearRect(0,0,cvs.width,cvs.height);
+data.forEach(x=>{
+const s=getStat(ds.name,x.q);
+correct+=s.correct;
+wrong+=s.wrong;
+if(s.correct===0&&s.wrong===0)unseen++;
+});
 
-  const vals = [correct,wrong,unseen];
-  const cols = ["#22c55e","#ef4444","#3b82f6"];
-  const total = Math.max(vals.reduce((a,b)=>a+b,0),1);
+const cvs=$("chart");
+const ctx=cvs.getContext("2d");
+ctx.clearRect(0,0,cvs.width,cvs.height);
 
-  let start = -Math.PI/2;
+const vals=[correct,wrong,unseen];
+const cols=["#22c55e","#ef4444","#3b82f6"];
+const total=Math.max(correct+wrong+unseen,1);
 
-  vals.forEach((v,i)=>{
-    const ang = v/total*Math.PI*2;
+let start=-Math.PI/2;
 
-    ctx.beginPath();
-    ctx.moveTo(120,120);
-    ctx.fillStyle = cols[i];
-    ctx.arc(120,120,90,start,start+ang);
-    ctx.fill();
+vals.forEach((v,i)=>{
+const ang=v/total*Math.PI*2;
 
-    start += ang;
-  });
+ctx.beginPath();
+ctx.moveTo(120,120);
+ctx.fillStyle=cols[i];
+ctx.arc(120,120,90,start,start+ang);
+ctx.fill();
 
-  ctx.fillStyle="#111";
-  ctx.font="16px sans-serif";
-  ctx.fillText("正解 "+correct,240,70);
-  ctx.fillText("不正解 "+wrong,240,100);
-  ctx.fillText("未出題 "+unseen,240,130);
+start+=ang;
+});
 
-  const sorted = [...data].sort((a,b)=>{
-    return getStat(ds.name,a.q).memory - getStat(ds.name,b.q).memory;
-  });
+ctx.fillStyle="#111";
+ctx.font="16px sans-serif";
+ctx.fillText("正解 "+correct,250,70);
+ctx.fillText("不正解 "+wrong,250,100);
+ctx.fillText("未出題 "+unseen,250,130);
 
-  $("list").innerHTML = sorted.map(x=>{
-    const s = getStat(ds.name,x.q);
-    return `
-      <div class="row">
-        <b>${escapeHtml(x.q)}</b><br>
-        定着:${s.memory} / 正解:${s.correct} / 不正解:${s.wrong}
-      </div>
-    `;
-  }).join("");
+const mode=$("sortMode").value;
+
+const rows=[...data];
+
+rows.sort((a,b)=>{
+
+const sa=getStat(ds.name,a.q);
+const sb=getStat(ds.name,b.q);
+
+switch(mode){
+
+case "correct_desc": return sb.correct-sa.correct;
+case "correct_asc": return sa.correct-sb.correct;
+
+case "wrong_desc": return sb.wrong-sa.wrong;
+case "wrong_asc": return sa.wrong-sb.wrong;
+
+case "memory_desc": return sb.memory-sa.memory;
+case "memory_asc": return sa.memory-sb.memory;
+
+case "date_desc": return sb.lastDate.localeCompare(sa.lastDate);
+case "date_asc": return sa.lastDate.localeCompare(sb.lastDate);
+}
+return 0;
+});
+
+$("list").innerHTML=rows.map(x=>{
+
+const s=getStat(ds.name,x.q);
+
+return `
+<div class="row">
+<b>${escapeHtml(x.q)}</b><br>
+定着:${s.memory}
+　正:${s.correct}
+　誤:${s.wrong}
+　最終:${s.lastDate||"-"}
+</div>
+`;
+
+}).join("");
 }
 
 function escapeHtml(str){
-  return str
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
+return str
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;");
 }
 
-/* イベント */
-$("start").onclick = async ()=>{
-  try{
-    clearInterval(intv);
+/* event */
+$("start").onclick=async()=>{
+try{
+clearInterval(intv);
 
-    gameOver = false;
-    score = 0;
-    hp = 3;
+gameOver=false;
+score=0;
+hp=3;
 
-    $("score").textContent = 0;
-    $("hp").textContent = 3;
-    $("status").textContent = "LOADING...";
-    $("enemy").style.display = "block";
+$("score").textContent=0;
+$("hp").textContent=3;
+$("status").textContent="LOADING...";
+$("enemy").style.display="block";
 
-    await loadSheet();
-    buildQueue();
-    nextQuestion();
+await loadSheet();
+buildQueue();
+nextQuestion();
 
-  }catch(e){
-    $("status").textContent = "読込失敗";
-    console.error(e);
-  }
+}catch(e){
+$("status").textContent="読込失敗";
+console.error(e);
+}
 };
 
-$("show").onclick = showAnswer;
-$("correct").onclick = ()=>hit(true);
-$("wrong").onclick = ()=>hit(false);
+$("show").onclick=showAnswer;
+$("correct").onclick=()=>hit(true);
+$("wrong").onclick=()=>hit(false);
 
-$("statsBtn").onclick = drawStats;
-$("closeStats").onclick = ()=>{
-  $("statsWrap").style.display = "none";
+$("statsBtn").onclick=drawStats;
+$("closeStats").onclick=()=>{
+$("statsWrap").style.display="none";
 };
+
+$("sortMode").onchange=drawStats;
+
 </script>
 </body>
 </html>
