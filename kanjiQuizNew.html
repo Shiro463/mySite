@@ -1057,37 +1057,27 @@ function startTimer(){
 
   clearInterval(intv);
 
-  remain=5;
-  timerStart=Date.now();
+  remain = 5;
+  timerStart = Date.now();
 
-  $("timer").textContent="5";
-  $("bigTimer").textContent="5.00";
+  $("timer").textContent = "5.00";
+  $("centerTimer").textContent = "5.00";
 
-  intv=setInterval(()=>{
+  intv = setInterval(()=>{
 
-    const diff=(Date.now()-timerStart)/1000;
-    remain=Math.max(0,5-diff);
+    const diff = (Date.now() - timerStart) / 1000;
+    remain = Math.max(0, 5 - diff);
 
-    $("timer").textContent=remain.toFixed(2);
-    $("bigTimer").textContent=remain.toFixed(2);
+    $("timer").textContent = remain.toFixed(2);
+    $("centerTimer").textContent = remain.toFixed(2);
 
-    if(remain<=0){
+    if(remain <= 0){
       showAnswer();
     }
 
   },10);
 }
 
-function showAnswer(){
-
-  clearInterval(intv);
-
-  if(!cur || gameOver) return;
-
-  $("answer").textContent = cur.a;
-  $("exp").textContent = cur.e || "解説なし";
-  $("status").textContent = "JUDGE!";
-}
 
 
 /* 起動時 */
