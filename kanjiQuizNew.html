@@ -452,34 +452,43 @@ async function loadSheet(){
 /* queue */
 function buildQueue(){
 
-    const ds=DATASETS[$("dataset").value||0];
+  const ds = DATASETS[$("dataset").value || 0];
 
-    const unseen=data.filter(x=>{
+  const unseen = data.filter(x=>{
     const s=getStat(ds.name,x.q);
-    return s.correct===0&&s.wrong===0;
-    });
+    return s.correct===0 && s.wrong===0;
+  });
 
-    const seen=data.filter(x=>{
+  const seen = data.filter(x=>{
     const s=getStat(ds.name,x.q);
-    return !(s.correct===0&&s.wrong===0);
-    });
+    return !(s.correct===0 && s.wrong===0);
+  });
 
-    shuffle(unseen);
+  shuffle(unseen);
 
-    seen.sort((a,b)=>{
+  /* 高定着度ほど優先 */
+  seen.sort((a,b)=>{
 
     const sa=getStat(ds.name,a.q);
     const sb=getStat(ds.name,b.q);
 
-    const ma=sa.memory + diffDays(sa.lastDate)*2;
-    const mb=sb.memory + diffDays(sb.lastDate)*2;
+    const pa =
+      sa.memory +
+      diffDays(sa.lastDate)*2;
 
-    return mb-ma;
-    });
+    const pb =
+      sb.memory +
+      diffDays(sb.lastDate)*2;
 
-    queue=[...unseen,...seen];
+    return pb-pa;
+  });
 
-    $("left").textContent=queue.length;
+  queue=[
+    ...seen,
+    ...unseen
+  ];
+
+  $("left").textContent=queue.length;
 }
 
 /* next */
@@ -587,37 +596,48 @@ function hit(ok){
 
     if(ok){
 
-    laser();
+        laser();
 
-    score+=100;
-    s.correct++;
-    s.memory=Math.max(1,s.memory-8);
-    s.last="correct";
+        score += 100;
+        s.correct++;
 
-    // $("enemy").className="boom";
-    $("status").textContent="撃破 +100";
+        /* 残り時間が多いほど定着している */
+        const bonus = Math.floor(remain * 4);
+
+        /* 早答えほど大きく下げる */
+        s.memory = Math.max(
+        1,
+        s.memory - (8 + bonus)
+        );
+
+        s.last="correct";
+
+        $("status").textContent="撃破 +100";
 
     }else{
 
-    hp--;
-    s.wrong++;
-    s.memory+=15;
-    s.last="wrong";
+        s.wrong++;
 
-    $("game").classList.add("flash");
-    setTimeout(()=>$("game").classList.remove("flash"),350);
+        /* 不正解で大幅増加 */
+        s.memory += 18;
 
-    $("status").textContent="被弾!";
+        s.last="wrong";
 
-    if(hp<=0){
-    gameOver=true;
-    $("hp").textContent=0;
-    $("question").textContent="GAME OVER";
-    $("answer").textContent="";
-    $("exp").textContent="";
-    $("status").textContent="STARTで再挑戦";
-    clearInterval(intv);
-    }
+        $("status").textContent="被弾!";
+
+        if(hp<=0){
+
+        gameOver=true;
+
+        $("hp").textContent=0;
+        $("question").textContent="GAME OVER";
+        $("answer").textContent="";
+        $("exp").textContent="";
+        $("status").textContent="STARTで再挑戦";
+
+        setStat(ds.name,cur.q,s);
+        return;
+        }
     }
 
     s.lastDate=todayStr();
@@ -627,7 +647,7 @@ function hit(ok){
     $("score").textContent=score;
     $("hp").textContent=hp;
 
-    if(!gameOver)setTimeout(nextQuestion,650);
+    setTimeout(nextQuestion,550);
 
     /* 正解時 */
     addDailyCorrect();
@@ -1030,8 +1050,44 @@ function drawDailyChart(){
 }
 
 
-let remain = 5.00;
-let startMs =
+let remain=5;
+let timerStart=0;
+
+function startTimer(){
+
+  clearInterval(intv);
+
+  remain=5;
+  timerStart=Date.now();
+
+  $("timer").textContent="5";
+  $("bigTimer").textContent="5.00";
+
+  intv=setInterval(()=>{
+
+    const diff=(Date.now()-timerStart)/1000;
+    remain=Math.max(0,5-diff);
+
+    $("timer").textContent=remain.toFixed(2);
+    $("bigTimer").textContent=remain.toFixed(2);
+
+    if(remain<=0){
+      showAnswer();
+    }
+
+  },10);
+}
+
+function showAnswer(){
+
+  clearInterval(intv);
+
+  if(!cur || gameOver) return;
+
+  $("answer").textContent = cur.a;
+  $("exp").textContent = cur.e || "解説なし";
+  $("status").textContent = "JUDGE!";
+}
 
 
 /* 起動時 */
