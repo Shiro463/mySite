@@ -79,10 +79,10 @@ body{
   z-index:10;
   font-size:72px;
 }
-@keyframes enemyDrop{
+/* @keyframes enemyDrop{
   from{top:-90px}
   to{top:68%}
-}
+} */
 
 #question{
   position:absolute;
@@ -213,6 +213,18 @@ from{height:0}
 to{height:72%}
 }
 
+#centerTimer{
+position:absolute;
+top:26%;
+left:50%;
+transform:translateX(-50%);
+font-size:72px;
+font-weight:900;
+color:#fff;
+text-shadow:0 0 20px rgba(0,0,0,.9);
+z-index:50;
+}
+
 /* 統計 */
 #statsWrap{
 position:absolute;
@@ -265,6 +277,7 @@ object-fit:contain;
 z-index:10;
 ">
 
+<div id="centerTimer">5.00</div>
 
 <div id="question">STARTを押してください</div>
 <div id="answer"></div>
@@ -335,14 +348,14 @@ const DATASETS=[
 
 // const ENEMIES=["👾","👹","🤖","👻","🐉","🦖","😈","💀","🛸","🔥","🧟","👽"];
 
-const ENEMY_IMAGES = [
+// const ENEMY_IMAGES = [
 
-"https://imgur.com/5iRsBf1.png",
-"https://imgur.com/kusuHsL.png",
-"https://imgur.com/je95sRs.png",
-"https://imgur.com/uOJ4p5G.png"
+// "https://imgur.com/5iRsBf1.png",
+// "https://imgur.com/kusuHsL.png",
+// "https://imgur.com/je95sRs.png",
+// "https://imgur.com/uOJ4p5G.png"
 
-];
+// ];
 
 const $=id=>document.getElementById(id);
 
@@ -472,48 +485,79 @@ function buildQueue(){
 /* next */
 function nextQuestion(){
 
-    if(gameOver)return;
+  if(gameOver) return;
 
-    clearInterval(intv);
+  clearInterval(intv);
 
-    if(queue.length===0){
+  if(queue.length===0){
+
     $("status").textContent="🏆 CLEAR!";
     $("question").textContent="MISSION COMPLETE";
-    $("enemy").style.display="none";
-    return;
-    }
-
-    cur=queue.shift();
-
-    $("left").textContent=queue.length+1;
-
-    // $("enemy").style.display="block";
-    // $("enemy").className="";
-    // $("enemy").textContent=
-    // ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
-    $("enemy").src =
-    ENEMY_IMAGES[
-    Math.floor(Math.random()*ENEMY_IMAGES.length)
-    ];
-
-    $("question").textContent=cur.q;
     $("answer").textContent="";
     $("exp").textContent="";
-    $("status").textContent="THINK!";
+    return;
+  }
 
-    timer=5;
-    $("timer").textContent=timer;
+  cur = queue.shift();
 
-    $("enemy").style.animation="none";
-    void $("enemy").offsetWidth;
-    $("enemy").style.animation="enemyDrop 5s linear forwards";
+  $("left").textContent = queue.length + 1;
 
-    intv=setInterval(()=>{
-    timer--;
-    $("timer").textContent=timer;
-    if(timer<=0)showAnswer();
-    },1000);
+  $("enemy").src =
+    ENEMY_IMAGES[
+      Math.floor(Math.random()*ENEMY_IMAGES.length)
+    ];
+
+  $("question").textContent = cur.q;
+  $("answer").textContent = "";
+  $("exp").textContent = "";
+  $("status").textContent = "";
+
+  startTimer();
 }
+// function nextQuestion(){
+
+//     if(gameOver)return;
+
+//     clearInterval(intv);
+
+//     if(queue.length===0){
+//         $("status").textContent="🏆 CLEAR!";
+//         $("question").textContent="MISSION COMPLETE";
+//         $("enemy").style.display="none";
+//         return;
+//     }
+
+//     cur=queue.shift();
+
+//     $("left").textContent=queue.length+1;
+
+//     // $("enemy").style.display="block";
+//     // $("enemy").className="";
+//     // $("enemy").textContent=
+//     // ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
+//     $("enemy").src =
+//     ENEMY_IMAGES[
+//     Math.floor(Math.random()*ENEMY_IMAGES.length)
+//     ];
+
+//     $("question").textContent=cur.q;
+//     $("answer").textContent="";
+//     $("exp").textContent="";
+//     $("status").textContent="THINK!";
+
+//     timer=5;
+//     $("timer").textContent=timer;
+
+//     $("enemy").style.animation="none";
+//     void $("enemy").offsetWidth;
+//     $("enemy").style.animation="enemyDrop 5s linear forwards";
+
+//     intv=setInterval(()=>{
+//         timer--;
+//         $("timer").textContent=timer;
+//         if(timer<=0)showAnswer();
+//     },1000);
+// }
 
 /* show */
 function showAnswer(){
@@ -985,6 +1029,9 @@ function drawDailyChart(){
 
 }
 
+
+let remain = 5.00;
+let startMs =
 
 
 /* 起動時 */
