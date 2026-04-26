@@ -23,32 +23,20 @@ body{
   height:100%;
   overflow:hidden;
   color:#fff;
+
   background:
-  radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 25%),
-  radial-gradient(circle at 80% 30%,rgba(255,255,255,.12),transparent 25%),
-  linear-gradient(#38bdf8,#1d4ed8 55%,#0f172a);
+    linear-gradient(
+      rgba(0,0,0,.35),
+      rgba(0,0,0,.45)
+    ),
+    url("https://imgur.com/v2I3HO2.png");
+
+  background-size:cover;
+  background-position:center;
 }
 
 /* 雲 */
-.cloud{
-  position:absolute;
-  background:rgba(255,255,255,.8);
-  border-radius:999px;
-  filter:blur(2px);
-  animation:cloud linear infinite;
-}
-.cloud:before,.cloud:after{
-  content:"";
-  position:absolute;
-  background:inherit;
-  border-radius:999px;
-}
-.cloud:before{width:60%;height:90%;left:10%;top:-20px}
-.cloud:after{width:50%;height:80%;right:10%;top:-10px}
-@keyframes cloud{
-  from{transform:translateX(-30vw)}
-  to{transform:translateX(130vw)}
-}
+
 
 /* HUD */
 #topHud{
@@ -159,11 +147,33 @@ body{
   justify-content:center;
 }
 
+#answer,
+#exp,
+#status{
+  text-shadow:
+  0 2px 6px rgba(0,0,0,.9),
+  0 0 12px rgba(0,0,0,.6);
+}
+
+/* ボタン改行 */
+#controls{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+}
+
+.break{
+  flex-basis:100%;
+  height:0;
+}
+
+
 button,select{
   border:none;
   border-radius:999px;
   padding:12px 16px;
-  font-size:15px;
+  font-size:11px;
   font-weight:900;
 }
 
@@ -253,14 +263,15 @@ font-size:14px;
 </div>
 
 <div id="controls">
-<select id="dataset"></select>
-<button class="start" id="start">START</button>
-<button class="show" id="show">答え</button>
-<button class="ok" id="correct">撃破</button>
-<button class="ng" id="wrong">被弾</button>
-<button class="misc" id="statsBtn">統計</button>
-</div>
-
+    <select id="dataset"></select>
+    <button class="start" id="start">START</button>
+    <div class="break"></div>
+        <button class="show" id="show">答え</button>
+        <button class="ok" id="correct">撃破</button>
+    <div class="break"></div>
+        <button class="ng" id="wrong">被弾</button>
+        <button class="misc" id="statsBtn">統計</button>
+    </div>
 </div>
 
 <!-- 統計 -->
@@ -282,6 +293,9 @@ font-size:14px;
 
 <h2>学習統計</h2>
 
+<h3>日別学習グラフ</h3>
+<canvas id="dailyChart" width="860" height="320"></canvas>
+
 <select id="sortMode">
 <option value="memory_desc">定着度▼</option>
 <option value="memory_asc">定着度▲</option>
@@ -293,7 +307,7 @@ font-size:14px;
 <option value="date_asc">最終回答日▲</option>
 </select>
 
-<canvas id="chart" width="420" height="260"></canvas>
+<canvas id="chart" width="300" height="200"></canvas>
 
 <div id="list"></div>
 
@@ -321,363 +335,372 @@ let gameOver=false;
 
 /* 初期化 */
 DATASETS.forEach((d,i)=>{
-const op=document.createElement("option");
-op.value=i;
-op.textContent=d.name;
-$("dataset").appendChild(op);
+    const op=document.createElement("option");
+    op.value=i;
+    op.textContent=d.name;
+    $("dataset").appendChild(op);
 });
 
 function keyName(dataset,q){
-return "ms_"+dataset+"_"+q;
+    return "ms_"+dataset+"_"+q;
 }
 
 function getStat(dataset,q){
-try{
-return JSON.parse(localStorage.getItem(keyName(dataset,q))||
-'{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":""}');
-}catch(e){
-return {correct:0,wrong:0,memory:0,last:"",lastDate:""};
-}
+    try{
+    return JSON.parse(localStorage.getItem(keyName(dataset,q))||
+    '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":""}');
+    }catch(e){
+    return {correct:0,wrong:0,memory:0,last:"",lastDate:""};
+    }
 }
 
 function setStat(dataset,q,obj){
-localStorage.setItem(keyName(dataset,q),JSON.stringify(obj));
+    localStorage.setItem(keyName(dataset,q),JSON.stringify(obj));
 }
 
 function shuffle(a){
-for(let i=a.length-1;i>0;i--){
-const j=Math.floor(Math.random()*(i+1));
-[a[i],a[j]]=[a[j],a[i]];
-}
-return a;
+    for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
 }
 
 function todayStr(){
-const d=new Date();
-const y=d.getFullYear();
-const m=String(d.getMonth()+1).padStart(2,"0");
-const da=String(d.getDate()).padStart(2,"0");
-return `${y}-${m}-${da}`;
+    const d=new Date();
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,"0");
+    const da=String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${da}`;
 }
 
 function diffDays(dateStr){
-if(!dateStr)return 9999;
-const t1=new Date(dateStr);
-const t2=new Date(todayStr());
-return Math.floor((t2-t1)/(1000*60*60*24));
+    if(!dateStr)return 9999;
+    const t1=new Date(dateStr);
+    const t2=new Date(todayStr());
+    return Math.floor((t2-t1)/(1000*60*60*24));
 }
 
 /* load */
 async function loadSheet(){
 
-const ds=DATASETS[$("dataset").value||0];
+    const ds=DATASETS[$("dataset").value||0];
 
-const url=
-"https://docs.google.com/spreadsheets/d/"
-+ds.id+
-"/gviz/tq?sheet="+encodeURIComponent(ds.sheet);
+    const url=
+    "https://docs.google.com/spreadsheets/d/"
+    +ds.id+
+    "/gviz/tq?sheet="+encodeURIComponent(ds.sheet);
 
-const txt=await (await fetch(url)).text();
+    const txt=await (await fetch(url)).text();
 
-const m=txt.match(/setResponse\((.*)\);/s);
-const json=JSON.parse(m[1]);
+    const m=txt.match(/setResponse\((.*)\);/s);
+    const json=JSON.parse(m[1]);
 
-data=(json.table.rows||[]).map(r=>{
+    data=(json.table.rows||[]).map(r=>{
 
-const c=r.c||[];
+    const c=r.c||[];
 
-const q=c[0]&&c[0].v!=null?String(c[0].v).trim():"";
-const raw=c[2]&&c[2].v!=null?String(c[2].v):"";
+    const q=c[0]&&c[0].v!=null?String(c[0].v).trim():"";
+    const raw=c[2]&&c[2].v!=null?String(c[2].v):"";
 
-const normalized=raw.replace(/\\n/g,"\n");
-const lines=normalized.split("\n");
+    const normalized=raw.replace(/\\n/g,"\n");
+    const lines=normalized.split("\n");
 
-const a=(lines.shift()||"").trim();
-const e=lines.join("\n").trim();
+    const a=(lines.shift()||"").trim();
+    const e=lines.join("\n").trim();
 
-return {q,a,e};
+    return {q,a,e};
 
-}).filter(x=>x.q&&x.a);
+    }).filter(x=>x.q&&x.a);
 }
 
 /* queue */
 function buildQueue(){
 
-const ds=DATASETS[$("dataset").value||0];
+    const ds=DATASETS[$("dataset").value||0];
 
-const unseen=data.filter(x=>{
-const s=getStat(ds.name,x.q);
-return s.correct===0&&s.wrong===0;
-});
+    const unseen=data.filter(x=>{
+    const s=getStat(ds.name,x.q);
+    return s.correct===0&&s.wrong===0;
+    });
 
-const seen=data.filter(x=>{
-const s=getStat(ds.name,x.q);
-return !(s.correct===0&&s.wrong===0);
-});
+    const seen=data.filter(x=>{
+    const s=getStat(ds.name,x.q);
+    return !(s.correct===0&&s.wrong===0);
+    });
 
-shuffle(unseen);
+    shuffle(unseen);
 
-seen.sort((a,b)=>{
+    seen.sort((a,b)=>{
 
-const sa=getStat(ds.name,a.q);
-const sb=getStat(ds.name,b.q);
+    const sa=getStat(ds.name,a.q);
+    const sb=getStat(ds.name,b.q);
 
-const ma=sa.memory + diffDays(sa.lastDate)*2;
-const mb=sb.memory + diffDays(sb.lastDate)*2;
+    const ma=sa.memory + diffDays(sa.lastDate)*2;
+    const mb=sb.memory + diffDays(sb.lastDate)*2;
 
-return mb-ma;
-});
+    return mb-ma;
+    });
 
-queue=[...unseen,...seen];
+    queue=[...unseen,...seen];
 
-$("left").textContent=queue.length;
+    $("left").textContent=queue.length;
 }
 
 /* next */
 function nextQuestion(){
 
-if(gameOver)return;
+    if(gameOver)return;
 
-clearInterval(intv);
+    clearInterval(intv);
 
-if(queue.length===0){
-$("status").textContent="🏆 CLEAR!";
-$("question").textContent="MISSION COMPLETE";
-$("enemy").style.display="none";
-return;
-}
+    if(queue.length===0){
+    $("status").textContent="🏆 CLEAR!";
+    $("question").textContent="MISSION COMPLETE";
+    $("enemy").style.display="none";
+    return;
+    }
 
-cur=queue.shift();
+    cur=queue.shift();
 
-$("left").textContent=queue.length+1;
+    $("left").textContent=queue.length+1;
 
-$("enemy").style.display="block";
-$("enemy").className="";
-$("enemy").textContent=
-ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
+    $("enemy").style.display="block";
+    $("enemy").className="";
+    $("enemy").textContent=
+    ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
 
-$("question").textContent=cur.q;
-$("answer").textContent="";
-$("exp").textContent="";
-$("status").textContent="THINK!";
+    $("question").textContent=cur.q;
+    $("answer").textContent="";
+    $("exp").textContent="";
+    $("status").textContent="THINK!";
 
-timer=5;
-$("timer").textContent=timer;
+    timer=5;
+    $("timer").textContent=timer;
 
-$("enemy").style.animation="none";
-void $("enemy").offsetWidth;
-$("enemy").style.animation="enemyDrop 5s linear forwards";
+    $("enemy").style.animation="none";
+    void $("enemy").offsetWidth;
+    $("enemy").style.animation="enemyDrop 5s linear forwards";
 
-intv=setInterval(()=>{
-timer--;
-$("timer").textContent=timer;
-if(timer<=0)showAnswer();
-},1000);
+    intv=setInterval(()=>{
+    timer--;
+    $("timer").textContent=timer;
+    if(timer<=0)showAnswer();
+    },1000);
 }
 
 /* show */
 function showAnswer(){
-clearInterval(intv);
-if(!cur||gameOver)return;
+    clearInterval(intv);
+    if(!cur||gameOver)return;
 
-$("answer").textContent=cur.a;
-$("exp").textContent=cur.e||"解説なし";
-$("status").textContent="JUDGE!";
+    $("answer").textContent=cur.a;
+    $("exp").textContent=cur.e||"解説なし";
+    $("status").textContent="JUDGE!";
 }
 
 /* laser */
 function laser(){
-const l=document.createElement("div");
-l.className="laser";
-$("game").appendChild(l);
-setTimeout(()=>l.remove(),350);
+    const l=document.createElement("div");
+    l.className="laser";
+    $("game").appendChild(l);
+    setTimeout(()=>l.remove(),350);
 }
 
 /* hit */
 function hit(ok){
 
-if(!cur||gameOver)return;
+    if(!cur||gameOver)return;
 
-const ds=DATASETS[$("dataset").value||0];
-let s=getStat(ds.name,cur.q);
+    const ds=DATASETS[$("dataset").value||0];
+    let s=getStat(ds.name,cur.q);
 
-if(ok){
+    if(ok){
 
-laser();
+    laser();
 
-score+=100;
-s.correct++;
-s.memory=Math.max(1,s.memory-8);
-s.last="correct";
+    score+=100;
+    s.correct++;
+    s.memory=Math.max(1,s.memory-8);
+    s.last="correct";
 
-$("enemy").className="boom";
-$("status").textContent="撃破 +100";
+    $("enemy").className="boom";
+    $("status").textContent="撃破 +100";
 
-}else{
+    }else{
 
-hp--;
-s.wrong++;
-s.memory+=15;
-s.last="wrong";
+    hp--;
+    s.wrong++;
+    s.memory+=15;
+    s.last="wrong";
 
-$("game").classList.add("flash");
-setTimeout(()=>$("game").classList.remove("flash"),350);
+    $("game").classList.add("flash");
+    setTimeout(()=>$("game").classList.remove("flash"),350);
 
-$("status").textContent="被弾!";
+    $("status").textContent="被弾!";
 
-if(hp<=0){
-gameOver=true;
-$("hp").textContent=0;
-$("question").textContent="GAME OVER";
-$("answer").textContent="";
-$("exp").textContent="";
-$("status").textContent="STARTで再挑戦";
-clearInterval(intv);
-}
-}
+    if(hp<=0){
+    gameOver=true;
+    $("hp").textContent=0;
+    $("question").textContent="GAME OVER";
+    $("answer").textContent="";
+    $("exp").textContent="";
+    $("status").textContent="STARTで再挑戦";
+    clearInterval(intv);
+    }
+    }
 
-s.lastDate=todayStr();
+    s.lastDate=todayStr();
 
-setStat(ds.name,cur.q,s);
+    setStat(ds.name,cur.q,s);
 
-$("score").textContent=score;
-$("hp").textContent=hp;
+    $("score").textContent=score;
+    $("hp").textContent=hp;
 
-if(!gameOver)setTimeout(nextQuestion,650);
+    if(!gameOver)setTimeout(nextQuestion,650);
+
+    /* 正解時 */
+    addDailyCorrect();
+
+    /* 不正解時 */
+    addDailyWrong();
 }
 
 /* 統計 */
 function drawStats(){
 
-$("statsWrap").style.display="block";
+    $("statsWrap").style.display="block";
 
-const ds=DATASETS[$("dataset").value||0];
+    const ds=DATASETS[$("dataset").value||0];
 
-let correct=0,wrong=0,unseen=0;
+    let correct=0,wrong=0,unseen=0;
 
-data.forEach(x=>{
-const s=getStat(ds.name,x.q);
-correct+=s.correct;
-wrong+=s.wrong;
-if(s.correct===0&&s.wrong===0)unseen++;
-});
+    data.forEach(x=>{
+    const s=getStat(ds.name,x.q);
+    correct+=s.correct;
+    wrong+=s.wrong;
+    if(s.correct===0&&s.wrong===0)unseen++;
+    });
 
-const cvs=$("chart");
-const ctx=cvs.getContext("2d");
-ctx.clearRect(0,0,cvs.width,cvs.height);
+    const cvs=$("chart");
+    const ctx=cvs.getContext("2d");
+    ctx.clearRect(0,0,cvs.width,cvs.height);
 
-const vals=[correct,wrong,unseen];
-const cols=["#22c55e","#ef4444","#3b82f6"];
-const total=Math.max(correct+wrong+unseen,1);
+    const vals=[correct,wrong,unseen];
+    const cols=["#22c55e","#ef4444","#3b82f6"];
+    const total=Math.max(correct+wrong+unseen,1);
 
-let start=-Math.PI/2;
+    let start=-Math.PI/2;
 
-vals.forEach((v,i)=>{
-const ang=v/total*Math.PI*2;
+    vals.forEach((v,i)=>{
+    const ang=v/total*Math.PI*2;
 
-ctx.beginPath();
-ctx.moveTo(120,120);
-ctx.fillStyle=cols[i];
-ctx.arc(120,120,90,start,start+ang);
-ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(120,120);
+    ctx.fillStyle=cols[i];
+    ctx.arc(120,120,90,start,start+ang);
+    ctx.fill();
 
-start+=ang;
-});
+    start+=ang;
+    });
 
-ctx.fillStyle="#111";
-ctx.font="16px sans-serif";
-ctx.fillText("正解 "+correct,250,70);
-ctx.fillText("不正解 "+wrong,250,100);
-ctx.fillText("未出題 "+unseen,250,130);
+    ctx.fillStyle="#111";
+    ctx.font="16px sans-serif";
+    ctx.fillText("正解 "+correct,250,70);
+    ctx.fillText("不正解 "+wrong,250,100);
+    ctx.fillText("未出題 "+unseen,250,130);
 
-const mode=$("sortMode").value;
+    const mode=$("sortMode").value;
 
-const rows=[...data];
+    const rows=[...data];
 
-rows.sort((a,b)=>{
+    rows.sort((a,b)=>{
 
-  const sa = getStat(ds.name,a.q);
-  const sb = getStat(ds.name,b.q);
+    const sa = getStat(ds.name,a.q);
+    const sb = getStat(ds.name,b.q);
 
-  switch(mode){
+    switch(mode){
 
-    case "correct_desc":
-      return sb.correct - sa.correct;
+        case "correct_desc":
+        return sb.correct - sa.correct;
 
-    case "correct_asc":
-      return sa.correct - sb.correct;
+        case "correct_asc":
+        return sa.correct - sb.correct;
 
-    case "wrong_desc":
-      return sb.wrong - sa.wrong;
+        case "wrong_desc":
+        return sb.wrong - sa.wrong;
 
-    case "wrong_asc":
-      return sa.wrong - sb.wrong;
+        case "wrong_asc":
+        return sa.wrong - sb.wrong;
 
-    case "memory_desc":
-      return sb.memory - sa.memory;
+        case "memory_desc":
+        return sb.memory - sa.memory;
 
-    case "memory_asc":
-      return sa.memory - sb.memory;
+        case "memory_asc":
+        return sa.memory - sb.memory;
 
-    /* ▼ 修正版：日付文字列比較ではなく Date比較 */
-    case "date_desc":
-      return new Date(sb.lastDate || "1900-01-01")
-           - new Date(sa.lastDate || "1900-01-01");
+        /* ▼ 修正版：日付文字列比較ではなく Date比較 */
+        case "date_desc":
+        return new Date(sb.lastDate || "1900-01-01")
+            - new Date(sa.lastDate || "1900-01-01");
 
-    case "date_asc":
-      return new Date(sa.lastDate || "1900-01-01")
-           - new Date(sb.lastDate || "1900-01-01");
-  }
+        case "date_asc":
+        return new Date(sa.lastDate || "1900-01-01")
+            - new Date(sb.lastDate || "1900-01-01");
+    }
 
-  return 0;
-});
+    return 0;
+    });
+    
 
-$("list").innerHTML=rows.map(x=>{
+    $("list").innerHTML=rows.map(x=>{
 
-const s=getStat(ds.name,x.q);
+    const s=getStat(ds.name,x.q);
 
-return `
-<div class="row">
-<b>${escapeHtml(x.q)}</b><br>
-定着:${s.memory}
-　正:${s.correct}
-　誤:${s.wrong}
-　最終:${s.lastDate||"-"}
-</div>
-`;
+    return `
+    <div class="row">
+    <b>${escapeHtml(x.q)}</b><br>
+    定着:${s.memory}
+    　正:${s.correct}
+    　誤:${s.wrong}
+    　最終:${s.lastDate||"-"}
+    </div>
+    `;
 
-}).join("");
+    }).join("");
+
+    drawDailyChart();
 }
 
 function escapeHtml(str){
-return str
-.replaceAll("&","&amp;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;");
+    return str
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
 }
 
 /* event */
 $("start").onclick=async()=>{
-try{
-clearInterval(intv);
+    try{
+    clearInterval(intv);
 
-gameOver=false;
-score=0;
-hp=3;
+    gameOver=false;
+    score=0;
+    hp=3;
 
-$("score").textContent=0;
-$("hp").textContent=3;
-$("status").textContent="LOADING...";
-$("enemy").style.display="block";
+    $("score").textContent=0;
+    $("hp").textContent=3;
+    $("status").textContent="LOADING...";
+    $("enemy").style.display="block";
 
-await loadSheet();
-buildQueue();
-nextQuestion();
+    await loadSheet();
+    buildQueue();
+    nextQuestion();
 
-}catch(e){
-$("status").textContent="読込失敗";
-console.error(e);
-}
+    }catch(e){
+    $("status").textContent="読込失敗";
+    console.error(e);
+    }
 };
 
 $("show").onclick=showAnswer;
@@ -761,6 +784,127 @@ $("delAll").onclick=()=>{
     s.last="";
   });
 };
+
+/* 今日の日付 */
+function todayStr(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const da=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+
+/* 初回アクセス時だけ保存 */
+function initDailyRecord(){
+
+  const key="daily_visit_"+todayStr();
+
+  if(localStorage.getItem(key)) return;
+
+  localStorage.setItem(
+    key,
+    JSON.stringify({
+      correct:0,
+      wrong:0
+    })
+  );
+}
+
+/* 正解加算 */
+function addDailyCorrect(){
+
+  const key="daily_visit_"+todayStr();
+
+  let d=JSON.parse(localStorage.getItem(key));
+
+  d.correct++;
+
+  localStorage.setItem(key,JSON.stringify(d));
+}
+
+/* 不正解加算 */
+function addDailyWrong(){
+
+  const key="daily_visit_"+todayStr();
+
+  let d=JSON.parse(localStorage.getItem(key));
+
+  d.wrong++;
+
+  localStorage.setItem(key,JSON.stringify(d));
+}
+
+
+
+function drawDailyChart(){
+
+  const cvs=$("dailyChart");
+  const ctx=cvs.getContext("2d");
+
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+
+  const keys=Object.keys(localStorage)
+    .filter(k=>k.startsWith("daily_visit_"))
+    .sort();
+
+  const rows=keys.map(k=>{
+    return {
+      date:k.replace("daily_visit_",""),
+      ...JSON.parse(localStorage.getItem(k))
+    };
+  });
+
+  if(rows.length===0)return;
+
+  const max=Math.max(
+    ...rows.map(x=>Math.max(x.correct,x.wrong)),
+    1
+  );
+
+  const W=760;
+  const H=220;
+  const sx=60;
+  const sy=260;
+
+  /* 軸 */
+  ctx.strokeStyle="#333";
+  ctx.beginPath();
+  ctx.moveTo(sx,20);
+  ctx.lineTo(sx,sy);
+  ctx.lineTo(sx+W,sy);
+  ctx.stroke();
+
+  rows.forEach((r,i)=>{
+
+    const x=sx+i*(W/Math.max(rows.length-1,1));
+
+    /* 正解 緑 */
+    const y1=sy-(r.correct/max)*H;
+
+    ctx.fillStyle="#22c55e";
+    ctx.fillRect(x-8,y1,14,sy-y1);
+
+    /* 不正解 赤 */
+    const y2=sy-(r.wrong/max)*H;
+
+    ctx.fillStyle="#ef4444";
+    ctx.fillRect(x+8,y2,14,sy-y2);
+
+    ctx.fillStyle="#111";
+    ctx.font="12px sans-serif";
+    ctx.fillText(r.date.slice(5),x-18,280);
+
+  });
+
+  ctx.fillStyle="#111";
+  ctx.fillText("緑=正解数",620,30);
+  ctx.fillText("赤=不正解数",620,50);
+}
+
+
+
+/* 起動時 */
+initDailyRecord();
 
 
 </script>
