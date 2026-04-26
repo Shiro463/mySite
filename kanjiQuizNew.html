@@ -851,23 +851,7 @@ $("start").onclick=async()=>{
 
 $("show").onclick=showAnswer;
 $("correct").onclick=()=>hit(true);
-$("wrong").onclick = ()=>{
-
-  if(!cur || gameOver) return;
-
-  /* タイマー停止 */
-  clearInterval(intv);
-
-  /* 答え表示 */
-  $("answer").textContent = cur.a;
-  $("exp").textContent = cur.e || "解説なし";
-  $("status").textContent = "被弾!";
-
-  /* 少し見せてから判定処理 */
-  setTimeout(()=>{
-    hit(false);
-  },700);
-};
+$("wrong").onclick=()=>hit(false);
 
 $("statsBtn").onclick=drawStats;
 $("closeStats").onclick=()=>{
