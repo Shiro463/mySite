@@ -269,6 +269,17 @@ font-size:14px;
 
 <button class="misc" id="closeStats">閉じる</button>
 
+<div style="margin:12px 0;padding:12px;border:1px solid #ddd;border-radius:12px">
+  <b>学習データ削除</b><br><br>
+
+  <button class="ng" id="delCorrect">正解数だけ削除</button>
+  <button class="ng" id="delWrong">不正解数だけ削除</button>
+  <button class="ng" id="delMemory">定着度だけ削除</button>
+  <button class="ng" id="delDate">最終回答日だけ削除</button>
+  <button class="ng" id="delAll">全項目削除</button>
+</div>
+
+
 <h2>学習統計</h2>
 
 <select id="sortMode">
@@ -679,6 +690,78 @@ $("statsWrap").style.display="none";
 };
 
 $("sortMode").onchange=drawStats;
+
+function eachStatUpdate(callback){
+
+  const ds = DATASETS[$("dataset").value || 0];
+
+  data.forEach(x=>{
+
+    let s = getStat(ds.name,x.q);
+
+    callback(s);
+
+    setStat(ds.name,x.q,s);
+
+  });
+
+  drawStats();
+}
+
+/* 正解数削除 */
+$("delCorrect").onclick=()=>{
+
+  if(!confirm("正解数を全問題分削除しますか？")) return;
+
+  eachStatUpdate(s=>{
+    s.correct=0;
+  });
+};
+
+/* 不正解数削除 */
+$("delWrong").onclick=()=>{
+
+  if(!confirm("不正解数を全問題分削除しますか？")) return;
+
+  eachStatUpdate(s=>{
+    s.wrong=0;
+  });
+};
+
+/* 定着度削除 */
+$("delMemory").onclick=()=>{
+
+  if(!confirm("定着度を全問題分削除しますか？")) return;
+
+  eachStatUpdate(s=>{
+    s.memory=0;
+  });
+};
+
+/* 最終回答日削除 */
+$("delDate").onclick=()=>{
+
+  if(!confirm("最終回答日を全問題分削除しますか？")) return;
+
+  eachStatUpdate(s=>{
+    s.lastDate="";
+  });
+};
+
+/* 全削除 */
+$("delAll").onclick=()=>{
+
+  if(!confirm("正解数・不正解数・定着度・最終回答日を全削除しますか？")) return;
+
+  eachStatUpdate(s=>{
+    s.correct=0;
+    s.wrong=0;
+    s.memory=0;
+    s.lastDate="";
+    s.last="";
+  });
+};
+
 
 </script>
 </body>
