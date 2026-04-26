@@ -251,7 +251,20 @@ font-size:14px;
 <div id="topHud">⏱ <span id="timer">5</span> ❤️ <span id="hp">3</span></div>
 
 <div id="status">READY</div>
-<div id="enemy">👾</div>
+<!-- <div id="enemy">👾</div> -->
+
+<img id="enemy"
+style="
+position:absolute;
+top:-90px;
+left:50%;
+transform:translateX(-50%);
+width:96px;
+height:96px;
+object-fit:contain;
+z-index:10;
+">
+
 
 <div id="question">STARTを押してください</div>
 <div id="answer"></div>
@@ -265,10 +278,9 @@ font-size:14px;
 <div id="controls">
     <select id="dataset"></select>
     <button class="start" id="start">START</button>
-    <div class="break"></div>
         <button class="show" id="show">答え</button>
-        <button class="ok" id="correct">撃破</button>
     <div class="break"></div>
+        <button class="ok" id="correct">撃破</button>
         <button class="ng" id="wrong">被弾</button>
         <button class="misc" id="statsBtn">統計</button>
     </div>
@@ -287,6 +299,7 @@ font-size:14px;
   <button class="ng" id="delWrong">不正解数だけ削除</button>
   <button class="ng" id="delMemory">定着度だけ削除</button>
   <button class="ng" id="delDate">最終回答日だけ削除</button>
+  <button class="ng" id="delDaily">日別データ削除</button>
   <button class="ng" id="delAll">全項目削除</button>
 </div>
 
@@ -320,7 +333,16 @@ const DATASETS=[
 {name:"みんはや",id:"1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0",sheet:"シート1"}
 ];
 
-const ENEMIES=["👾","👹","🤖","👻","🐉","🦖","😈","💀","🛸","🔥","🧟","👽"];
+// const ENEMIES=["👾","👹","🤖","👻","🐉","🦖","😈","💀","🛸","🔥","🧟","👽"];
+
+const ENEMY_IMAGES = [
+
+"https://imgur.com/5iRsBf1.png",
+"https://imgur.com/kusuHsL.png",
+"https://imgur.com/je95sRs.png",
+"https://imgur.com/uOJ4p5G.png"
+
+];
 
 const $=id=>document.getElementById(id);
 
@@ -465,10 +487,14 @@ function nextQuestion(){
 
     $("left").textContent=queue.length+1;
 
-    $("enemy").style.display="block";
-    $("enemy").className="";
-    $("enemy").textContent=
-    ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
+    // $("enemy").style.display="block";
+    // $("enemy").className="";
+    // $("enemy").textContent=
+    // ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
+    $("enemy").src =
+    ENEMY_IMAGES[
+    Math.floor(Math.random()*ENEMY_IMAGES.length)
+    ];
 
     $("question").textContent=cur.q;
     $("answer").textContent="";
@@ -771,19 +797,42 @@ $("delDate").onclick=()=>{
   });
 };
 
+$("delDaily").onclick=()=>{
+
+ if(!confirm("日別データを削除しますか？"))
+   return;
+
+ Object.keys(localStorage).forEach(k=>{
+   if(k.startsWith("daily_visit_")){
+     localStorage.removeItem(k);
+   }
+ });
+
+ drawStats();
+};
+
 /* 全削除 */
 $("delAll").onclick=()=>{
 
-  if(!confirm("正解数・不正解数・定着度・最終回答日を全削除しますか？")) return;
+ if(!confirm("全学習データを削除しますか？")) return;
 
-  eachStatUpdate(s=>{
-    s.correct=0;
-    s.wrong=0;
-    s.memory=0;
-    s.lastDate="";
-    s.last="";
-  });
+ const ds = DATASETS[$("dataset").value || 0];
+
+ data.forEach(x=>{
+   localStorage.removeItem(
+     keyName(ds.name,x.q)
+   );
+ });
+
+ Object.keys(localStorage).forEach(k=>{
+   if(k.startsWith("daily_visit_")){
+     localStorage.removeItem(k);
+   }
+ });
+
+ drawStats();
 };
+
 
 /* 今日の日付 */
 function todayStr(){
@@ -835,70 +884,105 @@ function addDailyWrong(){
 }
 
 
-
 function drawDailyChart(){
 
-  const cvs=$("dailyChart");
-  const ctx=cvs.getContext("2d");
+ const cvs=$("dailyChart");
+ const ctx=cvs.getContext("2d");
 
-  ctx.clearRect(0,0,cvs.width,cvs.height);
+ ctx.clearRect(0,0,cvs.width,cvs.height);
 
-  const keys=Object.keys(localStorage)
-    .filter(k=>k.startsWith("daily_visit_"))
-    .sort();
+ const keys=Object.keys(localStorage)
+ .filter(k=>k.startsWith("daily_visit_"))
+ .sort();
 
-  const rows=keys.map(k=>{
-    return {
-      date:k.replace("daily_visit_",""),
-      ...JSON.parse(localStorage.getItem(k))
-    };
-  });
+ const rows=keys.map(k=>{
+   return {
+     date:k.replace("daily_visit_",""),
+     ...JSON.parse(localStorage.getItem(k))
+   };
+ });
 
-  if(rows.length===0)return;
+ if(rows.length===0)return;
 
-  const max=Math.max(
-    ...rows.map(x=>Math.max(x.correct,x.wrong)),
-    1
-  );
+ const max=Math.max(
+   ...rows.map(x=>Math.max(x.correct,x.wrong)),
+   1
+ );
 
-  const W=760;
-  const H=220;
-  const sx=60;
-  const sy=260;
+ const W=760;
+ const H=220;
+ const sx=60;
+ const sy=260;
 
-  /* 軸 */
-  ctx.strokeStyle="#333";
-  ctx.beginPath();
-  ctx.moveTo(sx,20);
-  ctx.lineTo(sx,sy);
-  ctx.lineTo(sx+W,sy);
-  ctx.stroke();
+ /* 軸 */
+ ctx.strokeStyle="#333";
+ ctx.lineWidth=1;
 
-  rows.forEach((r,i)=>{
+ ctx.beginPath();
+ ctx.moveTo(sx,20);
+ ctx.lineTo(sx,sy);
+ ctx.lineTo(sx+W,sy);
+ ctx.stroke();
 
-    const x=sx+i*(W/Math.max(rows.length-1,1));
 
-    /* 正解 緑 */
-    const y1=sy-(r.correct/max)*H;
+ function drawLine(type,color){
 
-    ctx.fillStyle="#22c55e";
-    ctx.fillRect(x-8,y1,14,sy-y1);
+   ctx.beginPath();
+   ctx.strokeStyle=color;
+   ctx.lineWidth=3;
 
-    /* 不正解 赤 */
-    const y2=sy-(r.wrong/max)*H;
+   rows.forEach((r,i)=>{
 
-    ctx.fillStyle="#ef4444";
-    ctx.fillRect(x+8,y2,14,sy-y2);
+     const x=sx+i*(W/Math.max(rows.length-1,1));
+     const y=sy-(r[type]/max)*H;
 
-    ctx.fillStyle="#111";
-    ctx.font="12px sans-serif";
-    ctx.fillText(r.date.slice(5),x-18,280);
+     if(i===0) ctx.moveTo(x,y);
+     else ctx.lineTo(x,y);
 
-  });
+   });
 
-  ctx.fillStyle="#111";
-  ctx.fillText("緑=正解数",620,30);
-  ctx.fillText("赤=不正解数",620,50);
+   ctx.stroke();
+
+   /* プロット */
+   rows.forEach((r,i)=>{
+
+     const x=sx+i*(W/Math.max(rows.length-1,1));
+     const y=sy-(r[type]/max)*H;
+
+     ctx.beginPath();
+     ctx.fillStyle=color;
+     ctx.arc(x,y,5,0,Math.PI*2);
+     ctx.fill();
+
+   });
+ }
+
+ /* 正解 緑 */
+ drawLine("correct","#22c55e");
+
+ /* 不正解 赤 */
+ drawLine("wrong","#ef4444");
+
+
+ /* 日付 */
+ ctx.fillStyle="#111";
+ ctx.font="12px sans-serif";
+
+ rows.forEach((r,i)=>{
+
+   const x=sx+i*(W/Math.max(rows.length-1,1));
+
+   ctx.fillText(
+     r.date.slice(5),
+     x-18,
+     282
+   );
+
+ });
+
+ ctx.fillText("緑=正解数",620,28);
+ ctx.fillText("赤=不正解数",620,48);
+
 }
 
 
