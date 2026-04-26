@@ -35,15 +35,20 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 <div class='panel' id='status'>準備完了</div>
 </div>
 <script>
+const DEFAULT_SHEET_ID='YOUR_SHEET_ID';
+const DEFAULT_SHEET_NAME='Sheet1';
 let data=[],queue=[],cur=null,timer=5,intv=null,score=0,hp=3;
 const $=x=>document.getElementById(x);
+$('sheetId').value=DEFAULT_SHEET_ID;$('sheetName').value=DEFAULT_SHEET_NAME;
 function statKey(q){return 'stat_'+q}
-function getS(q){return JSON.parse(localStorage.getItem(statKey(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}')}
+function getS(q){try{return JSON.parse(localStorage.getItem(statKey(q))||'{"correct":0,"wrong":0,"memory":0,"last":""}')}catch(e){return {correct:0,wrong:0,memory:0,last:''}}}
 function setS(q,s){localStorage.setItem(statKey(q),JSON.stringify(s))}
-async function load(){const id=$('sheetId').value.trim();const sh=$('sheetName').value.trim()||'Sheet1';const url='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?sheet='+encodeURIComponent(sh);const t=await(await fetch(url)).text();const m=t.match(/setResponse\((.*)\);/s);const j=JSON.parse(m[1]);data=j.table.rows.map(r=>{const c=r.c||[];const q=c[0]&&c[0].v?c[0].v:'';const raw=c[2]&&c[2].v?c[2].v:'';const L=String(raw).split(/\n/);return{q:q,a:L[0]||'',e:L.slice(1).join('\n')}}).filter(x=>x.q&&x.a)}
-function build(){queue=[...data].sort((a,b)=>getS(a.q).memory-getS(b.q).memory);$('left').textContent=queue.length;}
-function next(){clearInterval(intv);if(queue.length===0){$('question').textContent='🏆 CLEAR!';$('status').textContent='全問題終了';return;}cur=queue.shift();$('left').textContent=queue.length+1;$('question').textContent=cur.q;$('answer').textContent='';$('exp').textContent='';$('enemy').className='enemy';timer=5;$('timer').textContent=5;intv=setInterval(()=>{timer--; $('timer').textContent=timer; if(timer<=0)show();},1000)}
-function show(){clearInterval(intv);$('answer').textContent='答え：'+cur.a;$('exp').textContent=cur.e||'解説なし';}
-function hit(ok){if(!cur)return;let s=getS(cur.q);if(ok){score+=100;s.correct++;s.memory+=10;s.last='correct';$('enemy').className='enemy blast';$('status').textContent='撃破！ +100';}else{hp--;s.wrong++;s.memory=Math.max(0,s.memory-15);s.last='wrong';$('status').textContent='被弾！';if(hp<=0){$('question').textContent='💀 GAME OVER';$('hp').textContent=0;clearInterval(intv);return;}}setS(cur.q,s);$('score').textContent=score;$('hp').textContent=hp;setTimeout(next,500)}
-$('start').onclick=async()=>{try{score=0;hp=3;$('score').textContent=0;$('hp').textContent=3;await load();build();next();$('status').textContent='START!';}catch(e){$('status').textContent='読込失敗';}};$('show').onclick=show;$('correct').onclick=()=>hit(true);$('wrong').onclick=()=>hit(false);
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+async function load(){const id=$('sheetId').value.trim();const sh=$('sheetName').value.trim()||DEFAULT_SHEET_NAME;const url='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?sheet='+encodeURIComponent(sh);const t=await (await fetch(url)).text();const m=t.match(/setResponse\((.*)\);/s);if(!m)throw new Error('読込失敗');const j=JSON.parse(m[1]);const rows=(j.table&&j.table.rows)||[];data=rows.map(r=>{const c=r.c||[];const q=c[0]&&c[0].v!=null?String(c[0].v).trim():'';const raw=c[2]&&c[2].v!=null?String(c[2].v):'';const norm=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');const idx=norm.indexOf('\n');const a=(idx>=0?norm.slice(0,idx):norm).trim();const e=(idx>=0?norm.slice(idx+1):'').trim();return {q,a,e};}).filter(x=>x.q&&x.a);}
+function build(){const unseen=data.filter(x=>{const s=getS(x.q);return s.correct===0&&s.wrong===0;});const seen=data.filter(x=>{const s=getS(x.q);return !(s.correct===0&&s.wrong===0);});shuffle(unseen);seen.sort((a,b)=>getS(a.q).memory-getS(b.q).memory);queue=[...unseen,...seen];$('left').textContent=queue.length;}
+function next(){clearInterval(intv);if(queue.length===0){$('question').textContent='🏆 CLEAR!';$('answer').textContent='';$('exp').textContent='';$('status').textContent='全問題終了';return;}cur=queue.shift();$('left').textContent=queue.length+1;$('question').textContent=cur.q;$('answer').textContent='';$('exp').textContent='';$('enemy').className='enemy';timer=5;$('timer').textContent='5';intv=setInterval(()=>{timer--;$('timer').textContent=String(timer);if(timer<=0)show();},1000);}
+function show(){clearInterval(intv);if(!cur)return;$('answer').textContent='答え：'+cur.a;$('exp').textContent=cur.e||'解説なし';}
+function hit(ok){if(!cur)return;let s=getS(cur.q);if(ok){score+=100;s.correct++;s.memory+=10;s.last='correct';$('enemy').className='enemy blast';$('status').textContent='撃破！ +100';}else{hp--;s.wrong++;s.memory=Math.max(0,s.memory-15);s.last='wrong';$('status').textContent='被弾！';if(hp<=0){$('hp').textContent='0';$('question').textContent='💀 GAME OVER';clearInterval(intv);return;}}setS(cur.q,s);$('score').textContent=String(score);$('hp').textContent=String(hp);setTimeout(next,450);}
+$('start').onclick=async()=>{try{score=0;hp=3;$('score').textContent='0';$('hp').textContent='3';$('status').textContent='読込中...';await load();build();next();$('status').textContent='START!';}catch(e){$('status').textContent=e.message;}};
+$('show').onclick=show;$('correct').onclick=()=>hit(true);$('wrong').onclick=()=>hit(false);
 </script></body></html>
