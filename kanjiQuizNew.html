@@ -101,7 +101,7 @@ body{
   justify-content:center;
   word-break:break-word;
   font-size:52px;
-  transition:font-size .28s ease;
+  transition:font-size 1s ease;
 }
 
 #answer{
@@ -121,7 +121,7 @@ body{
   justify-content:center;
   word-break:break-word;
   font-size:42px;
-  transition:font-size .28s ease;
+  transition:font-size 1s ease;
 }
 
 #exp{
@@ -142,7 +142,8 @@ body{
   white-space:pre-wrap;
   word-break:break-word;
   font-size:28px;
-  transition:font-size .28s ease;
+  font-weight: bold;
+  transition:font-size 1s ease;
 }
 
 
@@ -338,53 +339,62 @@ font-size:14px;
 
 <div id="game">
 
-<div class="cloud" style="width:140px;height:56px;top:10%;left:-20%;animation-duration:34s"></div>
-<div class="cloud" style="width:180px;height:70px;top:26%;left:-30%;animation-duration:48s"></div>
-<div class="cloud" style="width:120px;height:50px;top:42%;left:-25%;animation-duration:40s"></div>
+    <div class="cloud" style="width:140px;height:56px;top:10%;left:-20%;animation-duration:34s"></div>
+    <div class="cloud" style="width:180px;height:70px;top:26%;left:-30%;animation-duration:48s"></div>
+    <div class="cloud" style="width:120px;height:50px;top:42%;left:-25%;animation-duration:40s"></div>
 
-<div id="topHud"> ❤️ <span id="hp">3</span></div>
+    <div id="topHud"> ❤️ <span id="hp">3</span></div>
 
-<div id="status">READY</div>
-<!-- <div id="enemy">👾</div> -->
+    <div id="status">READY</div>
+    <!-- <div id="enemy">👾</div> -->
 
-<!-- <img id="enemy"
-style="
-position:absolute;
-top:-90px;
-left:50%;
-transform:translateX(-50%);
-width:96px;
-height:96px;
-object-fit:contain;
-z-index:10;
-"> -->
+    <!-- <img id="enemy"
+    style="
+    position:absolute;
+    top:-90px;
+    left:50%;
+    transform:translateX(-50%);
+    width:96px;
+    height:96px;
+    object-fit:contain;
+    z-index:10;
+    "> -->
 
-<div id="centerTimer">5.00</div>
+    <div id="centerTimer">5.00</div>
 
-<div id="question">STARTを押してください</div>
-<div id="answer"></div>
-<div id="exp"></div>
+    <div id="question">STARTを押してください</div>
+    <div id="answer"></div>
+    <div id="exp"></div>
 
-<div id="hud">
-⭐ SCORE <span id="score">0</span><br>
-📚 LEFT <span id="left">0</span>
-</div>
+    <div id="hud">
+    ⭐ SCORE <span id="score">0</span><br>
+    📚 LEFT <span id="left">0</span>
+    </div>
 
-<div id="controls">
-    <select id="dataset"></select>
-    <select id="memoryFilter">
-    <option value="0">全問題</option>
-    <option value="20">定着度20以上</option>
-    <option value="40">定着度40以上</option>
-    <option value="60">定着度60以上</option>
-    <option value="80">定着度80以上</option>
-    <option value="100">定着度100以上</option>
-    </select>
-    <button class="start" id="start">START</button>
+    <div id="controls">
+        <select id="dataset"></select>
+        <select id="memoryFilter">
+        <option value="0">全問題</option>
+        <option value="20">定着度20以上</option>
+        <option value="40">定着度40以上</option>
+        <option value="60">定着度60以上</option>
+        <option value="80">定着度80以上</option>
+        <option value="100">定着度100以上</option>
+        <option value="correct">最新状態が正解</option>
+        <option value="wrong">最新状態が不正解</option>
+        <option value="unseen">未出題</option>
+        <option value="old30">最終回答日1ヶ月前以前</option>
+        <option value="old14">最終回答日2週間前以前</option>
+        <option value="old7">最終回答日1週間前以前</option>
+        <option value="fav">お気に入りのみ</option>
+        </select>
+        <button class="start" id="start">START</button>
+        <div class="break"></div>
         <button class="show" id="show">答え</button>
-    <div class="break"></div>
+        <div class="break"></div>
         <button class="ok" id="correct">撃破</button>
         <button class="ng" id="wrong">被弾</button>
+        <div class="break"></div>
         <button class="misc" id="statsBtn">統計</button>
     </div>
 </div>
@@ -409,6 +419,7 @@ z-index:10;
         <button class="ng" id="delMemory">定着度だけ削除</button>
         <button class="ng" id="delDate">最終回答日だけ削除</button>
         <button class="ng" id="delDaily">日別データ削除</button>
+        <button class="ng" id="delFav">お気に入り削除</button>
         <button class="ng" id="delAll">全項目削除</button>
       </div>
 
@@ -483,13 +494,31 @@ function keyName(dataset,q){
     return "ms_"+dataset+"_"+q;
 }
 
+// function getStat(dataset,q){
+//     try{
+//     return JSON.parse(localStorage.getItem(keyName(dataset,q))||
+//     '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":""}');
+//     }catch(e){
+//     return {correct:0,wrong:0,memory:0,last:"",lastDate:""};
+//     }
+// }
+
 function getStat(dataset,q){
-    try{
-    return JSON.parse(localStorage.getItem(keyName(dataset,q))||
-    '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":""}');
-    }catch(e){
-    return {correct:0,wrong:0,memory:0,last:"",lastDate:""};
-    }
+  try{
+    return JSON.parse(
+      localStorage.getItem(keyName(dataset,q)) ||
+      '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":"","fav":false}'
+    );
+  }catch(e){
+    return {
+      correct:0,
+      wrong:0,
+      memory:0,
+      last:"",
+      lastDate:"",
+      fav:false
+    };
+  }
 }
 
 function setStat(dataset,q,obj){
@@ -555,79 +584,97 @@ async function loadSheet(){
 /* queue */
 function buildQueue(){
 
-  const ds = DATASETS[$("dataset").value || 0];
-  const limit =
-    Number($("memoryFilter").value || 0);
+  const ds = DATASETS[$("dataset").value||0];
+
+  const memoryLimit =
+    Number($("memoryFilter").value||0);
+
+  const mode =
+    $("questionFilter").value || "all";
 
   let target = data.filter(x=>{
+
     const s = getStat(ds.name,x.q);
-    return s.memory >= limit;
+
+    /* 定着度条件 */
+    if(s.memory < memoryLimit) return false;
+
+    switch(mode){
+
+      case "correct":
+        return s.last==="correct";
+
+      case "wrong":
+        return s.last==="wrong";
+
+      case "unseen":
+        return s.correct===0 && s.wrong===0;
+
+      case "old30":
+        return diffDays(s.lastDate)>=30;
+
+      case "old14":
+        return diffDays(s.lastDate)>=14;
+
+      case "old7":
+        return diffDays(s.lastDate)>=7;
+
+      case "fav":
+        return s.fav===true;
+    }
+
+    return true;
   });
 
-  /* 該当なし */
   if(target.length===0){
 
     queue=[];
     $("left").textContent="0";
-
     $("question").textContent="";
     $("answer").textContent="";
     $("exp").textContent="";
-
-    $("status").textContent=
-      `定着度${limit}以上の問題無し！`;
+    $("status").textContent="対象問題なし";
 
     return;
   }
 
-  /* -------------------------
-     重み付きランダム抽選
-     memory高いほど選ばれやすい
-  ------------------------- */
-
+  /* 重み付きランダム */
   queue=[];
-
   let pool=[...target];
 
   while(pool.length){
 
-    const weights = pool.map(x=>{
+    const weights=pool.map(x=>{
 
-      const s = getStat(ds.name,x.q);
+      const s=getStat(ds.name,x.q);
 
-      /* 未出題は少し優遇 */
-      const unseen =
-        (s.correct===0 && s.wrong===0) ? 8 : 0;
+      let w=Math.max(1,s.memory);
 
-      /* 最低1保証 */
-      return Math.max(
-        1,
-        s.memory + unseen
-      );
+      if(s.fav) w+=25;
+
+      return w;
     });
 
-    const total =
+    const total=
       weights.reduce((a,b)=>a+b,0);
 
     let r=Math.random()*total;
 
-    let pickIndex=0;
+    let pick=0;
 
     for(let i=0;i<weights.length;i++){
-
       r-=weights[i];
-
       if(r<=0){
-        pickIndex=i;
+        pick=i;
         break;
       }
     }
 
-    queue.push(pool[pickIndex]);
-    pool.splice(pickIndex,1);
+    queue.push(pool[pick]);
+    pool.splice(pick,1);
   }
 
-  $("left").textContent = queue.length;
+  $("left").textContent=queue.length;
 }
 
 /* next */
@@ -755,15 +802,20 @@ function hit(ok){
 
         /* 早答えほど大きく下げる */
         s.memory = Math.max(
-        1,
-        s.memory - (8 + bonus)
+            1,
+            s.memory - (8 + bonus)
         );
 
         s.last="correct";
 
         $("status").textContent="撃破 +100";
 
+        addDailyCorrect();
+
     }else{
+
+        hp--;                    /* ←これが抜けていた */
+        $("hp").textContent=hp;
 
         s.wrong++;
 
@@ -774,18 +826,20 @@ function hit(ok){
 
         $("status").textContent="被弾!";
 
+        addDailyWrong();
+
         if(hp<=0){
 
-        gameOver=true;
+            gameOver=true;
 
-        $("hp").textContent=0;
-        $("question").textContent="GAME OVER";
-        $("answer").textContent="";
-        $("exp").textContent="";
-        $("status").textContent="STARTで再挑戦";
+            $("hp").textContent=0;
+            $("question").textContent="GAME OVER";
+            $("answer").textContent="";
+            $("exp").textContent="";
+            $("status").textContent="STARTで再挑戦";
 
-        setStat(ds.name,cur.q,s);
-        return;
+            setStat(ds.name,cur.q,s);
+            return;
         }
     }
 
@@ -892,24 +946,54 @@ function drawStats(){
     });
     
 
-    $("list").innerHTML=rows.map(x=>{
+
+    $("list").innerHTML = rows.map(x=>{
 
     const s=getStat(ds.name,x.q);
 
     return `
     <div class="row">
-    <b>${escapeHtml(x.q)}</b><br>
-    定着:${s.memory}
-    　正:${s.correct}
-    　誤:${s.wrong}
-    　最終:${s.lastDate||"-"}
+        <b>${escapeHtml(x.q)}</b><br>
+
+        定着:${s.memory}
+        正:${s.correct}
+        誤:${s.wrong}
+        最終:${s.lastDate||"-"}
+
+        <br><br>
+
+        <button
+        onclick="toggleFav('${encodeURIComponent(x.q)}')"
+        class="misc">
+
+        ${s.fav ? "★解除" : "☆お気に入り"}
+
+        </button>
     </div>
     `;
-
     }).join("");
+
 
     drawDailyChart();
 }
+
+
+function toggleFav(encodedQ){
+
+  const q = decodeURIComponent(encodedQ);
+
+  const ds = DATASETS[$("dataset").value||0];
+
+  let s = getStat(ds.name,q);
+
+  s.fav = !s.fav;
+
+  setStat(ds.name,q,s);
+
+  drawStats();
+}
+
+
 
 function escapeHtml(str){
     return str
@@ -1024,12 +1108,25 @@ $("delDaily").onclick=()=>{
  drawStats();
 };
 
+
+$("delFav").onclick=()=>{
+
+  if(!confirm("お気に入りを全解除しますか？"))
+    return;
+
+  eachStatUpdate(s=>{
+    s.fav=false;
+  });
+};
+
 /* 全削除 */
+
 $("delAll").onclick=()=>{
 
- if(!confirm("全学習データを削除しますか？")) return;
+ if(!confirm("全学習データを削除しますか？"))
+   return;
 
- const ds = DATASETS[$("dataset").value || 0];
+ const ds = DATASETS[$("dataset").value||0];
 
  data.forEach(x=>{
    localStorage.removeItem(
