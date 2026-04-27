@@ -106,12 +106,12 @@ body{
 
 #answer{
   position:absolute;
-  top:42%;
+  top:36%;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw,980px);
-  height:14%;
-  padding:8px;
+  height:12%;
+  padding:6px;
   text-align:center;
   line-height:1.25;
   overflow:hidden;
@@ -126,12 +126,12 @@ body{
 
 #exp{
   position:absolute;
-  top:58%;
+  top:44%;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw,980px);
-  height:22%;
-  padding:10px;
+  height:16%;
+  padding:6px;
   text-align:center;
   line-height:1.35;
   overflow:hidden;
@@ -339,9 +339,9 @@ font-size:14px;
 
 <div id="game">
 
-    <div class="cloud" style="width:140px;height:56px;top:10%;left:-20%;animation-duration:34s"></div>
+    <!-- <div class="cloud" style="width:140px;height:56px;top:10%;left:-20%;animation-duration:34s"></div>
     <div class="cloud" style="width:180px;height:70px;top:26%;left:-30%;animation-duration:48s"></div>
-    <div class="cloud" style="width:120px;height:50px;top:42%;left:-25%;animation-duration:40s"></div>
+    <div class="cloud" style="width:120px;height:50px;top:42%;left:-25%;animation-duration:40s"></div> -->
 
     <div id="topHud"> ❤️ <span id="hp">3</span></div>
 
@@ -388,13 +388,13 @@ font-size:14px;
         <option value="old7">最終回答日1週間前以前</option>
         <option value="fav">お気に入りのみ</option>
         </select>
+        <div class="break"></div>
         <button class="misc" id="statsBtn">統計</button>
         <button class="start" id="start">START</button>
         <div class="break"></div>
-        <button class="show" id="show">答え</button>
-        <div class="break"></div>
-        <button class="ok" id="correct">撃破</button>
         <button class="ng" id="wrong">被弾</button>
+        <button class="ok" id="correct">撃破</button>
+        <button class="show" id="show">答え</button>
     </div>
 </div>
 
