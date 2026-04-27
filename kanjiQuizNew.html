@@ -96,9 +96,12 @@ body{
   line-height:1.25;
   overflow:hidden;
   display:flex;
+  z-index:3;
   align-items:center;
   justify-content:center;
   word-break:break-word;
+  font-size:52px;
+  transition:font-size .28s ease;
 }
 
 #answer{
@@ -113,9 +116,12 @@ body{
   line-height:1.25;
   overflow:hidden;
   display:flex;
+  z-index:4;
   align-items:center;
   justify-content:center;
   word-break:break-word;
+  font-size:42px;
+  transition:font-size .28s ease;
 }
 
 #exp{
@@ -130,10 +136,13 @@ body{
   line-height:1.35;
   overflow:hidden;
   display:flex;
+  z-index:5;
   align-items:center;
   justify-content:center;
   white-space:pre-wrap;
   word-break:break-word;
+  font-size:28px;
+  transition:font-size .28s ease;
 }
 
 
@@ -238,7 +247,9 @@ to{height:72%}
   transform:translateX(-50%);
   width:100%;
   text-align:center;
-  z-index:50;
+  z-index:0;
+  font-size:92px;
+  transition:font-size .22s ease;
 
   color:#ffd6ef;   /* 薄いピンク */
 
@@ -649,8 +660,13 @@ function nextQuestion(){
   $("exp").textContent = "";
   $("status").textContent = "";
 
-  setTimeout(resizeAllTexts,10);
-  startTimer();
+//   setTimeout(resizeAllTexts,10);
+//   startTimer();
+
+  requestAnimationFrame(()=>{
+    setTimeout(resizeAllTexts,20);
+  });
+
 }
 // function nextQuestion(){
 
@@ -706,8 +722,9 @@ function showAnswer(){
     $("exp").textContent=cur.e||"解説なし";
     $("status").textContent="JUDGE!";
     
-    setTimeout(resizeAllTexts,10);
-
+    requestAnimationFrame(()=>{
+        setTimeout(resizeAllTexts,20);
+    });
 }
 
 /* laser */
@@ -1219,29 +1236,38 @@ function fitText(el, maxSize, minSize){
 
   if(!el) return;
 
+  /* 毎回まずデフォルトへ戻す */
+  el.style.fontSize = maxSize + "px";
+
   let size = maxSize;
 
-  el.style.fontSize = size + "px";
-
-  while(size > minSize &&
-    (el.scrollHeight > el.clientHeight ||
-     el.scrollWidth  > el.clientWidth)){
-
-    size -= 1;
+  while(
+    size > minSize &&
+    (
+      el.scrollHeight > el.clientHeight ||
+      el.scrollWidth  > el.clientWidth
+    )
+  ){
+    size--;
     el.style.fontSize = size + "px";
   }
 }
 
 function resizeAllTexts(){
 
-  fitText($("question"), 52, 14);
-  fitText($("centerTimer"), 92, 26);
-  fitText($("answer"), 42, 12);
-  fitText($("exp"), 28, 10);
+  fitText($("question"),52,14);
+  fitText($("answer"),42,12);
+  fitText($("exp"),28,10);
+  fitText($("centerTimer"),92,26);
+
 }
 
 window.addEventListener("resize",()=>{
-  setTimeout(resizeAllTexts,50);
+
+  requestAnimationFrame(()=>{
+    setTimeout(resizeAllTexts,30);
+  });
+
 });
 
 /* 起動時 */
