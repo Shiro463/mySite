@@ -249,7 +249,7 @@ to{height:72%}
   width:100%;
   text-align:center;
   z-index:0;
-  font-size:92px;
+  font-size:32px;
   transition:font-size .22s ease;
 
   color:#ffd6ef;   /* 薄いピンク */
@@ -388,14 +388,13 @@ font-size:14px;
         <option value="old7">最終回答日1週間前以前</option>
         <option value="fav">お気に入りのみ</option>
         </select>
+        <button class="misc" id="statsBtn">統計</button>
         <button class="start" id="start">START</button>
         <div class="break"></div>
         <button class="show" id="show">答え</button>
         <div class="break"></div>
         <button class="ok" id="correct">撃破</button>
         <button class="ng" id="wrong">被弾</button>
-        <div class="break"></div>
-        <button class="misc" id="statsBtn">統計</button>
     </div>
 </div>
 
@@ -1355,10 +1354,10 @@ function fitText(el, maxSize, minSize){
 
 function resizeAllTexts(){
 
-  fitText($("question"),52,14);
-  fitText($("answer"),42,12);
-  fitText($("exp"),28,10);
-  fitText($("centerTimer"),92,26);
+  fitText($("question"),52,24);
+  fitText($("answer"),42,24);
+  fitText($("exp"),28,16);
+  fitText($("centerTimer"),32,26);
 
 }
 
