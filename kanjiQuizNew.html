@@ -133,10 +133,11 @@ body{
   transform:translateX(-50%);
   width:min(92vw,980px);
   padding:6px;
-  text-align:center;
-  line-height:1.35;
-  overflow:hidden;
-  display:flex;
+  overflow-y:auto;
+  overflow-x:hidden;
+  text-align:left;
+  display:block;
+  line-height:1.45;
   z-index:5;
   align-items:center;
   justify-content:center;
@@ -201,7 +202,7 @@ body{
 button,select{
   border:none;
   border-radius:999px;
-  padding:12px 16px;
+  padding:8px 8px;
   font-size:11px;
   font-weight:900;
 }
@@ -251,7 +252,7 @@ to{height:72%}
   width:100%;
   text-align:center;
   z-index:0;
-  font-size:32px;
+  font-size:40px;
   transition:font-size .22s ease;
 
   color:#ffd6ef;   /* 薄いピンク */
@@ -718,6 +719,9 @@ function nextQuestion(){
     setTimeout(resizeAllTexts,20);
   });
 
+  resizeAllTexts();
+  $("exp").scrollTop=0;
+
 }
 // function nextQuestion(){
 
@@ -776,6 +780,10 @@ function showAnswer(){
     requestAnimationFrame(()=>{
         setTimeout(resizeAllTexts,20);
     });
+
+    resizeAllTexts();
+    $("exp").scrollTop=0;
+
 }
 
 /* laser */
@@ -1333,41 +1341,48 @@ function startTimer(){
   },10);
 }
 
-function fitText(el, maxSize, minSize){
+
+function fitText(el,maxSize,minSize){
 
   if(!el) return;
 
-  /* 毎回まずデフォルトへ戻す */
-  el.style.fontSize = maxSize + "px";
+  /* 一旦非表示 */
+  el.style.visibility="hidden";
+  el.style.fontSize=maxSize+"px";
 
-  let size = maxSize;
+  let size=maxSize;
 
   while(
-    size > minSize &&
+    size>minSize &&
     (
       el.scrollHeight > el.clientHeight ||
       el.scrollWidth  > el.clientWidth
     )
   ){
     size--;
-    el.style.fontSize = size + "px";
+    el.style.fontSize=size+"px";
   }
+
+  /* 最終サイズ確定後に表示 */
+  el.style.fontSize=size+"px";
+  el.style.visibility="visible";
 }
+
 
 function resizeAllTexts(){
 
-  fitText($("question"),52,16);
-  fitText($("answer"),42,16);
-  fitText($("exp"),28,16);
-  fitText($("centerTimer"),32,16);
+  fitText($("question"),52,14);
+  fitText($("answer"),42,12);
+  fitText($("centerTimer"),40,40);
 
+  /* 解説文は固定 */
+  $("exp").style.fontSize="28px";
 }
+
 
 window.addEventListener("resize",()=>{
 
-  requestAnimationFrame(()=>{
-    setTimeout(resizeAllTexts,30);
-  });
+  resizeAllTexts();
 
 });
 
