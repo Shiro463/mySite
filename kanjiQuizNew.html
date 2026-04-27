@@ -447,9 +447,6 @@ font-size:14px;
   </div>
 </div>
 
-<canvas id="chart" width="300" height="200"></canvas>
-
-<div id="list"></div>
 
 </div>
 </div>
@@ -584,15 +581,21 @@ async function loadSheet(){
 /* queue */
 function buildQueue(){
 
-  const ds = DATASETS[$("dataset").value||0];
+    const ds = DATASETS[$("dataset").value||0];
 
-  const memoryLimit =
-    Number($("memoryFilter").value||0);
+    const filterValue = $("memoryFilter").value || "0";
 
-  const mode =
-    $("questionFilter").value || "all";
+    let memoryLimit = 0;
+    let mode = "all";
 
-  let target = data.filter(x=>{
+    /* 数値なら定着度フィルタ */
+    if(!isNaN(Number(filterValue))){
+    memoryLimit = Number(filterValue);
+    }else{
+    mode = filterValue;
+    }
+
+    let target = data.filter(x=>{
 
     const s = getStat(ds.name,x.q);
 
