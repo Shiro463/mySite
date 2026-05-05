@@ -139,7 +139,6 @@ body{
   z-index:5;
   align-items:center;
   justify-content:center;
-  white-space:pre-wrap;
   word-break:break-word;
   font-size:28px;
   font-weight: bold;
@@ -565,6 +564,16 @@ function diffDays(dateStr){
     return Math.floor((t2-t1)/(1000*60*60*24));
 }
 
+function nl2brSafe(str){
+  if(!str) return "";
+  return str
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replace(/\\n/g,"\n")
+    .replace(/\n/g,"<br>");
+}
+
 /* load */
 async function loadSheet(){
 
@@ -744,7 +753,8 @@ function nextQuestion(){
 //       Math.floor(Math.random()*ENEMY_IMAGES.length)
 //     ];
 
-  $("question").textContent = cur.q;
+  // $("question").textContent = cur.q;
+  $("question").innerHTML = nl2br(cur.q);
   $("answer").textContent = "";
   $("exp").textContent = "";
   $("status").textContent = "";
@@ -810,8 +820,8 @@ function showAnswer(){
     clearInterval(intv);
     if(!cur||gameOver)return;
 
-    $("answer").textContent=cur.a;
-    $("exp").textContent=cur.e||"解説なし";
+    $("answer").innerHTML = nl2br(cur.a);
+    $("exp").innerHTML = nl2br(cur.e || "解説なし");
     $("status").textContent="JUDGE!";
     
     requestAnimationFrame(()=>{
