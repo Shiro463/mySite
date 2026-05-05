@@ -456,19 +456,22 @@ const DATASETS=[
   name:"音読み",
   id:"1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M",
   sheet:"シート1",
-  bg:"https://i.imgur.com/v2I3HO2.png"
+  bg:"https://i.imgur.com/v2I3HO2.png",
+  mode:"normal"
 },
 {
   name:"みんはや",
   id:"1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0",
   sheet:"シート1",
-  bg:"https://i.imgur.com/EibCVRv.png"
+  bg:"https://i.imgur.com/EibCVRv.png",
+  mode:"normal"
 },
 {
   name:"イタリア語",
   id:"1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w",
   sheet:"シート1",
-  bg:"https://i.imgur.com/bfFHhfo.png"
+  bg:"https://i.imgur.com/bfFHhfo.png",
+  mode:"fullAnswer"
 }
 ];
 
@@ -589,6 +592,24 @@ async function loadSheet(){
 
     const a=(lines.shift()||"").trim();
     const e=lines.join("\n").trim();
+
+    /* ===============================
+      ★ イタリア語専用ロジック
+      =============================== */
+    if(ds.mode === "fullAnswer"){
+
+      a = normalized.trim();   // 全部を答え
+      e = "";                  // 解説なし
+
+    }else{
+
+      const lines = normalized.split("\n");
+
+      a = (lines.shift()||"").trim();  // 1行目
+      e = lines.join("\n").trim();     // 残り
+
+    }
+
 
     return {q,a,e};
 
