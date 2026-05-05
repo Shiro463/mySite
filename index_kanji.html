@@ -366,7 +366,8 @@ font-size:14px;
     <div id="exp"></div>
 
     <div id="hud">
-    ⭐ SCORE <span id="score">0</span><br>
+    ⭐ CORRECT <span id="score">0</span><br>
+    🏆 WR <span id="wr">0</span><br>
     📚 LEFT <span id="left">0</span>
     </div>
 
@@ -456,35 +457,40 @@ const DATASETS=[
   id:"1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M",
   sheet:"シート1",
   bg:"https://i.imgur.com/v2I3HO2.png",
-  mode:"normal"
+  mode:"normal",
+  time:5
 },
 {
   name:"四字熟語1",
   id:"1AJ-WAqJi4pw1dnXNVFOi8lDXlmeXjkjCKlPWzhDN91Y",
   sheet:"シート1",
   bg:"https://i.imgur.com/5iRsBf1.png",
-  mode:"normal"
+  mode:"normal",
+  time:8
 },
 {
   name:"みんはや",
   id:"1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0",
   sheet:"シート1",
   bg:"https://i.imgur.com/EibCVRv.png",
-  mode:"normal"
+  mode:"normal",
+  time:10
 },
 {
   name:"イタリア語",
   id:"1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w",
   sheet:"シート1",
   bg:"https://i.imgur.com/bfFHhfo.png",
-  mode:"fullAnswer"
+  mode:"fullAnswer",
+  time:10
 },
 {
   name:"首都",
   id:"1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA",
   sheet:"シート1",
   bg:"https://i.imgur.com/oXnDY4b.png",
-  mode:"fullAnswer"
+  mode:"fullAnswer",
+  time:5
 }
 ];
 
@@ -511,6 +517,7 @@ let intv=null;
 let score=0;
 let hp=3;
 let gameOver=false;
+let LIMIT_TIME = 5;
 
 /* 初期化 */
 DATASETS.forEach((d,i)=>{
@@ -592,6 +599,7 @@ function nl2br(str){
 async function loadSheet(){
 
     const ds=DATASETS[$("dataset").value||0];
+    LIMIT_TIME = ds.time || 5;
 
     const url=
     "https://docs.google.com/spreadsheets/d/"
@@ -755,6 +763,9 @@ function nextQuestion(){
     $("question").textContent="MISSION COMPLETE";
     $("answer").textContent="";
     $("exp").textContent="";
+
+    updateWR();
+    
     return;
   }
 
@@ -867,7 +878,8 @@ function hit(ok){
 
         laser();
 
-        score += 100;
+        // score += 100;
+        score++;   // ← +100やめる
         s.correct++;
 
         /* 残り時間が多いほど定着している */
@@ -881,11 +893,11 @@ function hit(ok){
 
         s.last="correct";
 
-        $("status").textContent="撃破 +100";
+        $("status").textContent="正解！";
 
         addDailyCorrect();
 
-    }else{
+      }else{
 
         hp--;                    /* ←これが抜けていた */
         $("hp").textContent=hp;
@@ -910,8 +922,11 @@ function hit(ok){
             $("answer").textContent="";
             $("exp").textContent="";
             $("status").textContent="STARTで再挑戦";
-
+            
             setStat(ds.name,cur.q,s);
+            
+            updateWR();
+
             return;
         }
     }
@@ -1090,6 +1105,9 @@ $("start").onclick=async()=>{
     // $("enemy").style.display="block";
 
     applyBackground();   /* ←追加 */
+
+
+    refreshWR();   // ←追加
 
     await loadSheet();
     buildQueue();
@@ -1271,102 +1289,128 @@ function addDailyWrong(){
 
 function drawDailyChart(){
 
- const cvs=$("dailyChart");
- const ctx=cvs.getContext("2d");
+  const cvs=$("dailyChart");
+  const ctx=cvs.getContext("2d");
 
- ctx.clearRect(0,0,cvs.width,cvs.height);
+  ctx.clearRect(0,0,cvs.width,cvs.height);
 
- const keys=Object.keys(localStorage)
- .filter(k=>k.startsWith("daily_visit_"))
- .sort();
+  const keys=Object.keys(localStorage)
+  .filter(k=>k.startsWith("daily_visit_"))
+  .sort();
 
- const rows=keys.map(k=>{
-   return {
-     date:k.replace("daily_visit_",""),
-     ...JSON.parse(localStorage.getItem(k))
-   };
- });
+  const rows=keys.map(k=>{
+    return {
+      date:k.replace("daily_visit_",""),
+      ...JSON.parse(localStorage.getItem(k))
+    };
+  });
 
- if(rows.length===0)return;
+  if(rows.length===0)return;
 
- const max=Math.max(
-   ...rows.map(x=>Math.max(x.correct,x.wrong)),
-   1
- );
+  const max=Math.max(
+    ...rows.map(x=>Math.max(x.correct,x.wrong)),
+    1
+  );
 
- const W=760;
- const H=220;
- const sx=60;
- const sy=260;
+  const W=760;
+  const H=220;
+  const sx=60;
+  const sy=260;
 
- /* 軸 */
- ctx.strokeStyle="#333";
- ctx.lineWidth=1;
+  /* 軸 */
+  ctx.strokeStyle="#333";
+  ctx.lineWidth=1;
 
- ctx.beginPath();
- ctx.moveTo(sx,20);
- ctx.lineTo(sx,sy);
- ctx.lineTo(sx+W,sy);
- ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(sx,20);
+  ctx.lineTo(sx,sy);
+  ctx.lineTo(sx+W,sy);
+  ctx.stroke();
 
+  const gridCount = 5;
 
- function drawLine(type,color){
+  ctx.strokeStyle = "rgba(0,0,0,0.15)";
+  ctx.lineWidth = 1;
 
-   ctx.beginPath();
-   ctx.strokeStyle=color;
-   ctx.lineWidth=3;
+  for(let i=0;i<=gridCount;i++){
 
-   rows.forEach((r,i)=>{
+    const y = sy - (H/gridCount)*i;
 
-     const x=sx+i*(W/Math.max(rows.length-1,1));
-     const y=sy-(r[type]/max)*H;
+    /* 横グリッド線 */
+    ctx.beginPath();
+    ctx.moveTo(sx,y);
+    ctx.lineTo(sx+W,y);
+    ctx.stroke();
 
-     if(i===0) ctx.moveTo(x,y);
-     else ctx.lineTo(x,y);
+    /* 縦軸ラベル */
+    const val = Math.round(max/gridCount*i);
+    ctx.fillStyle="#333";
+    ctx.font="12px sans-serif";
+    ctx.fillText(val, sx-35, y+4);
+  }
 
-   });
+  function drawLine(type,color){
 
-   ctx.stroke();
+    ctx.beginPath();
+    ctx.strokeStyle=color;
+    ctx.lineWidth=3;
 
-   /* プロット */
-   rows.forEach((r,i)=>{
+    rows.forEach((r,i)=>{
 
-     const x=sx+i*(W/Math.max(rows.length-1,1));
-     const y=sy-(r[type]/max)*H;
+      const x=sx+i*(W/Math.max(rows.length-1,1));
+      const y=sy-(r[type]/max)*H;
 
-     ctx.beginPath();
-     ctx.fillStyle=color;
-     ctx.arc(x,y,5,0,Math.PI*2);
-     ctx.fill();
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
 
-   });
+    });
+
+    ctx.stroke();
+
+    /* プロット */
+    rows.forEach((r,i)=>{
+
+      const x=sx+i*(W/Math.max(rows.length-1,1));
+      const y=sy-(r[type]/max)*H;
+
+      ctx.beginPath();
+      ctx.fillStyle=color;
+      ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.fill();
+
+    });
  }
 
- /* 正解 緑 */
- drawLine("correct","#22c55e");
+  /* 正解 緑 */
+  drawLine("correct","#22c55e");
 
- /* 不正解 赤 */
- drawLine("wrong","#ef4444");
+  /* 不正解 赤 */
+  drawLine("wrong","#ef4444");
 
 
- /* 日付 */
- ctx.fillStyle="#111";
- ctx.font="12px sans-serif";
+  /* 日付 */
+  ctx.fillStyle="#111";
+  ctx.font="12px sans-serif";
 
- rows.forEach((r,i)=>{
+  rows.forEach((r,i)=>{
 
-   const x=sx+i*(W/Math.max(rows.length-1,1));
+    const x=sx+i*(W/Math.max(rows.length-1,1));
 
-   ctx.fillText(
-     r.date.slice(5),
-     x-18,
-     282
-   );
+    ctx.fillText(
+      r.date.slice(5),
+      x-18,
+      282
+    );
+    
+    ctx.beginPath();
+    ctx.moveTo(x,20);
+    ctx.lineTo(x,sy);
+    ctx.stroke();
 
- });
+  });
 
- ctx.fillText("緑=正解数",620,28);
- ctx.fillText("赤=不正解数",620,48);
+  ctx.fillText("緑=正解数",620,28);
+  ctx.fillText("赤=不正解数",620,48);
 
 }
 
@@ -1377,6 +1421,12 @@ let timerStart=0;
 function startTimer(){
 
 
+  const ds = DATASETS[$("dataset").value || 0];
+  LIMIT_TIME = ds.time || 5;
+
+  remain = LIMIT_TIME;
+  timerStart = Date.now();
+
   $("centerTimer").textContent =
     remain.toFixed(2);
 
@@ -1384,15 +1434,15 @@ function startTimer(){
 
   clearInterval(intv);
 
-  remain = 5;
-  timerStart = Date.now();
+  // remain = 5;
+  // timerStart = Date.now();
 
-  $("centerTimer").textContent = "5.00";
+  // $("centerTimer").textContent = "5.00";
 
   intv = setInterval(()=>{
 
     const diff = (Date.now() - timerStart) / 1000;
-    remain = Math.max(0, 5 - diff);
+    remain = Math.max(0, LIMIT_TIME - diff);
 
     $("centerTimer").textContent =
       remain.toFixed(2);
@@ -1465,7 +1515,38 @@ function applyBackground(){
 }
 
 
-$("dataset").addEventListener("change",applyBackground);
+function getWR(){
+
+  const ds = DATASETS[$("dataset").value || 0];
+  const key = "ms_wr_" + ds.name;
+
+  return Number(localStorage.getItem(key) || 0);
+}
+
+function refreshWR(){
+  $("wr").textContent = getWR();
+}
+
+function updateWR(){
+
+  const ds = DATASETS[$("dataset").value || 0];
+  const key = "ms_wr_" + ds.name;
+
+  const prev = Number(localStorage.getItem(key) || 0);
+
+  if(score > prev){
+    localStorage.setItem(key, score);
+    refreshWR();  // ←ここ重要（即反映）
+  }
+
+  return Math.max(score, prev);
+}
+
+
+$("dataset").addEventListener("change",()=>{
+  applyBackground();
+  refreshWR();   // ←追加
+});
 
 window.addEventListener("load",applyBackground);
 
