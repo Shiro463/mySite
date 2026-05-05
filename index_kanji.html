@@ -564,7 +564,7 @@ function diffDays(dateStr){
     return Math.floor((t2-t1)/(1000*60*60*24));
 }
 
-function nl2brSafe(str){
+function nl2br(str){
   if(!str) return "";
   return str
     .replaceAll("&","&amp;")
