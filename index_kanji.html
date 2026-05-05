@@ -588,10 +588,11 @@ async function loadSheet(){
     const raw=c[2]&&c[2].v!=null?String(c[2].v):"";
 
     const normalized=raw.replace(/\\n/g,"\n");
-    const lines=normalized.split("\n");
+    // const lines=normalized.split("\n");
 
-    const a=(lines.shift()||"").trim();
-    const e=lines.join("\n").trim();
+    // const a=(lines.shift()||"").trim();
+    // const e=lines.join("\n").trim();
+    let a="", e="";
 
     /* ===============================
       ★ イタリア語専用ロジック
