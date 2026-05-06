@@ -619,41 +619,63 @@ async function loadSheet(){
     const m=txt.match(/setResponse\((.*)\);/s);
     const json=JSON.parse(m[1]);
 
-    data=(json.table.rows||[]).map(r=>{
+    data = (json.table.rows || []).map(r => {
 
-    const c=r.c||[];
+      const c = r.c || [];
 
-    const q=c[0]&&c[0].v!=null?String(c[0].v).trim():"";
-    const raw=c[2]&&c[2].v!=null?String(c[2].v):"";
+      let q = "";
+      let a = "";
+      let e = "";
 
-    const normalized=raw.replace(/\\n/g,"\n");
-    // const lines=normalized.split("\n");
-
-    // const a=(lines.shift()||"").trim();
-    // const e=lines.join("\n").trim();
-    let a="", e="";
-
-    /* ===============================
-      ★ イタリア語専用ロジック
+      /* ===============================
+        ★ モード分岐
       =============================== */
-    if(ds.mode === "fullAnswer"){
 
-      a = normalized.trim();   // 全部を答え
-      e = "";                  // 解説なし
+      if(ds.mode === "kanji_parts1"){
 
-    }else{
+        // E列 = 問題
+        q = c[4] && c[4].v != null
+          ? String(c[4].v).trim()
+          : "";
 
-      const lines = normalized.split("\n");
+        // D列 = 答え（全文）
+        a = c[3] && c[3].v != null
+          ? String(c[3].v).replace(/\\n/g,"\n").trim()
+          : "";
 
-      a = (lines.shift()||"").trim();  // 1行目
-      e = lines.join("\n").trim();     // 残り
+        e = ""; // 解説なし
 
-    }
+      }else{
 
+        const qRaw = c[0] && c[0].v != null
+          ? String(c[0].v).trim()
+          : "";
 
-    return {q,a,e};
+        const raw = c[2] && c[2].v != null
+          ? String(c[2].v)
+          : "";
 
-    }).filter(x=>x.q&&x.a);
+        const normalized = raw.replace(/\\n/g,"\n");
+
+        if(ds.mode === "fullAnswer"){
+
+          q = qRaw;
+          a = normalized.trim();
+          e = "";
+
+        }else{
+
+          const lines = normalized.split("\n");
+
+          q = qRaw;
+          a = (lines.shift() || "").trim();
+          e = lines.join("\n").trim();
+        }
+      }
+
+      return { q, a, e };
+
+    }).filter(x => x.q && x.a);
 }
 
 /* queue */
