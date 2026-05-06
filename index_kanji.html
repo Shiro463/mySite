@@ -1299,12 +1299,10 @@ function drawDailyChart(){
   .filter(k=>k.startsWith("daily_visit_"))
   .sort();
 
-  const rows=keys.map(k=>{
-    return {
-      date:k.replace("daily_visit_",""),
-      ...JSON.parse(localStorage.getItem(k))
-    };
-  });
+  const rows=keys.map(k=>({
+    date:k.replace("daily_visit_",""),
+    ...JSON.parse(localStorage.getItem(k))
+  }));
 
   if(rows.length===0)return;
 
@@ -1318,7 +1316,9 @@ function drawDailyChart(){
   const sx=60;
   const sy=260;
 
-  /* 軸 */
+  /* ===============================
+     ★ 軸
+  =============================== */
   ctx.strokeStyle="#333";
   ctx.lineWidth=1;
 
@@ -1330,26 +1330,48 @@ function drawDailyChart(){
 
   const gridCount = 5;
 
-  ctx.strokeStyle = "#333";
-  ctx.lineWidth = 1;
+  /* ===============================
+     ★ 汎用グリッド描画関数
+  =============================== */
+  function drawGridLines(){
 
-  for(let i=0;i<=gridCount;i++){
+    ctx.strokeStyle = "#ddd";
+    ctx.lineWidth = 1;
 
-    const y = sy - (H/gridCount)*i;
+    /* 横線 */
+    for(let i=0;i<=gridCount;i++){
+      const y = sy - (H/gridCount)*i;
 
-    /* 横グリッド線 */
-    ctx.beginPath();
-    ctx.moveTo(sx,y);
-    ctx.lineTo(sx+W,y);
-    ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(sx,y);
+      ctx.lineTo(sx+W,y);
+      ctx.stroke();
 
-    /* 縦軸ラベル */
-    const val = Math.round(max/gridCount*i);
-    ctx.fillStyle="#333";
-    ctx.font="12px sans-serif";
-    ctx.fillText(val, sx-35, y+4);
+      /* 縦軸ラベル */
+      const val = Math.round(max/gridCount*i);
+      ctx.fillStyle="#333";
+      ctx.font="12px sans-serif";
+      ctx.fillText(val, sx-35, y+4);
+    }
+
+    /* 縦線 */
+    rows.forEach((r,i)=>{
+
+      const x = sx + i*(W/Math.max(rows.length-1,1));
+
+      ctx.beginPath();
+      ctx.moveTo(x,20);
+      ctx.lineTo(x,sy);
+      ctx.stroke();
+    });
+
   }
 
+  drawGridLines();  // ←ここで一発描画
+
+  /* ===============================
+     ★ 折れ線
+  =============================== */
   function drawLine(type,color){
 
     ctx.beginPath();
@@ -1357,18 +1379,14 @@ function drawDailyChart(){
     ctx.lineWidth=3;
 
     rows.forEach((r,i)=>{
-
       const x=sx+i*(W/Math.max(rows.length-1,1));
       const y=sy-(r[type]/max)*H;
 
       if(i===0) ctx.moveTo(x,y);
       else ctx.lineTo(x,y);
-
     });
 
     ctx.stroke();
-
-    ctx.strokeStyle = "#333";  // ←軸やグラフ用に戻す
 
     /* プロット */
     rows.forEach((r,i)=>{
@@ -1382,16 +1400,14 @@ function drawDailyChart(){
       ctx.fill();
 
     });
- }
+  }
 
-  /* 正解 緑 */
   drawLine("correct","#22c55e");
-
-  /* 不正解 赤 */
   drawLine("wrong","#ef4444");
 
-
-  /* 日付 */
+  /* ===============================
+     ★ 日付ラベル
+  =============================== */
   ctx.fillStyle="#111";
   ctx.font="12px sans-serif";
 
@@ -1404,17 +1420,10 @@ function drawDailyChart(){
       x-18,
       282
     );
-    
-    ctx.beginPath();
-    ctx.moveTo(x,20);
-    ctx.lineTo(x,sy);
-    ctx.stroke();
-
   });
 
   ctx.fillText("緑=正解数",620,28);
   ctx.fillText("赤=不正解数",620,48);
-
 }
 
 
