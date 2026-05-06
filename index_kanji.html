@@ -107,7 +107,7 @@ body{
 #answer{
   position:absolute;
   top:36%;
-  height:12%;
+  height:22%;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw,980px);
@@ -126,7 +126,7 @@ body{
 #exp{
   position:absolute;
   top:48%;
-  height:30%;
+  height:24%;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw,980px);
@@ -610,6 +610,13 @@ function nl2br(str){
     .replace(/\\n/g,"\n")
     .replace(/\n/g,"<br>");
 }
+
+function escapeHtmlWithBr(str){
+  return escapeHtml(String(str))
+    .replace(/\r?\n/g, "<br>");
+}
+
+
 
 /* load */
 async function loadSheet(){
@@ -1108,7 +1115,7 @@ function drawStats(){
 
     return `
     <div class="row">
-        <b>${escapeHtml(x.q)}</b><br>
+        <b>${escapeHtmlWithBr(x.q)}</b><br>
 
         定着:${s.memory}
         正:${s.correct}
