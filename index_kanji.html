@@ -1330,7 +1330,7 @@ function drawDailyChart(){
 
   const gridCount = 5;
 
-  ctx.strokeStyle = "#eee";
+  ctx.strokeStyle = "#333";
   ctx.lineWidth = 1;
 
   for(let i=0;i<=gridCount;i++){
@@ -1551,9 +1551,10 @@ $("dataset").addEventListener("change",()=>{
   refreshWR();   // ←追加
 });
 
-window.addEventListener("load",applyBackground);
-
-refershWR()
+window.addEventListener("load",()=>{
+  applyBackground();
+  refreshWR();   // ←これを追加
+});
 
 /* 起動時 */
 initDailyRecord();
