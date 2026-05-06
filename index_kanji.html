@@ -963,6 +963,10 @@ function drawStats(){
 
     const ds=DATASETS[$("dataset").value||0];
 
+    const keys = Object.keys(localStorage)
+      .filter(k=>k.startsWith("daily_visit_" + ds.name + "_"))
+      .sort();
+
     let correct=0,wrong=0,unseen=0;
 
     data.forEach(x=>{
@@ -1002,9 +1006,19 @@ function drawStats(){
 
     const mode=$("sortMode").value;
 
-    const rows=[...data];
+    // const rows=[...data];
 
-    rows.sort((a,b)=>{
+    // rows.sort((a,b)=>{
+
+    const rows = keys.map(k=>{
+
+      const date = k.replace("daily_visit_" + ds.name + "_","");
+
+      return {
+        date,
+        ...JSON.parse(localStorage.getItem(k))
+      };
+    });
 
     const sa = getStat(ds.name,a.q);
     const sb = getStat(ds.name,b.q);
@@ -1274,7 +1288,8 @@ function initDailyRecord(){
 /* 正解加算 */
 function addDailyCorrect(){
 
-  const key="daily_visit_"+todayStr();
+  // const key="daily_visit_"+todayStr();
+  const key = getDailyKey();
 
   let d=JSON.parse(localStorage.getItem(key));
 
@@ -1286,7 +1301,8 @@ function addDailyCorrect(){
 /* 不正解加算 */
 function addDailyWrong(){
 
-  const key="daily_visit_"+todayStr();
+  // const key="daily_visit_"+todayStr();
+  const key = getDailyKey();
 
   let d=JSON.parse(localStorage.getItem(key));
 
@@ -1294,6 +1310,26 @@ function addDailyWrong(){
 
   localStorage.setItem(key,JSON.stringify(d));
 }
+
+
+function getDailyKey(){
+  const ds = DATASETS[$("dataset").value || 0];
+  return "daily_visit_" + ds.name + "_" + todayStr();
+}
+
+function initDailyRecord(){
+
+  const key = getDailyKey();
+
+  if(localStorage.getItem(key)) return;
+
+  localStorage.setItem(key, JSON.stringify({
+    correct:0,
+    wrong:0
+  }));
+}
+
+
 
 
 function drawDailyChart(){
