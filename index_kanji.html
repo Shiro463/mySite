@@ -966,7 +966,7 @@ function drawStats(){
     const keys = Object.keys(localStorage)
       .filter(k=>k.startsWith("daily_visit_" + ds.name + "_"))
       .sort();
-
+      
     let correct=0,wrong=0,unseen=0;
 
     data.forEach(x=>{
@@ -1006,10 +1006,6 @@ function drawStats(){
 
     const mode=$("sortMode").value;
 
-    // const rows=[...data];
-
-    // rows.sort((a,b)=>{
-
     const rows = keys.map(k=>{
 
       const date = k.replace("daily_visit_" + ds.name + "_","");
@@ -1019,6 +1015,8 @@ function drawStats(){
         ...JSON.parse(localStorage.getItem(k))
       };
     });
+
+    rows.sort((a,b)=>{
 
     const sa = getStat(ds.name,a.q);
     const sb = getStat(ds.name,b.q);
