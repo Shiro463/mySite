@@ -696,7 +696,6 @@ function buildQueue(){
         return s.fav===true;
     }
 
-    refershWR()
 
     return true;
   });
@@ -1331,7 +1330,7 @@ function drawDailyChart(){
 
   const gridCount = 5;
 
-  ctx.strokeStyle = "#ccc";
+  ctx.strokeStyle = "#eee";
   ctx.lineWidth = 1;
 
   for(let i=0;i<=gridCount;i++){
@@ -1554,6 +1553,7 @@ $("dataset").addEventListener("change",()=>{
 
 window.addEventListener("load",applyBackground);
 
+refershWR()
 
 /* 起動時 */
 initDailyRecord();
