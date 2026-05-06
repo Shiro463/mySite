@@ -1160,7 +1160,24 @@ $("show").onclick=showAnswer;
 $("correct").onclick=()=>hit(true);
 $("wrong").onclick=()=>hit(false);
 
-$("statsBtn").onclick=drawStats;
+$("statsBtn").onclick = async () => {
+
+  const ds = DATASETS[$("dataset").value || 0];
+
+  // まだデータ未ロードならロード
+  if(data.length === 0){
+    $("status").textContent = "統計読込中...";
+    try{
+      await loadSheet();
+    }catch(e){
+      $("status").textContent = "統計読込失敗";
+      console.error(e);
+      return;
+    }
+  }
+
+  drawStats();
+};
 $("closeStats").onclick=()=>{
 $("statsWrap").style.display="none";
 };
@@ -1559,8 +1576,10 @@ $("dataset").addEventListener("change",()=>{
   applyBackground();
   refreshWR();
 
+  data = [];   // ←これ重要
+
   if($("statsWrap").style.display === "block"){
-    drawStats();
+    $("statsWrap").style.display = "none";
   }
 });
 
