@@ -949,12 +949,40 @@ function hit(ok){
 
     setTimeout(nextQuestion,550);
 
-    /* 正解時 */
-    addDailyCorrect();
+    // /* 正解時 */
+    // addDailyCorrect();
 
-    /* 不正解時 */
-    addDailyWrong();
+    // /* 不正解時 */
+    // addDailyWrong();
 }
+
+
+function getCurrentDataset(){
+  return DATASETS[$("dataset").value || 0];
+}
+
+function dailyKey(ds, date=todayStr()){
+  return `daily_visit_${ds.id}_${date}`;
+}
+
+
+function initDailyRecord(){
+  const ds = getCurrentDataset();
+  const key = dailyKey(ds);
+
+  if(localStorage.getItem(key)) return;
+
+  localStorage.setItem(
+    key,
+    JSON.stringify({
+      correct:0,
+      wrong:0
+    })
+  );
+}
+
+
+
 
 /* 統計 */
 function drawStats(){
@@ -1273,62 +1301,58 @@ function initDailyRecord(){
 
 /* 正解加算 */
 function addDailyCorrect(){
+  const ds = getCurrentDataset();
+  const key = dailyKey(ds);
 
-  const key="daily_visit_"+todayStr();
-
-  let d=JSON.parse(localStorage.getItem(key));
-
+  let d = JSON.parse(localStorage.getItem(key) || '{"correct":0,"wrong":0}');
   d.correct++;
-
-  localStorage.setItem(key,JSON.stringify(d));
+  localStorage.setItem(key, JSON.stringify(d));
 }
 
 /* 不正解加算 */
 function addDailyWrong(){
+  const ds = getCurrentDataset();
+  const key = dailyKey(ds);
 
-  const key="daily_visit_"+todayStr();
-
-  let d=JSON.parse(localStorage.getItem(key));
-
+  let d = JSON.parse(localStorage.getItem(key) || '{"correct":0,"wrong":0}');
   d.wrong++;
-
-  localStorage.setItem(key,JSON.stringify(d));
+  localStorage.setItem(key, JSON.stringify(d));
 }
-
 
 function drawDailyChart(){
 
-  const cvs=$("dailyChart");
-  const ctx=cvs.getContext("2d");
+  const cvs = $("dailyChart");
+  const ctx = cvs.getContext("2d");
 
   ctx.clearRect(0,0,cvs.width,cvs.height);
 
-  const keys=Object.keys(localStorage)
-  .filter(k=>k.startsWith("daily_visit_"))
-  .sort();
+  const ds = getCurrentDataset();
+  const prefix = `daily_visit_${ds.id}_`;
 
-  const rows=keys.map(k=>({
-    date:k.replace("daily_visit_",""),
+  const keys = Object.keys(localStorage)
+    .filter(k => k.startsWith(prefix))
+    .sort();
+
+  const rows = keys.map(k => ({
+    date: k.replace(prefix, ""),
     ...JSON.parse(localStorage.getItem(k))
   }));
 
-  if(rows.length===0)return;
+  if(rows.length === 0) return;
 
-  const max=Math.max(
-    ...rows.map(x=>Math.max(x.correct,x.wrong)),
+  const max = Math.max(
+    ...rows.map(x => Math.max(x.correct, x.wrong)),
     1
   );
 
-  const W=760;
-  const H=220;
-  const sx=60;
-  const sy=260;
+  const W = 760;
+  const H = 220;
+  const sx = 60;
+  const sy = 260;
+  const gridCount = 5;
 
-  /* ===============================
-     ★ 軸
-  =============================== */
-  ctx.strokeStyle="#333";
-  ctx.lineWidth=1;
+  ctx.strokeStyle = "#333";
+  ctx.lineWidth = 1;
 
   ctx.beginPath();
   ctx.moveTo(sx,20);
@@ -1336,98 +1360,66 @@ function drawDailyChart(){
   ctx.lineTo(sx+W,sy);
   ctx.stroke();
 
-  const gridCount = 5;
+  ctx.strokeStyle = "#ddd";
+  ctx.lineWidth = 1;
 
-  /* ===============================
-     ★ 汎用グリッド描画関数
-  =============================== */
-  function drawGridLines(){
-
-    ctx.strokeStyle = "#ddd";
-    ctx.lineWidth = 1;
-
-    /* 横線 */
-    for(let i=0;i<=gridCount;i++){
-      const y = sy - (H/gridCount)*i;
-
-      ctx.beginPath();
-      ctx.moveTo(sx,y);
-      ctx.lineTo(sx+W,y);
-      ctx.stroke();
-
-      /* 縦軸ラベル */
-      const val = Math.round(max/gridCount*i);
-      ctx.fillStyle="#333";
-      ctx.font="12px sans-serif";
-      ctx.fillText(val, sx-35, y+4);
-    }
-
-    /* 縦線 */
-    rows.forEach((r,i)=>{
-
-      const x = sx + i*(W/Math.max(rows.length-1,1));
-
-      ctx.beginPath();
-      ctx.moveTo(x,20);
-      ctx.lineTo(x,sy);
-      ctx.stroke();
-    });
-
-  }
-
-  drawGridLines();  // ←ここで一発描画
-
-  /* ===============================
-     ★ 折れ線
-  =============================== */
-  function drawLine(type,color){
+  for(let i=0;i<=gridCount;i++){
+    const y = sy - (H/gridCount)*i;
 
     ctx.beginPath();
-    ctx.strokeStyle=color;
-    ctx.lineWidth=3;
+    ctx.moveTo(sx,y);
+    ctx.lineTo(sx+W,y);
+    ctx.stroke();
+
+    const val = Math.round(max/gridCount*i);
+    ctx.fillStyle = "#333";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(val, sx-35, y+4);
+  }
+
+  rows.forEach((r,i)=>{
+    const x = sx + i*(W/Math.max(rows.length-1,1));
+
+    ctx.beginPath();
+    ctx.moveTo(x,20);
+    ctx.lineTo(x,sy);
+    ctx.stroke();
+  });
+
+  function drawLine(type,color){
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
 
     rows.forEach((r,i)=>{
-      const x=sx+i*(W/Math.max(rows.length-1,1));
-      const y=sy-(r[type]/max)*H;
-
+      const x = sx + i*(W/Math.max(rows.length-1,1));
+      const y = sy - (r[type]/max)*H;
       if(i===0) ctx.moveTo(x,y);
       else ctx.lineTo(x,y);
     });
 
     ctx.stroke();
 
-    /* プロット */
     rows.forEach((r,i)=>{
-
-      const x=sx+i*(W/Math.max(rows.length-1,1));
-      const y=sy-(r[type]/max)*H;
+      const x = sx + i*(W/Math.max(rows.length-1,1));
+      const y = sy - (r[type]/max)*H;
 
       ctx.beginPath();
-      ctx.fillStyle=color;
+      ctx.fillStyle = color;
       ctx.arc(x,y,5,0,Math.PI*2);
       ctx.fill();
-
     });
   }
 
   drawLine("correct","#22c55e");
   drawLine("wrong","#ef4444");
 
-  /* ===============================
-     ★ 日付ラベル
-  =============================== */
-  ctx.fillStyle="#111";
-  ctx.font="12px sans-serif";
+  ctx.fillStyle = "#111";
+  ctx.font = "12px sans-serif";
 
   rows.forEach((r,i)=>{
-
-    const x=sx+i*(W/Math.max(rows.length-1,1));
-
-    ctx.fillText(
-      r.date.slice(5),
-      x-18,
-      282
-    );
+    const x = sx + i*(W/Math.max(rows.length-1,1));
+    ctx.fillText(r.date.slice(5), x-18, 282);
   });
 
   ctx.fillText("緑=正解数",620,28);
@@ -1565,7 +1557,11 @@ function updateWR(){
 
 $("dataset").addEventListener("change",()=>{
   applyBackground();
-  refreshWR();   // ←追加
+  refreshWR();
+
+  if($("statsWrap").style.display === "block"){
+    drawStats();
+  }
 });
 
 window.addEventListener("load",()=>{
