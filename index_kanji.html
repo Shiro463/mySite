@@ -696,6 +696,8 @@ function buildQueue(){
         return s.fav===true;
     }
 
+    refershWR()
+
     return true;
   });
 
@@ -765,7 +767,7 @@ function nextQuestion(){
     $("exp").textContent="";
 
     updateWR();
-    
+
     return;
   }
 
@@ -1329,7 +1331,7 @@ function drawDailyChart(){
 
   const gridCount = 5;
 
-  ctx.strokeStyle = "rgba(0,0,0,0.15)";
+  ctx.strokeStyle = "#ccc";
   ctx.lineWidth = 1;
 
   for(let i=0;i<=gridCount;i++){
@@ -1366,6 +1368,8 @@ function drawDailyChart(){
     });
 
     ctx.stroke();
+
+    ctx.strokeStyle = "#333";  // ←軸やグラフ用に戻す
 
     /* プロット */
     rows.forEach((r,i)=>{
