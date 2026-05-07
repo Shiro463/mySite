@@ -64,12 +64,12 @@ body{
 /* 中央 */
 #status{
   position:absolute;
-  top:5%;
+  top:1%;
   height:3%;
   left:50%;
   transform:translateX(-50%);
   z-index:20;
-  font-size:30px;
+  font-size:25px;
   font-weight:900;
 }
 /* #enemy{
@@ -87,9 +87,9 @@ body{
 
 #question{
   position:absolute;
-  top:8%;
-  height:20%;
-  left:50%;
+  top:6%;
+  height:10%;
+  left:20%;
   transform:translateX(-50%);
   width:min(94vw,1100px);
   padding:10px;
@@ -106,7 +106,7 @@ body{
 
 #answer{
   position:absolute;
-  top:36%;
+  top:30%;
   height:22%;
   left:50%;
   transform:translateX(-50%);
@@ -120,7 +120,7 @@ body{
   align-items:center;
   justify-content:center;
   word-break:break-word;
-  font-size:42px;
+  font-size:36px;
 }
 
 #exp{
@@ -140,7 +140,7 @@ body{
   align-items:center;
   justify-content:center;
   word-break:break-word;
-  font-size:28px;
+  font-size:24px;
   font-weight: bold;
 }
 
@@ -662,9 +662,22 @@ async function loadSheet(){
 
       }else{
 
-        const qRaw = c[0] && c[0].v != null
-          ? String(c[0].v).trim()
-          : "";
+        let qRaw = "";
+
+        if(ds.mode === "fullAnswer"){
+
+          // B列
+          qRaw = c[1] && c[1].v != null
+            ? String(c[1].v).trim()
+            : "";
+
+        }else{
+
+          // A列
+          qRaw = c[0] && c[0].v != null
+            ? String(c[0].v).trim()
+            : "";
+        }
 
         const raw = c[2] && c[2].v != null
           ? String(c[2].v)
