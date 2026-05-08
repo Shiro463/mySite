@@ -105,6 +105,10 @@ body{
   font-size:24px;
 }
 
+.noWrap{
+  white-space:nowrap;
+}
+
 #answer{
   position:absolute;
   top:38%;
@@ -842,6 +846,12 @@ function nextQuestion(){
 
   // $("question").textContent = cur.q;
   $("question").innerHTML = nl2br(cur.q);
+  const ds = DATASETS[$("dataset").value || 0];
+  if(ds.mode === "kanji_parts1"){
+    $("question").classList.add("noWrap");
+  }else{
+    $("question").classList.remove("noWrap");
+  }
   $("answer").textContent = "";
   $("exp").textContent = "";
   $("status").textContent = "";
