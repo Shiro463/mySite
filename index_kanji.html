@@ -394,6 +394,7 @@ font-size:14px;
         <button class="misc" id="statsBtn">統計</button>
         <button class="start" id="start">START</button>
         <div class="break"></div>
+        <button class="misc" id="skip">スルー</button>
         <button class="ng" id="wrong">被弾</button>
         <button class="ok" id="correct">撃破</button>
         <button class="show" id="show">答え</button>
@@ -927,16 +928,19 @@ function setJudgeButtonsEnabled(enabled){
 
   $("correct").disabled = !enabled;
   $("wrong").disabled = !enabled;
+  $("skip").disabled = !enabled;
 
   if(enabled){
 
     $("correct").style.opacity = "1";
     $("wrong").style.opacity = "1";
+    $("skip").style.opacity = "1";
 
   }else{
 
     $("correct").style.opacity = "0.45";
     $("wrong").style.opacity = "0.45";
+    $("skip").style.opacity = "0.45";
   }
 }
 
@@ -1031,6 +1035,33 @@ function hit(ok){
     // /* 不正解時 */
     // addDailyWrong();
 }
+
+
+function skipQuestion(){
+
+  if(!cur || gameOver) return;
+
+  const ds = DATASETS[$("dataset").value||0];
+
+  let s = getStat(ds.name, cur.q);
+
+  /* 出題済み扱いにする */
+  s.last = "skip";
+  s.lastDate = todayStr();
+
+  /* memoryは少しだけ増やす（任意） */
+  // s.memory += 3;
+
+  setStat(ds.name, cur.q, s);
+
+  $("status").textContent = "スルー";
+
+  setJudgeButtonsEnabled(false);
+
+  setTimeout(nextQuestion, 350);
+}
+
+
 
 
 function getCurrentDataset(){
@@ -1235,6 +1266,7 @@ $("start").onclick=async()=>{
 $("show").onclick=showAnswer;
 $("correct").onclick=()=>hit(true);
 $("wrong").onclick=()=>hit(false);
+$("skip").onclick=skipQuestion;
 
 $("statsBtn").onclick = async () => {
 
@@ -1652,7 +1684,7 @@ $("dataset").addEventListener("change",()=>{
   applyBackground();
   refreshWR();
 
-  data = [];   // ←これ重要
+  data = [];
 
   if($("statsWrap").style.display === "block"){
     $("statsWrap").style.display = "none";
@@ -1661,7 +1693,7 @@ $("dataset").addEventListener("change",()=>{
 
 window.addEventListener("load",()=>{
   applyBackground();
-  refreshWR();   // ←これを追加
+  refreshWR();
 
   setJudgeButtonsEnabled(false);
 
