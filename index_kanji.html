@@ -1468,10 +1468,26 @@ function drawDailyChart(){
     .filter(k => k.startsWith(prefix))
     .sort();
 
-  const rows = keys.map(k => ({
+  const rawRows = keys.map(k => ({
     date: k.replace(prefix, ""),
     ...JSON.parse(localStorage.getItem(k))
   }));
+
+  /* 累計化 */
+  let totalCorrect = 0;
+  let totalWrong = 0;
+
+  const rows = rawRows.map(r => {
+
+    totalCorrect += r.correct;
+    totalWrong += r.wrong;
+
+    return {
+      date: r.date,
+      correct: totalCorrect,
+      wrong: totalWrong
+    };
+  });
 
   if(rows.length === 0) return;
 
