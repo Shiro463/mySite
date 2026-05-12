@@ -975,18 +975,31 @@ function hit(ok){
 
         laser();
 
-        // score += 100;
-        score++;   // ← +100やめる
+        score++;
+
+        /* 初回正解か？ */
+        const firstClear =
+          s.correct === 0 &&
+          s.wrong === 0;
+
         s.correct++;
 
-        /* 残り時間が多いほど定着している */
-        const bonus = Math.floor(remain * 4);
+        if(firstClear){
 
-        /* 早答えほど大きく下げる */
-        s.memory = Math.max(
-            1,
-            s.memory - (8 + bonus)
-        );
+          /* 未出題→初回正解なら0 */
+          s.memory = 0;
+
+        }else{
+
+          /* 残り時間が多いほど定着している */
+          const bonus = Math.floor(remain * 4);
+
+          /* 早答えほど大きく下げる */
+          s.memory = Math.max(
+              0,
+              s.memory - (8 + bonus)
+          );
+        }
 
         s.last="correct";
 
