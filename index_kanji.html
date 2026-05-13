@@ -52,7 +52,7 @@ body{
 #hud{
   position:absolute;
   right:10px;
-  bottom:10px;
+  top:10px;
   z-index:30;
   background:rgba(0,0,0,.25);
   padding:12px;
@@ -87,40 +87,40 @@ body{
 
 #question{
   position:absolute;
-  top:10%;
+  top:8%;
   height:26%;
   left:30%;
   transform:translateX(-50%);
-  width:40%;
-  padding:10px;
-  text-align:left;
-  line-height:1.25;
+  width:60%;
+  padding:8px;
   overflow-y:auto;
-  overflow-x:hidden;
   display:flex;
-  z-index:3;
-  align-items:left;
+  align-items:center;
   justify-content:center;
+  vertical-align: top;
+  text-align:left;
+  line-height:1.15;
   word-break:break-word;
+  overflow-wrap:anywhere;
   font-size:24px;
 }
-
 .noWrap{
   white-space:nowrap;
 }
 
 #answer{
   position:absolute;
-  top:38%;
-  height:22%;
+  top:32%;
+  height:32%;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw,980px);
   padding:6px;
   text-align:left;
+  vertical-align: top;
   line-height:1.25;
   overflow-y:auto;
-  overflow-x:hidden;
+  overflow-x:auto;
   display:flex;
   z-index:4;
   align-items:center;
@@ -131,16 +131,17 @@ body{
 
 #exp{
   position:absolute;
-  top:56%;
+  top:64%;
   height:20%;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw,980px);
   padding:6px;
   overflow-y:auto;
-  overflow-x:hidden;
+  overflow-x:auto;
   text-align:left;
-  display:block;
+  vertical-align: text-top;
+  /* display:block; */
   line-height:1.45;
   z-index:5;
   align-items:center;
@@ -192,7 +193,7 @@ body{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
-  gap:4px;
+  gap:4px 18px;
 }
 
 .break{
@@ -249,12 +250,12 @@ to{height:72%}
   position:absolute;
   top:22%;
   height:6%;
-  left:70%;
+  left:90%;
   transform:translateX(-50%);
   width:100%;
   text-align:center;
   z-index:0;
-  font-size:36px;
+  font-size:24px;
   transition:font-size .22s ease;
 
   color:#ffd6ef;   /* 薄いピンク */
@@ -397,7 +398,7 @@ font-size:14px;
         <div class="break"></div>
         <button class="misc" id="statsBtn">統計</button>
         <button class="start" id="start">START</button>
-        <div class="break"></div>
+
         <button class="misc" id="skip">スルー</button>
         <button class="ng" id="wrong">被弾</button>
         <button class="ok" id="correct">撃破</button>
@@ -1036,6 +1037,7 @@ function hit(ok){
             setStat(ds.name,cur.q,s);
             
             updateWR();
+            setJudgeButtonsEnabled(false);
 
             return;
         }
@@ -1606,7 +1608,7 @@ function startTimer(){
   $("centerTimer").textContent =
     remain.toFixed(2);
 
-  fitText($("centerTimer"),92,26);
+  // fitText($("centerTimer"),92,26);
 
   clearInterval(intv);
 
@@ -1631,41 +1633,51 @@ function startTimer(){
 }
 
 
-function fitText(el,maxSize,minSize){
+function fitText(el,maxSize=60,minSize=8){
 
   if(!el) return;
 
-  /* 一旦非表示 */
-  el.style.visibility="hidden";
-  el.style.fontSize=maxSize+"px";
+  let size = maxSize;
 
-  let size=maxSize;
+  el.style.visibility = "hidden";
 
-  while(
-    size>minSize &&
-    (
+  while(size > minSize){
+
+    el.style.fontSize = size + "px";
+
+    /* 再レイアウト強制 */
+    void el.offsetHeight;
+
+    const over =
       el.scrollHeight > el.clientHeight ||
-      el.scrollWidth  > el.clientWidth
-    )
-  ){
+      el.scrollWidth  > el.clientWidth;
+
+    /* 収まったら終了 */
+    if(!over){
+      break;
+    }
+
     size--;
-    el.style.fontSize=size+"px";
   }
 
-  /* 最終サイズ確定後に表示 */
-  el.style.fontSize=size+"px";
-  el.style.visibility="visible";
+  el.style.fontSize = size + "px";
+  el.style.visibility = "visible";
 }
 
 
 function resizeAllTexts(){
 
-  fitText($("question"),52,14);
-  fitText($("answer"),42,12);
-  fitText($("centerTimer"),40,40);
+  /* 問題文は極限まで縮小許可 */
+  fitText($("question"),72,2);
 
-  /* 解説文は固定 */
-  $("exp").style.fontSize="28px";
+  /* 答え */
+  fitText($("answer"),56,4);
+
+  /* タイマー */
+  // fitText($("centerTimer"),40,20);
+
+  /* 解説 */
+  fitText($("exp"),32,6);
 }
 
 
