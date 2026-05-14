@@ -48,6 +48,7 @@ body{
   padding:10px 14px;
   border-radius:14px;
   font-weight:900;
+  font-size:12px;
 }
 #hud{
   position:absolute;
@@ -57,6 +58,7 @@ body{
   background:rgba(0,0,0,.25);
   padding:12px;
   border-radius:14px;
+  font-size:12px;
   text-align:right;
   font-weight:900;
 }
@@ -193,7 +195,7 @@ body{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
-  gap:4px 18px;
+  gap:4px 12px;
 }
 
 .break{
@@ -1033,6 +1035,8 @@ function hit(ok){
             $("answer").textContent="";
             $("exp").textContent="";
             $("status").textContent="STARTで再挑戦";
+
+            resizeAllTexts();
             
             setStat(ds.name,cur.q,s);
             
@@ -1637,31 +1641,22 @@ function fitText(el,maxSize=60,minSize=8){
 
   if(!el) return;
 
-  let size = maxSize;
+  el.style.fontSize = maxSize + "px";
 
-  el.style.visibility = "hidden";
+  let size = maxSize;
 
   while(size > minSize){
 
-    el.style.fontSize = size + "px";
-
-    /* 再レイアウト強制 */
-    void el.offsetHeight;
-
     const over =
-      el.scrollHeight > el.clientHeight ||
-      el.scrollWidth  > el.clientWidth;
+      el.scrollWidth > el.clientWidth ||
+      el.scrollHeight > el.clientHeight;
 
-    /* 収まったら終了 */
-    if(!over){
-      break;
-    }
+    if(!over) break;
 
     size--;
-  }
 
-  el.style.fontSize = size + "px";
-  el.style.visibility = "visible";
+    el.style.fontSize = size + "px";
+  }
 }
 
 
