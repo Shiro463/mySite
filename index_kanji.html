@@ -561,8 +561,8 @@ DATASETS.forEach((d,i)=>{
     $("dataset").appendChild(op);
 });
 
-function keyName(dataset,q){
-    return "ms_"+dataset+"_"+q;
+function keyName(dataset,id){
+    return "ms_"+dataset+"_"+id;
 }
 
 // function getStat(dataset,q){
@@ -652,76 +652,94 @@ async function loadSheet(){
     const m=txt.match(/setResponse\((.*)\);/s);
     const json=JSON.parse(m[1]);
 
-    data = (json.table.rows || []).map(r => {
+    data=(json.table.rows||[]).map(r=>{
 
-      const c = r.c || [];
+      const c=r.c||[];
 
-      let q = "";
-      let a = "";
-      let e = "";
+      /* A列 = 固定ID */
+      const id=
+        c[0]&&c[0].v!=null
+        ? String(c[0].v).trim()
+        : "";
 
-      /* ===============================
-        ★ モード分岐
-      =============================== */
+      let q="";
+      let a="";
+      let e="";
 
-      if(ds.mode === "kanji_parts1"){
+      if(ds.mode==="kanji_parts1"){
 
-        // E列 = 問題
-        q = c[4] && c[4].v != null
-          ? String(c[4].v).trim()
+        /* F列問題 (E→Fへ1列ずれる) */
+        q=c[5]?.v!=null
+          ? String(c[5].v).trim()
           : "";
 
-        // D列 = 答え（全文）
-        a = c[3] && c[3].v != null
-          ? String(c[3].v).replace(/\\n/g,"\n").trim()
+        /* E列答え */
+        a=c[4]?.v!=null
+          ? String(c[4].v)
+              .replace(/\\n/g,"\n")
+              .trim()
           : "";
 
-        e = ""; // 解説なし
+        e="";
 
       }else{
 
-        let qRaw = "";
+        let qRaw="";
 
-        if(ds.mode === "fullAnswer"){
+        if(ds.mode==="fullAnswer"){
 
-          // B列
-          qRaw = c[1] && c[1].v != null
-            ? String(c[1].v).trim()
+          /* C列 */
+          qRaw=c[2]?.v!=null
+            ? String(c[2].v).trim()
             : "";
 
         }else{
 
-          // A列
-          qRaw = c[0] && c[0].v != null
-            ? String(c[0].v).trim()
+          /* B列 */
+          qRaw=c[1]?.v!=null
+            ? String(c[1].v).trim()
             : "";
         }
 
-        const raw = c[2] && c[2].v != null
-          ? String(c[2].v)
+        /* D列 */
+        const raw=
+          c[3]?.v!=null
+          ? String(c[3].v)
           : "";
 
-        const normalized = raw.replace(/\\n/g,"\n");
+        const normalized=
+          raw.replace(/\\n/g,"\n");
 
-        if(ds.mode === "fullAnswer"){
+        if(ds.mode==="fullAnswer"){
 
-          q = qRaw;
-          a = normalized.trim();
-          e = "";
+          q=qRaw;
+          a=normalized.trim();
+          e="";
 
         }else{
 
-          const lines = normalized.split("\n");
+          const lines=
+            normalized.split("\n");
 
-          q = qRaw;
-          a = (lines.shift() || "").trim();
-          e = lines.join("\n").trim();
+          q=qRaw;
+
+          a=(lines.shift()||"")
+            .trim();
+
+          e=lines
+            .join("\n")
+            .trim();
         }
       }
 
-      return { q, a, e };
+      return{
+        id,
+        q,
+        a,
+        e
+      };
 
-    }).filter(x => x.q && x.a);
+    }).filter(x=>x.id&&x.q&&x.a);
 }
 
 /* queue */
@@ -743,7 +761,7 @@ function buildQueue(){
 
     let target = data.filter(x=>{
 
-    const s = getStat(ds.name,x.q);
+    const s = getStat(ds.name,x.id);
 
     /* 定着度条件 */
     if(s.memory < memoryLimit) return false;
@@ -796,7 +814,7 @@ function buildQueue(){
 
     const weights=pool.map(x=>{
 
-      const s=getStat(ds.name,x.q);
+      const s=getStat(ds.name,x.id)
 
       let w=Math.max(1,s.memory);
 
@@ -980,7 +998,7 @@ function hit(ok){
     if(!cur||gameOver)return;
 
     const ds=DATASETS[$("dataset").value||0];
-    let s=getStat(ds.name,cur.q);
+    let s=getStat(ds.name,cur.id);
 
     if(ok){
 
@@ -1046,7 +1064,7 @@ function hit(ok){
 
             resizeAllTexts();
             
-            setStat(ds.name,cur.q,s);
+            setStat(ds.name,cur.id,s);
             
             updateWR();
             setJudgeButtonsEnabled(false);
@@ -1080,7 +1098,7 @@ function skipQuestion(){
 
   const ds = DATASETS[$("dataset").value||0];
 
-  let s = getStat(ds.name, cur.q);
+  let s = getStat(ds.name, cur.id);
 
   /* 出題済み扱いにする */
   s.last = "skip";
@@ -1089,7 +1107,7 @@ function skipQuestion(){
   /* memoryは少しだけ増やす（任意） */
   // s.memory += 3;
 
-  setStat(ds.name, cur.q, s);
+  setStat(ds.name, cur.id, s);
 
   $("status").textContent = "スルー";
 
@@ -1138,7 +1156,7 @@ function drawStats(){
     let correct=0,wrong=0,unseen=0;
 
     data.forEach(x=>{
-    const s=getStat(ds.name,x.q);
+    const s=getStat(ds.name,x.id)
     correct+=s.correct;
     wrong+=s.wrong;
     if(s.correct===0&&s.wrong===0)unseen++;
@@ -1232,7 +1250,7 @@ function drawStats(){
         <br><br>
 
         <button
-        onclick="toggleFav('${encodeURIComponent(x.q)}')"
+        onclick="toggleFav('${x.id}')"
         class="misc">
 
         ${s.fav ? "★解除" : "☆お気に入り"}
@@ -1247,17 +1265,19 @@ function drawStats(){
 }
 
 
-function toggleFav(encodedQ){
+function toggleFav(id){
 
-  const q = decodeURIComponent(encodedQ);
+  const ds=
+    DATASETS[
+      $("dataset").value||0
+    ];
 
-  const ds = DATASETS[$("dataset").value||0];
+  let s=
+    getStat(ds.name,id);
 
-  let s = getStat(ds.name,q);
+  s.fav=!s.fav;
 
-  s.fav = !s.fav;
-
-  setStat(ds.name,q,s);
+  setStat(ds.name,id,s);
 
   drawStats();
 }
@@ -1415,24 +1435,24 @@ $("delFav").onclick=()=>{
 
 $("delAll").onclick=()=>{
 
- if(!confirm("全学習データを削除しますか？"))
-   return;
+  if(!confirm("全学習データを削除しますか？"))
+    return;
 
- const ds = DATASETS[$("dataset").value||0];
+  const ds = DATASETS[$("dataset").value||0];
 
- data.forEach(x=>{
-   localStorage.removeItem(
-     keyName(ds.name,x.q)
-   );
- });
+  data.forEach(x=>{
+    localStorage.removeItem(
+      keyName(ds.name,x.id)
+    );
+  });
 
- Object.keys(localStorage).forEach(k=>{
-   if(k.startsWith("daily_visit_")){
-     localStorage.removeItem(k);
-   }
- });
+  Object.keys(localStorage).forEach(k=>{
+    if(k.startsWith("daily_visit_")){
+      localStorage.removeItem(k);
+    }
+  });
 
- drawStats();
+  drawStats();
 };
 
 
