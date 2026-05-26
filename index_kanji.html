@@ -592,8 +592,8 @@ function getStat(dataset,q){
   }
 }
 
-function setStat(dataset,q,obj){
-    localStorage.setItem(keyName(dataset,q),JSON.stringify(obj));
+function setStat(dataset,id,obj){
+    localStorage.setItem(keyName(dataset,id),JSON.stringify(obj));
 }
 
 function shuffle(a){
@@ -874,7 +874,7 @@ function nextQuestion(){
 //     ];
 
   // $("question").textContent = cur.q;
-  $("question").innerHTML = nl2br(cur.q);
+  $("question").innerHTML = nl2br(id);
   const ds = DATASETS[$("dataset").value || 0];
   if(ds.mode === "kanji_parts1"){
     $("question").classList.add("noWrap");
@@ -1075,7 +1075,7 @@ function hit(ok){
 
     s.lastDate=todayStr();
 
-    setStat(ds.name,cur.q,s);
+    setStat(ds.name,cur.id,s);
 
     $("score").textContent=score;
     $("hp").textContent=hp;
@@ -1196,8 +1196,8 @@ function drawStats(){
 
     rows.sort((a,b)=>{
 
-    const sa = getStat(ds.name,a.q);
-    const sb = getStat(ds.name,b.q);
+    const sa = getStat(ds.name,a.id);
+    const sb = getStat(ds.name,b.id);
 
     switch(mode){
 
@@ -1299,6 +1299,9 @@ $("start").onclick=async()=>{
     gameOver=false;
     score=0;
     hp=3;
+
+
+    initDailyRecord();   // ←追加
 
     $("score").textContent=0;
     $("hp").textContent=3;
@@ -1468,7 +1471,8 @@ function todayStr(){
 /* 初回アクセス時だけ保存 */
 function initDailyRecord(){
 
-  const key="daily_visit_"+todayStr();
+  const ds = getCurrentDataset();
+  const key = dailyKey(ds);
 
   if(localStorage.getItem(key)) return;
 
