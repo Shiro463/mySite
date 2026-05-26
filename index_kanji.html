@@ -1236,11 +1236,11 @@ function drawStats(){
 
     $("list").innerHTML = rows.map(x=>{
 
-    const s=getStat(ds.name,x.q);
+    const s=getStat(ds.name,x.id);
 
     return `
     <div class="row">
-        <b>${escapeHtmlWithBr(x.q)}</b><br>
+        <b>${escapeHtmlWithBr(x.id)}</b><br>
 
         定着:${s.memory}
         正:${s.correct}
@@ -1355,11 +1355,11 @@ function eachStatUpdate(callback){
 
   data.forEach(x=>{
 
-    let s = getStat(ds.name,x.q);
+    let s = getStat(ds.name,x.id);
 
     callback(s);
 
-    setStat(ds.name,x.q,s);
+    setStat(ds.name,x.id,s);
 
   });
 
