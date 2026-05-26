@@ -874,7 +874,7 @@ function nextQuestion(){
 //     ];
 
   // $("question").textContent = cur.q;
-  $("question").innerHTML = nl2br(id);
+  $("question").innerHTML = nl2br(cur.q);
   const ds = DATASETS[$("dataset").value || 0];
   if(ds.mode === "kanji_parts1"){
     $("question").classList.add("noWrap");
@@ -1353,19 +1353,18 @@ $("statsWrap").style.display="none";
 $("sortMode").onchange=drawStats;
 
 function eachStatUpdate(callback){
-
   const ds = DATASETS[$("dataset").value || 0];
-
   data.forEach(x=>{
-
-    let s = getStat(ds.name,x.id);
-
+    const key = keyName(ds.name,x.id);
+    const raw = localStorage.getItem(key);
+    if(!raw) return;   // ←存在しないものは触らない
+    let s = JSON.parse(raw);
     callback(s);
-
-    setStat(ds.name,x.id,s);
-
+    localStorage.setItem(
+      key,
+      JSON.stringify(s)
+    );
   });
-
   drawStats();
 }
 
