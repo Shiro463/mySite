@@ -1247,24 +1247,43 @@ function drawStats(){
 
     const s=getStat(ds.name,x.id);
 
+    const now = Date.now();
+    let skipText = "なし";
+    if(s.skipUntil){
+      if(s.skipUntil > now){
+        const remain = s.skipUntil - now;
+        const min = Math.floor(remain / 60000);
+        const sec = Math.floor((remain % 60000) / 1000);
+        skipText = `🕒 ${min}分${sec}秒`;
+      }else{
+        skipText = "解除済み";
+      }
+    }
+
     return `
     <div class="row">
-        <b>${escapeHtmlWithBr(x.q)}</b><br>
 
-        定着:${s.memory}
-        正:${s.correct}
-        誤:${s.wrong}
-        最終:${s.lastDate||"-"}
+      <b>${escapeHtmlWithBr(x.q)}</b><br>
 
-        <br><br>
+      定着:${s.memory}
+      正:${s.correct}
+      誤:${s.wrong}
+      最終:${s.lastDate||"-"}
 
-        <button
+      <br>
+
+      スルー:${skipText}
+
+      <br><br>
+
+      <button
         onclick="toggleFav('${x.id}')"
         class="misc">
 
         ${s.fav ? "★解除" : "☆お気に入り"}
 
-        </button>
+      </button>
+
     </div>
     `;
     }).join("");
