@@ -578,16 +578,17 @@ function getStat(dataset,q){
   try{
     return JSON.parse(
       localStorage.getItem(keyName(dataset,q)) ||
-      '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":"","fav":false}'
+      '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":"","fav":false,"skipUntil":0}'
     );
   }catch(e){
-    return {
+    return{
       correct:0,
       wrong:0,
       memory:0,
       last:"",
       lastDate:"",
-      fav:false
+      fav:false,
+      skipUntil:0
     };
   }
 }
@@ -745,23 +746,28 @@ async function loadSheet(){
 /* queue */
 function buildQueue(){
 
-    const ds = DATASETS[$("dataset").value||0];
+  const ds = DATASETS[$("dataset").value||0];
 
-    const filterValue = $("memoryFilter").value || "0";
+  const filterValue = $("memoryFilter").value || "0";
 
-    let memoryLimit = 0;
-    let mode = "all";
+  let memoryLimit = 0;
+  let mode = "all";
 
-    /* 数値なら定着度フィルタ */
-    if(!isNaN(Number(filterValue))){
+  /* 数値なら定着度フィルタ */
+  if(!isNaN(Number(filterValue))){
     memoryLimit = Number(filterValue);
-    }else{
+  }else{
     mode = filterValue;
-    }
+  }
 
-    let target = data.filter(x=>{
+  let target = data.filter(x=>{
 
     const s = getStat(ds.name,x.id);
+
+    /* スルー中なら出題しない */
+    if(s.skipUntil && s.skipUntil > now){
+        return false;
+    }
 
     /* 定着度条件 */
     if(s.memory < memoryLimit) return false;
@@ -1080,6 +1086,8 @@ function hit(ok){
     $("score").textContent=score;
     $("hp").textContent=hp;
 
+    s.skipUntil = 0;
+    
     setTimeout(nextQuestion,550);
 
     setJudgeButtonsEnabled(false);
@@ -1100,12 +1108,11 @@ function skipQuestion(){
 
   let s = getStat(ds.name, cur.id);
 
-  /* 出題済み扱いにする */
   s.last = "skip";
   s.lastDate = todayStr();
 
-  /* memoryは少しだけ増やす（任意） */
-  // s.memory += 3;
+  /* 1時間後まで出題しない */
+  s.skipUntil = Date.now() + 60*60*1000;
 
   setStat(ds.name, cur.id, s);
 
@@ -1113,7 +1120,7 @@ function skipQuestion(){
 
   setJudgeButtonsEnabled(false);
 
-  setTimeout(nextQuestion, 350);
+  setTimeout(nextQuestion,350);
 }
 
 
