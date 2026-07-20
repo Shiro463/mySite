@@ -760,6 +760,8 @@ function buildQueue(){
     mode = filterValue;
   }
 
+  const now = Date.now();
+
   let target = data.filter(x=>{
 
     const s = getStat(ds.name,x.id);
@@ -1087,7 +1089,7 @@ function hit(ok){
     $("hp").textContent=hp;
 
     s.skipUntil = 0;
-    
+
     setTimeout(nextQuestion,550);
 
     setJudgeButtonsEnabled(false);
