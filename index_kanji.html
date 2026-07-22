@@ -745,18 +745,31 @@ async function loadSheet(){
 }
 
 /* queue */
-const today = todayStr();
+function buildQueue(){
+
+  const ds = DATASETS[$("dataset").value || 0];
+
+  const filterValue = $("memoryFilter").value || "0";
+
+  let memoryLimit = 0;
+  let mode = "all";
+
+  if(!isNaN(Number(filterValue))){
+    memoryLimit = Number(filterValue);
+  }else{
+    mode = filterValue;
+  }
+
+  const today = todayStr();
 
   let target = data.filter(x=>{
 
     const s = getStat(ds.name, x.id);
 
-    /* スルー中なら除外 */
     if(s.skipUntil && s.skipUntil > today){
       return false;
     }
 
-    /* 定着度 */
     if(s.memory < memoryLimit){
       return false;
     }
@@ -800,7 +813,6 @@ const today = todayStr();
     return;
   }
 
-  /* 重み付きランダム */
   queue=[];
   let pool=[...target];
 
@@ -808,7 +820,7 @@ const today = todayStr();
 
     const weights=pool.map(x=>{
 
-      const s=getStat(ds.name,x.id)
+      const s=getStat(ds.name,x.id);
 
       let w=Math.max(1,s.memory);
 
@@ -817,11 +829,9 @@ const today = todayStr();
       return w;
     });
 
-    const total=
-      weights.reduce((a,b)=>a+b,0);
+    const total=weights.reduce((a,b)=>a+b,0);
 
     let r=Math.random()*total;
-
     let pick=0;
 
     for(let i=0;i<weights.length;i++){
