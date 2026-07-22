@@ -745,61 +745,45 @@ async function loadSheet(){
 }
 
 /* queue */
-function buildQueue(){
+const today = todayStr();
 
-  const ds = DATASETS[$("dataset").value||0];
+  let target = data.filter(x=>{
 
-  const filterValue = $("memoryFilter").value || "0";
+    const s = getStat(ds.name, x.id);
 
-  let memoryLimit = 0;
-  let mode = "all";
-
-  /* 数値なら定着度フィルタ */
-  if(!isNaN(Number(filterValue))){
-    memoryLimit = Number(filterValue);
-  }else{
-    mode = filterValue;
-  }
-
-  const today = todayStr();
-
-  target = target.filter(x=>{
-
-  const s = getStat(ds.name,x.id);
-
-  if(s.skipUntil && s.skipUntil > today){
+    /* スルー中なら除外 */
+    if(s.skipUntil && s.skipUntil > today){
       return false;
-  }
+    }
 
-     
+    /* 定着度 */
+    if(s.memory < memoryLimit){
+      return false;
+    }
 
-  /* 定着度条件 */
-  if(s.memory < memoryLimit) return false;
+    switch(mode){
 
-  switch(mode){
+      case "correct":
+        return s.last==="correct";
 
-    case "correct":
-      return s.last==="correct";
+      case "wrong":
+        return s.last==="wrong";
 
-    case "wrong":
-      return s.last==="wrong";
+      case "unseen":
+        return s.correct===0 && s.wrong===0;
 
-    case "unseen":
-      return s.correct===0 && s.wrong===0;
+      case "old30":
+        return diffDays(s.lastDate)>=30;
 
-    case "old30":
-      return diffDays(s.lastDate)>=30;
+      case "old14":
+        return diffDays(s.lastDate)>=14;
 
-    case "old14":
-      return diffDays(s.lastDate)>=14;
+      case "old7":
+        return diffDays(s.lastDate)>=7;
 
-    case "old7":
-      return diffDays(s.lastDate)>=7;
-
-    case "fav":
-      return s.fav===true;
-  }
-
+      case "fav":
+        return s.fav===true;
+    }
 
     return true;
   });
