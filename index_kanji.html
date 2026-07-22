@@ -429,6 +429,7 @@ font-size:14px;
         <button class="ng" id="delDate">最終回答日だけ削除</button>
         <button class="ng" id="delDaily">日別データ削除</button>
         <button class="ng" id="delFav">お気に入り削除</button>
+        <button class="ng" id="delSkip">スルー解除</button>
         <button class="ng" id="delAll">全項目削除</button>
       </div>
 
@@ -760,43 +761,44 @@ function buildQueue(){
     mode = filterValue;
   }
 
-  const now = Date.now();
+  const today = todayStr();
 
-  let target = data.filter(x=>{
+  target = target.filter(x=>{
 
-    const s = getStat(ds.name,x.id);
+  const s = getStat(ds.name,x.id);
 
-    /* スルー中なら出題しない */
-    if(s.skipUntil && s.skipUntil > now){
-        return false;
-    }
+  if(s.skipUntil && s.skipUntil > today){
+      return false;
+  }
 
-    /* 定着度条件 */
-    if(s.memory < memoryLimit) return false;
+     
 
-    switch(mode){
+  /* 定着度条件 */
+  if(s.memory < memoryLimit) return false;
 
-      case "correct":
-        return s.last==="correct";
+  switch(mode){
 
-      case "wrong":
-        return s.last==="wrong";
+    case "correct":
+      return s.last==="correct";
 
-      case "unseen":
-        return s.correct===0 && s.wrong===0;
+    case "wrong":
+      return s.last==="wrong";
 
-      case "old30":
-        return diffDays(s.lastDate)>=30;
+    case "unseen":
+      return s.correct===0 && s.wrong===0;
 
-      case "old14":
-        return diffDays(s.lastDate)>=14;
+    case "old30":
+      return diffDays(s.lastDate)>=30;
 
-      case "old7":
-        return diffDays(s.lastDate)>=7;
+    case "old14":
+      return diffDays(s.lastDate)>=14;
 
-      case "fav":
-        return s.fav===true;
-    }
+    case "old7":
+      return diffDays(s.lastDate)>=7;
+
+    case "fav":
+      return s.fav===true;
+  }
 
 
     return true;
@@ -1110,11 +1112,17 @@ function skipQuestion(){
 
   let s = getStat(ds.name, cur.id);
 
+  // 明日の日付
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+
+  s.skipUntil =
+    d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
+
   s.last = "skip";
   s.lastDate = todayStr();
-
-  /* 1時間後まで出題しない */
-  s.skipUntil = Date.now() + 60*60*1000;
 
   setStat(ds.name, cur.id, s);
 
@@ -1124,7 +1132,6 @@ function skipQuestion(){
 
   setTimeout(nextQuestion,350);
 }
-
 
 
 
@@ -1269,6 +1276,7 @@ function drawStats(){
       正:${s.correct}
       誤:${s.wrong}
       最終:${s.lastDate||"-"}
+      スルー:${s.skipUntil || "-"}
 
       <br>
 
@@ -1461,8 +1469,23 @@ $("delFav").onclick=()=>{
   });
 };
 
-/* 全削除 */
 
+$("delSkip").onclick=()=>{
+
+  if(!confirm("全問題のスルー状態を解除しますか？"))
+    return;
+
+  eachStatUpdate(s=>{
+
+    delete s.skipUntil;
+
+  });
+
+};
+
+
+
+/* 全削除 */
 $("delAll").onclick=()=>{
 
   if(!confirm("全学習データを削除しますか？"))
