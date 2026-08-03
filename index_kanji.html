@@ -579,7 +579,7 @@ function getStat(dataset,q){
   try{
     return JSON.parse(
       localStorage.getItem(keyName(dataset,q)) ||
-      '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":"","fav":false,"skipUntil":0}'
+      '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":"","fav":false,"skipUntil":0,"skipCount":0}'
     );
   }catch(e){
     return{
@@ -589,7 +589,8 @@ function getStat(dataset,q){
       last:"",
       lastDate:"",
       fav:false,
-      skipUntil:0
+      skipUntil:0,
+      skipCount:0
     };
   }
 }
@@ -823,6 +824,11 @@ function buildQueue(){
       const s=getStat(ds.name,x.id);
 
       let w=Math.max(1,s.memory);
+
+      // 未出題を少し優遇
+      if(s.correct === 0 && s.wrong === 0){
+          w += 10;
+      }
 
       if(s.fav) w+=25;
 
@@ -1084,7 +1090,8 @@ function hit(ok){
     $("score").textContent=score;
     $("hp").textContent=hp;
 
-    s.skipUntil = 0;
+    s.skipUntil="";
+    s.skipCount=0;
 
     setTimeout(nextQuestion,550);
 
@@ -1106,14 +1113,37 @@ function skipQuestion(){
 
   let s = getStat(ds.name, cur.id);
 
-  // 明日の日付
+  s.skipCount = (s.skipCount || 0) + 1;
+
+  let days;
+
+  switch(s.skipCount){
+
+    case 1:
+      days = 3;
+      break;
+
+    case 2:
+      days = 7;
+      break;
+
+    default:
+      days = 14;
+      break;
+  }
+
   const d = new Date();
-  d.setDate(d.getDate() + 3);
+  d.setDate(d.getDate() + days);
 
   s.skipUntil =
-    d.getFullYear() + "-" +
-    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    d.getFullYear()+"-"+
+    String(d.getMonth()+1).padStart(2,"0")+"-"+
     String(d.getDate()).padStart(2,"0");
+
+    s.skipUntil =
+      d.getFullYear() + "-" +
+      String(d.getMonth()+1).padStart(2,"0") + "-" +
+      String(d.getDate()).padStart(2,"0");
 
   s.last = "skip";
   s.lastDate = todayStr();
@@ -1270,7 +1300,8 @@ function drawStats(){
       正:${s.correct}
       誤:${s.wrong}
       最終:${s.lastDate||"-"}
-      スルー:${s.skipUntil || "-"}
+      スルー回数:${s.skipCount || 0}
+      スルー期限:${s.skipUntil || "-"}
 
       <br>
 
@@ -1471,7 +1502,8 @@ $("delSkip").onclick=()=>{
 
   eachStatUpdate(s=>{
 
-    delete s.skipUntil;
+    s.skipUntil="";
+    s.skipCount=0;
 
   });
 
