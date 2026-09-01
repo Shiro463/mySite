@@ -159,6 +159,62 @@
         grid-auto-flow: row;
       }
     }
+
+        .mnemonic-section {
+      margin-top: 40px;
+      padding-top: 25px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .mnemonic-section h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    .mnemonic-description {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #666;
+    }
+
+    #mnemonic-table {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .mnemonic-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .mnemonic-letter {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #3498db;
+      margin-bottom: 5px;
+    }
+
+    .mnemonic-morse {
+      font-size: 1.1em;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+
+    .mnemonic-text {
+      font-size: 0.95em;
+      color: #555;
+    }
+
+    @media (max-width: 600px) {
+      #mnemonic-table {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -206,6 +262,16 @@
     </div>
   </div>
 
+    <div class="mnemonic-section">
+      <h2>アルファベットのモールス信号の覚え方</h2>
+
+      <p class="mnemonic-description">
+        「トン＝短い音」「ツー＝長い音」のリズムで覚えます。
+      </p>
+
+      <div id="mnemonic-table"></div>
+    </div>
+
   <!-- <script src="script.js"></script> -->
 </body>
 </html>
@@ -223,6 +289,35 @@ const morseCodeMap = {
   Z: "--..",
   0: "-----", 1: ".----", 2: "..---", 3: "...--", 4: "....-",
   5: ".....", 6: "-....", 7: "--...", 8: "---..", 9: "----."
+};
+
+const morseMnemonics = {
+  A: "アホー",
+  B: "ビートルズ",
+  C: "中華料理",
+  D: "道徳",
+  E: "え？",
+  F: "ファブリーズ",
+  G: "ゴーカート",
+  H: "ヘリウム",
+  I: "愛",
+  J: "女装高校",
+  K: "警視庁",
+  L: "レディーガガ",
+  M: "メーデー",
+  N: "ノート",
+  O: "応用法",
+  P: "プレーボール",
+  Q: "救急至急",
+  R: "リコール",
+  S: "スイカ",
+  T: "ティー",
+  U: "運命",
+  V: "ヴィクトリー",
+  W: "和洋風",
+  X: "エークスレー",
+  Y: "幼女高校",
+  Z: "ザーザー雨"
 };
 
 const chars = Object.keys(morseCodeMap);
@@ -336,8 +431,48 @@ startButton.addEventListener("click", () => {
   playMorse(currentAnswer);
 });
 
+function populateMnemonicTable() {
+  const table = document.getElementById("mnemonic-table");
+
+  table.innerHTML = "";
+
+  chars
+    .filter(char => /^[A-Z]$/.test(char))
+    .forEach(char => {
+
+      const card = document.createElement("div");
+      card.className = "mnemonic-card";
+
+      const letter = document.createElement("div");
+      letter.className = "mnemonic-letter";
+      letter.textContent = char;
+
+      const morse = document.createElement("div");
+      morse.className = "mnemonic-morse";
+
+      // . → ・
+      // - → －
+      morse.textContent = morseCodeMap[char]
+        .replace(/\./g, "・")
+        .replace(/-/g, "－");
+
+      const mnemonic = document.createElement("div");
+      mnemonic.className = "mnemonic-text";
+
+      mnemonic.textContent =
+        `覚え方：${morseMnemonics[char]}`;
+
+      card.appendChild(letter);
+      card.appendChild(morse);
+      card.appendChild(mnemonic);
+
+      table.appendChild(card);
+    });
+}
+
 createAnswerButtons();
 populateMorseTable();
+populateMnemonicTable();
 
 
 </script>
