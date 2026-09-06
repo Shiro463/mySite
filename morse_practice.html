@@ -215,6 +215,43 @@
       }
     }
 
+    .button-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px auto;
+    }
+
+    .button-wrapper button {
+      font-size: 16px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button#start {
+      margin: 0;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      color: white;
+    }
+
+    button#replay {
+      background: #95a5a6;
+      color: white;
+    }
+
+    button#replay:not(:disabled):hover {
+      background: #7f8c8d;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    button#replay:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
   </style>
 </head>
 <body>
@@ -248,7 +285,10 @@
       </div>
     </div>
 
-    <button id="start">出題</button>
+    <div class="button-wrapper">
+      <button id="start">出題</button>
+      <button id="replay" disabled>もう一度再生</button>
+    </div>
 
     <div class="answer-wrapper">
         <div id="user-input"></div>
@@ -257,9 +297,9 @@
     <div class="signal" id="signal"></div>
     <div id="answer-buttons"></div>
 
-    <div class="morse-wrapper">
+    <!-- <div class="morse-wrapper">
       <div id="morse-table"></div>
-    </div>
+    </div> -->
   </div>
 
     <div class="mnemonic-section">
@@ -325,6 +365,7 @@ let currentAnswer = "";
 let userInput = "";
 
 const startButton = document.getElementById("start");
+const replayButton = document.getElementById("replay");]
 const answerButtons = document.getElementById("answer-buttons");
 const resultDiv = document.getElementById("result");
 const userInputDiv = document.getElementById("user-input");
@@ -412,22 +453,35 @@ function handleUserInput(char) {
   }
 }
 
-function populateMorseTable() {
-  const table = document.getElementById("morse-table");
-  table.innerHTML = "";
-  chars.forEach(char => {
-    const div = document.createElement("div");
-    div.textContent = `${char}: ${morseCodeMap[char]}`;
-    table.appendChild(div);
-  });
-}
+// function populateMorseTable() {
+//   const table = document.getElementById("morse-table");
+//   table.innerHTML = "";
+//   chars.forEach(char => {
+//     const div = document.createElement("div");
+//     div.textContent = `${char}: ${morseCodeMap[char]}`;
+//     table.appendChild(div);
+//   });
+// }
 
 startButton.addEventListener("click", () => {
   const length = parseInt(lengthSlider.value);
+
   currentAnswer = generateQuestion(length);
   userInput = "";
+
   userInputDiv.textContent = "";
   resultDiv.textContent = "";
+
+  // 再生ボタンを有効にする
+  replayButton.disabled = false;
+
+  playMorse(currentAnswer);
+});
+
+replayButton.addEventListener("click", () => {
+  // 問題が存在するときだけ再生
+  if (currentAnswer === "") return;
+
   playMorse(currentAnswer);
 });
 
@@ -471,7 +525,7 @@ function populateMnemonicTable() {
 }
 
 createAnswerButtons();
-populateMorseTable();
+// populateMorseTable();
 populateMnemonicTable();
 
 
