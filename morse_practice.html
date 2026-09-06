@@ -285,10 +285,10 @@
       </div>
     </div>
 
-    <div class="button-wrapper">
-      <button id="start">出題</button>
-      <button id="replay" disabled>もう一度再生</button>
-    </div>
+  <div class="button-wrapper">
+    <button id="start">出題</button>
+    <button id="replay" disabled>もう一度再生</button>
+  </div>
 
     <div class="answer-wrapper">
         <div id="user-input"></div>
@@ -297,9 +297,6 @@
     <div class="signal" id="signal"></div>
     <div id="answer-buttons"></div>
 
-    <!-- <div class="morse-wrapper">
-      <div id="morse-table"></div>
-    </div> -->
   </div>
 
     <div class="mnemonic-section">
@@ -365,7 +362,7 @@ let currentAnswer = "";
 let userInput = "";
 
 const startButton = document.getElementById("start");
-const replayButton = document.getElementById("replay");]
+const replayButton = document.getElementById("replay");
 const answerButtons = document.getElementById("answer-buttons");
 const resultDiv = document.getElementById("result");
 const userInputDiv = document.getElementById("user-input");
@@ -444,24 +441,17 @@ function handleUserInput(char) {
   if (!currentAnswer.startsWith(userInput)) {
     resultDiv.textContent = `不正解！ 答えは: ${currentAnswer}`;
     currentAnswer = "";
+    replayButton.disabled = true;
     return;
   }
 
   if (userInput === currentAnswer) {
     resultDiv.textContent = `正解！ 答えは: ${currentAnswer}`;
     currentAnswer = "";
+    replayButton.disabled = true;
   }
 }
 
-// function populateMorseTable() {
-//   const table = document.getElementById("morse-table");
-//   table.innerHTML = "";
-//   chars.forEach(char => {
-//     const div = document.createElement("div");
-//     div.textContent = `${char}: ${morseCodeMap[char]}`;
-//     table.appendChild(div);
-//   });
-// }
 
 startButton.addEventListener("click", () => {
   const length = parseInt(lengthSlider.value);
@@ -525,7 +515,6 @@ function populateMnemonicTable() {
 }
 
 createAnswerButtons();
-// populateMorseTable();
 populateMnemonicTable();
 
 
