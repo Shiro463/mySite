@@ -735,15 +735,76 @@ async function loadSheet(){
         }
       }
 
+      let yomi = "";
+
+      const match = a.match(/（([^）]+)）/);
+      if(match){
+        yomi = match[1];
+      }
+
       return{
         id,
         q,
         a,
-        e
+        e,
+        yomi
       };
 
     }).filter(x=>x.id&&x.q&&x.a);
 }
+
+// 四字熟語用　選択肢生成
+function createYojiChoices(current){
+  if(!current.yomi) return [];
+
+  const isFrontMissing = current.q.includes("____一") ||
+                         current.q.startsWith("____");
+
+  let correct;
+
+  if(isFrontMissing){
+    // ____一炊 → こうりょう
+    correct = current.yomi.substring(0,4);
+  }else{
+    // 拳拳____ → ふくよう
+    correct = current.yomi.substring(4);
+  }
+
+  const pool = [];
+
+  data.forEach(row=>{
+
+    if(!row.yomi) return;
+
+    let candidate;
+
+    if(isFrontMissing){
+      candidate = row.yomi.substring(0,4);
+    }else{
+      candidate = row.yomi.substring(4);
+    }
+
+    if(candidate){
+      pool.push(candidate);
+    }
+  });
+
+  // 重複削除
+  const uniquePool =
+    [...new Set(pool)]
+      .filter(x=>x!==correct);
+
+  shuffle(uniquePool);
+
+  const choices = [
+    correct,
+    ...uniquePool.slice(0,9)
+  ];
+
+  return shuffle(choices);
+}
+
+
 
 /* queue */
 function buildQueue(){
@@ -886,10 +947,19 @@ function nextQuestion(){
   // $("question").textContent = cur.q;
   $("question").innerHTML = nl2br(cur.q);
   const ds = DATASETS[$("dataset").value || 0];
+  
   if(ds.mode === "kanji_parts1"){
     $("question").classList.add("noWrap");
   }else{
     $("question").classList.remove("noWrap");
+  }
+
+  if(ds.name.startsWith("四字熟語")){
+    const choices = createYojiChoices(cur);
+    $("question").innerHTML =
+      nl2br(cur.q)
+      + "<br><br>選択肢："
+      + choices.join("、");
   }
   $("answer").textContent = "";
   $("exp").textContent = "";
