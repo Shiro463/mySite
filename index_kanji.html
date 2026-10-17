@@ -191,12 +191,12 @@ body{
 }
 
 /* ボタン改行 */
-#controls{
+/* #controls{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
   gap:4px 12px;
-}
+} */
 
 .break{
   flex-basis:100%;
@@ -344,17 +344,11 @@ font-size:14px;
 /* 設定パネル */
 
 #settingPanel{
-  position:absolute;
-  top:50px;
-  left:50%;
-  transform:translateX(-50%);
-  width:96%;
-  z-index:50;
-
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+  position:relative;
+  width:100%;
+  z-index:999;
 }
+
 
 .panelRow{
   display:flex;
@@ -483,6 +477,9 @@ font-size:14px;
     📚 LEFT <span id="left">0</span>
     </div>
 
+    
+    <div id="settingPanel">
+
     <div id="controls">
         <!-- <select id="dataset"></select>
         <select id="memoryFilter">
@@ -500,7 +497,6 @@ font-size:14px;
         <option value="old7">最終回答日1週間前以前</option>
         <option value="fav">お気に入りのみ</option>
         </select> -->
-        <div id="settingPanel">
 
         <div id="datasetArea"
             class="panelRow"></div>
@@ -728,7 +724,7 @@ let currentFilter="all";
 //     $("dataset").appendChild(op);
 // });
 
-renderDatasetButtons();
+// renderDatasetButtons();
 
 
 document
