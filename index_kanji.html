@@ -720,13 +720,16 @@ let LIMIT_TIME = 5;
 let currentDataset=0;
 let currentFilter="all";
 
-/* 初期化 */
-DATASETS.forEach((d,i)=>{
-    const op=document.createElement("option");
-    op.value=i;
-    op.textContent=d.name;
-    $("dataset").appendChild(op);
-});
+// /* 初期化 */
+// DATASETS.forEach((d,i)=>{
+//     const op=document.createElement("option");
+//     op.value=i;
+//     op.textContent=d.name;
+//     $("dataset").appendChild(op);
+// });
+
+renderDatasetButtons();
+
 
 document
 .querySelectorAll(".filterBtn")
@@ -1092,27 +1095,16 @@ function buildQueue(){
 
   const ds = DATASETS[currentDataset || 0];
 
-  // let memoryLimit = 0;
-  // let mode = "all";
+  const memoryLimit =
+    Number($("memoryLimit").value || 0);
 
-  // const filterValue = $("memoryFilter").value || "0";
+  const oldDays =
+    Number($("oldDays").value || 0);
 
-  const memoryLimit = Number($("memoryLimit").value||0);
-
-  const oldDays = Number($("oldDays").value||0);
-
-  const mode = currentFilter;
+  const mode =
+    currentFilter;
 
 
-  if(!isNaN(Number(filterValue))){
-    memoryLimit = Number(filterValue);
-  }else{
-    mode = filterValue;
-  }
-
-  if(oldDays>0 && diffDays(s.lastDate)<oldDays){
-    return false;
-  }
 
 
   const today = todayStr();
@@ -1126,6 +1118,10 @@ function buildQueue(){
     }
 
     if(s.memory < memoryLimit){
+      return false;
+    }
+
+    if(oldDays>0 && diffDays(s.lastDate)<oldDays){
       return false;
     }
 
@@ -1247,10 +1243,7 @@ function nextQuestion(){
     const choices =
       createYojiChoices(cur);
 
-    $("question").innerHTML =
-      nl2br(cur.q)
-      + "<br><br>選択肢："
-      + choices.join("、");
+
   }
 
   renderChoices(cur);
@@ -2198,19 +2191,23 @@ function updateWR(){
 }
 
 
-$("dataset").addEventListener("change",()=>{
-  applyBackground();
-  refreshWR();
+// $("dataset").addEventListener("change",()=>{
+//   applyBackground();
+//   refreshWR();
 
-  data = [];
+//   data = [];
 
-  if($("statsWrap").style.display === "block"){
-    $("statsWrap").style.display = "none";
-  }
-});
+//   if($("statsWrap").style.display === "block"){
+//     $("statsWrap").style.display = "none";
+//   }
+// });
 
 window.addEventListener("load",()=>{
+
+  renderDatasetButtons();
+
   applyBackground();
+
   refreshWR();
 
   setJudgeButtonsEnabled(false);
