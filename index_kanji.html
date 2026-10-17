@@ -340,6 +340,108 @@ padding:7px 0;
 border-bottom:1px solid #ddd;
 font-size:14px;
 }
+
+/* 設定パネル */
+
+#settingPanel{
+  position:absolute;
+  top:50px;
+  left:50%;
+  transform:translateX(-50%);
+  width:96%;
+  z-index:50;
+
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.panelRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+}
+
+.datasetBtn,
+.filterBtn{
+  border:none;
+  border-radius:999px;
+  padding:8px 12px;
+
+  background:#334155;
+  color:white;
+  font-size:13px;
+  font-weight:900;
+}
+
+.activeBtn{
+  background:#2563eb;
+}
+
+/* 条件入力 */
+
+.smallInput{
+  width:70px;
+  border-radius:10px;
+  border:none;
+  padding:6px;
+  text-align:center;
+  font-size:14px;
+}
+
+/* 選択肢 */
+
+#choices{
+  position:absolute;
+
+  top:34%;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  width:96%;
+
+  display:grid;
+
+  grid-template-columns:
+  repeat(2,1fr);
+
+  gap:6px;
+
+  z-index:25;
+}
+
+.choiceBtn{
+
+  min-height:52px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:
+  linear-gradient(
+  #2563eb,
+  #1d4ed8);
+
+  color:white;
+
+  font-size:18px;
+  font-weight:900;
+
+  padding:8px;
+
+  box-shadow:
+  0 2px 10px rgba(0,0,0,.35);
+
+}
+
+.choiceBtn:active{
+  transform:scale(.96);
+}
+
+
 </style>
 </head>
 
@@ -371,6 +473,7 @@ font-size:14px;
     <div id="centerTimer">5.00</div>
 
     <div id="question">STARTを押してください</div>
+    <div id="choices"></div>
     <div id="answer"></div>
     <div id="exp"></div>
 
@@ -381,7 +484,7 @@ font-size:14px;
     </div>
 
     <div id="controls">
-        <select id="dataset"></select>
+        <!-- <select id="dataset"></select>
         <select id="memoryFilter">
         <option value="0">全問題</option>
         <option value="20">定着度20以上</option>
@@ -396,7 +499,68 @@ font-size:14px;
         <option value="old14">最終回答日2週間前以前</option>
         <option value="old7">最終回答日1週間前以前</option>
         <option value="fav">お気に入りのみ</option>
-        </select>
+        </select> -->
+        <div id="settingPanel">
+
+        <div id="datasetArea"
+            class="panelRow"></div>
+
+        <div id="filterArea"
+            class="panelRow">
+
+            <button
+            class="filterBtn"
+            data-mode="all">
+            全問
+            </button>
+
+            <button
+            class="filterBtn"
+            data-mode="unseen">
+            未出題
+            </button>
+
+            <button
+            class="filterBtn"
+            data-mode="correct">
+            正解
+            </button>
+
+            <button
+            class="filterBtn"
+            data-mode="wrong">
+            不正解
+            </button>
+
+            <button
+            class="filterBtn"
+            data-mode="fav">
+            ★
+            </button>
+
+        </div>
+
+        <div class="panelRow">
+
+            定着度≥
+
+            <input
+            id="memoryLimit"
+            class="smallInput"
+            type="number"
+            value="0">
+
+            日数≥
+
+            <input
+            id="oldDays"
+            class="smallInput"
+            type="number"
+            value="0">
+
+          </div>
+
+        </div>
         <div class="break"></div>
         <button class="misc" id="statsBtn">統計</button>
 
@@ -553,6 +717,8 @@ let score=0;
 let hp=3;
 let gameOver=false;
 let LIMIT_TIME = 5;
+let currentDataset=0;
+let currentFilter="all";
 
 /* 初期化 */
 DATASETS.forEach((d,i)=>{
@@ -560,6 +726,26 @@ DATASETS.forEach((d,i)=>{
     op.value=i;
     op.textContent=d.name;
     $("dataset").appendChild(op);
+});
+
+document
+.querySelectorAll(".filterBtn")
+.forEach(btn=>{
+
+  btn.onclick=()=>{
+
+    document
+    .querySelectorAll(".filterBtn")
+    .forEach(x=>
+      x.classList.remove("activeBtn")
+    );
+
+    btn.classList.add("activeBtn");
+
+    currentFilter=
+      btn.dataset.mode;
+  };
+
 });
 
 function keyName(dataset,id){
@@ -597,6 +783,47 @@ function getStat(dataset,q){
 
 function setStat(dataset,id,obj){
     localStorage.setItem(keyName(dataset,id),JSON.stringify(obj));
+}
+
+function renderDatasetButtons(){
+
+  const area=
+    $("datasetArea");
+
+  area.innerHTML="";
+
+  DATASETS.forEach((d,i)=>{
+
+    const b=
+      document.createElement("button");
+
+    b.className="datasetBtn";
+
+    if(i===0){
+      b.classList.add("activeBtn");
+    }
+
+    b.textContent=d.name;
+
+    b.onclick=()=>{
+
+      document
+      .querySelectorAll(".datasetBtn")
+      .forEach(x=>
+        x.classList.remove("activeBtn")
+      );
+
+      b.classList.add("activeBtn");
+
+      currentDataset=i;
+
+      applyBackground();
+      refreshWR();
+
+    };
+
+    area.appendChild(b);
+  });
 }
 
 function shuffle(a){
@@ -642,7 +869,7 @@ function escapeHtmlWithBr(str){
 /* load */
 async function loadSheet(){
 
-    const ds=DATASETS[$("dataset").value||0];
+    const ds=DATASETS[currentDataset||0];
     LIMIT_TIME = ds.time || 5;
 
     const url=
@@ -801,23 +1028,92 @@ function createYojiChoices(cur){
   ]);
 }
 
+function renderChoices(cur){
+
+  const area=
+    $("choices");
+
+  area.innerHTML="";
+
+  const ds=
+    DATASETS[currentDataset];
+
+  if(
+    !ds.name.startsWith("四字熟語")
+  ){
+    return;
+  }
+
+  const frontBlank =
+    cur.q.startsWith("____");
+
+  const correct =
+    frontBlank
+    ? cur.firstYomi
+    : cur.secondYomi;
+
+  const choices =
+    createYojiChoices(cur);
+
+  choices.forEach(text=>{
+
+    const btn=
+      document.createElement("button");
+
+    btn.className=
+      "choiceBtn";
+
+    btn.textContent=
+      text;
+
+    btn.onclick=()=>{
+
+      if(text===correct){
+
+        hit(true);
+
+      }else{
+
+        hit(false);
+
+      }
+
+    };
+
+    area.appendChild(btn);
+
+  });
+
+}
 
 
 /* queue */
 function buildQueue(){
 
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
 
-  const filterValue = $("memoryFilter").value || "0";
+  // let memoryLimit = 0;
+  // let mode = "all";
 
-  let memoryLimit = 0;
-  let mode = "all";
+  // const filterValue = $("memoryFilter").value || "0";
+
+  const memoryLimit = Number($("memoryLimit").value||0);
+
+  const oldDays = Number($("oldDays").value||0);
+
+  const mode = currentFilter;
+
 
   if(!isNaN(Number(filterValue))){
     memoryLimit = Number(filterValue);
   }else{
     mode = filterValue;
   }
+
+  if(oldDays>0 && diffDays(s.lastDate)<oldDays){
+    return false;
+  }
+
 
   const today = todayStr();
 
@@ -944,7 +1240,7 @@ function nextQuestion(){
   // $("question").textContent = cur.q;
   $("question").innerHTML = nl2br(cur.q);
 
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
 
   if(ds.name.startsWith("四字熟語")){
 
@@ -957,6 +1253,7 @@ function nextQuestion(){
       + choices.join("、");
   }
 
+  renderChoices(cur);
 
   $("answer").textContent = "";
   $("exp").textContent = "";
@@ -1074,7 +1371,7 @@ function hit(ok){
 
     if(!cur||gameOver)return;
 
-    const ds=DATASETS[$("dataset").value||0];
+    const ds=DATASETS[currentDataset||0];
     let s=getStat(ds.name,cur.id);
 
     if(ok){
@@ -1176,7 +1473,7 @@ function skipQuestion(){
 
   if(!cur || gameOver) return;
 
-  const ds = DATASETS[$("dataset").value||0];
+  const ds = DATASETS[currentDataset||0];
 
   let s = getStat(ds.name, cur.id);
 
@@ -1227,7 +1524,7 @@ function skipQuestion(){
 
 
 function getCurrentDataset(){
-  return DATASETS[$("dataset").value || 0];
+  return DATASETS[currentDataset || 0];
 }
 
 function dailyKey(ds, date=todayStr()){
@@ -1258,7 +1555,7 @@ function drawStats(){
 
     $("statsWrap").style.display="block";
 
-    const ds=DATASETS[$("dataset").value||0];
+    const ds=DATASETS[currentDataset||0];
 
     let correct=0,wrong=0,unseen=0;
 
@@ -1397,7 +1694,7 @@ function toggleFav(id){
 
   const ds=
     DATASETS[
-      $("dataset").value||0
+      currentDataset||0
     ];
 
   let s=
@@ -1458,7 +1755,7 @@ $("skip").onclick=skipQuestion;
 
 $("statsBtn").onclick = async () => {
 
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
 
   // まだデータ未ロードならロード
   if(data.length === 0){
@@ -1481,7 +1778,7 @@ $("statsWrap").style.display="none";
 $("sortMode").onchange=drawStats;
 
 function eachStatUpdate(callback){
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
   data.forEach(x=>{
     const key = keyName(ds.name,x.id);
     const raw = localStorage.getItem(key);
@@ -1584,7 +1881,7 @@ $("delAll").onclick=()=>{
   if(!confirm("全学習データを削除しますか？"))
     return;
 
-  const ds = DATASETS[$("dataset").value||0];
+  const ds = DATASETS[currentDataset||0];
 
   data.forEach(x=>{
     localStorage.removeItem(
@@ -1778,7 +2075,7 @@ let timerStart=0;
 function startTimer(){
 
 
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
   LIMIT_TIME = ds.time || 5;
 
   remain = LIMIT_TIME;
@@ -1860,7 +2157,7 @@ window.addEventListener("resize",()=>{
 
 function applyBackground(){
 
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
 
   if(!ds.bg) return;
 
@@ -1875,7 +2172,7 @@ function applyBackground(){
 
 function getWR(){
 
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
   const key = "ms_wr_" + ds.name;
 
   return Number(localStorage.getItem(key) || 0);
@@ -1887,7 +2184,7 @@ function refreshWR(){
 
 function updateWR(){
 
-  const ds = DATASETS[$("dataset").value || 0];
+  const ds = DATASETS[currentDataset || 0];
   const key = "ms_wr_" + ds.name;
 
   const prev = Number(localStorage.getItem(key) || 0);
