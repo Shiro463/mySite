@@ -89,7 +89,7 @@ body{
 
 #question{
   position:absolute;
-  top:20%;
+  top:12;
   height:12%;
   left:30%;
   transform:translateX(-50%);
@@ -112,8 +112,8 @@ body{
 
 #answer{
   position:absolute;
-  top:32%;
-  height:32%;
+  top:72%;
+  height:12%;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw,980px);
@@ -186,12 +186,23 @@ body{
   z-index:60;
 }
 
+#question,
 #answer,
-#exp,
-#status{
-  text-shadow:
-  0 2px 6px rgba(0,0,0,.9),
-  0 0 12px rgba(0,0,0,.6);
+#exp{
+
+  color:#d8fff2;
+
+  border:1px solid rgba(255,255,255,0.2);
+
+  background:rgba(0,0,0,0.15);
+
+  border-radius:16px;
+
+  backdrop-filter:blur(2px);
+
+  padding:10px;
+
+  box-shadow:  0 0 8px rgba(0,255,255,.12);
 }
 
 /* ボタン改行 */
@@ -349,17 +360,12 @@ font-size:14px;
 
 #settingPanel{
   position:absolute;
-
-  top:48px;
+  bottom:60px;
   left:50%;
-
   transform:translateX(-50%);
-
   width:95%;
-
   z-index:40;
 }
-
 
 .panelRow{
   display:flex;
@@ -400,19 +406,18 @@ font-size:14px;
 #choices{
   position:absolute;
 
-  top:34%;
+  top:28%;
   left:50%;
 
   transform:translateX(-50%);
 
-  width:96%;
+  width:80%;
 
   display:grid;
 
-  grid-template-columns:
-  repeat(2,1fr);
+  grid-template-columns:repeat(2,1fr);
 
-  gap:6px;
+  gap:10px;
 
   z-index:25;
 }
@@ -727,6 +732,7 @@ let gameOver=false;
 let LIMIT_TIME = 5;
 let currentDataset=0;
 let currentFilter="all";
+let pendingYojiResult= null;
 
 // /* 初期化 */
 // DATASETS.forEach((d,i)=>{
@@ -1079,16 +1085,10 @@ function renderChoices(cur){
 
     btn.onclick=()=>{
 
-      if(text===correct){
+      pendingYojiResult =
+        (text === correct);
 
-        hit(true);
-
-      }else{
-
-        hit(false);
-
-      }
-
+      showAnswer();
     };
 
     area.appendChild(btn);
@@ -1218,6 +1218,9 @@ function nextQuestion(){
 
   if(gameOver) return;
 
+  pendingYojiResult = null;
+  $("choices").style.pointerEvents="auto";
+
   clearInterval(intv);
 
   if(queue.length===0){
@@ -1244,7 +1247,12 @@ function nextQuestion(){
   // $("question").textContent = cur.q;
   $("question").innerHTML = nl2br(cur.q);
 
+
+  
   const ds = DATASETS[currentDataset || 0];
+
+  pendingYojiResult = null;
+  $("choices").style.pointerEvents="auto";
 
   if(ds.name.startsWith("四字熟語")){
 
@@ -1337,6 +1345,16 @@ function showAnswer(){
 
     resizeAllTexts();
     $("exp").scrollTop=0;
+
+
+
+    document
+    .querySelectorAll(".choiceBtn")
+    .forEach(btn=>{
+      btn.disabled=true;
+    });
+
+    $("choices").style.pointerEvents="none";
 
 }
 
@@ -1752,8 +1770,36 @@ $("start").onclick=async()=>{
 };
 
 $("show").onclick=showAnswer;
-$("correct").onclick=()=>hit(true);
-$("wrong").onclick=()=>hit(false);
+$("correct").onclick=()=>{
+
+  const ds =
+    DATASETS[currentDataset];
+
+  if(
+    ds.name.startsWith("四字熟語") &&
+    pendingYojiResult !== null
+  ){
+    hit(pendingYojiResult);
+  }else{
+    hit(true);
+  }
+
+};
+$("wrong").onclick=()=>{
+
+  const ds =
+    DATASETS[currentDataset];
+
+  if(
+    ds.name.startsWith("四字熟語") &&
+    pendingYojiResult !== null
+  ){
+    hit(!pendingYojiResult);
+  }else{
+    hit(false);
+  }
+
+};
 $("skip").onclick=skipQuestion;
 
 $("statsBtn").onclick = async () => {
