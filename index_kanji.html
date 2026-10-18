@@ -41,24 +41,24 @@ body{
 /* HUD */
 #topHud{
   position:absolute;
-  left:10px;
-  top:10px;
+  left:0px;
+  top:0px;
   z-index:30;
   background:rgba(0,0,0,.25);
-  padding:10px 14px;
+  padding:8px 8px;
   border-radius:14px;
   font-weight:900;
-  font-size:12px;
+  font-size:8px;
 }
 #hud{
   position:absolute;
-  right:10px;
-  top:10px;
+  right:0px;
+  top:0px;
   z-index:30;
   background:rgba(0,0,0,.25);
-  padding:12px;
+  padding:8px;
   border-radius:14px;
-  font-size:12px;
+  font-size:8px;
   text-align:right;
   font-weight:900;
 }
@@ -66,12 +66,12 @@ body{
 /* 中央 */
 #status{
   position:absolute;
-  top:1%;
+  top:0%;
   height:3%;
   left:50%;
   transform:translateX(-50%);
   z-index:20;
-  font-size:25px;
+  font-size:12px;
   font-weight:900;
 }
 /* #enemy{
@@ -89,7 +89,7 @@ body{
 
 #question{
   position:absolute;
-  top:12%;
+  top:6%;
   height:12%;
   left:30%;
   transform:translateX(-50%);
@@ -112,7 +112,7 @@ body{
 
 #answer{
   position:absolute;
-  top:72%;
+  top:28%;
   height:12%;
   left:50%;
   transform:translateX(-50%);
@@ -133,7 +133,7 @@ body{
 
 #exp{
   position:absolute;
-  top:64%;
+  top:44%;
   height:20%;
   left:50%;
   transform:translateX(-50%);
@@ -154,19 +154,27 @@ body{
 }
 
 #questionInfo{
-
-    margin-top:10px;
-
-    text-align:center;
-
-    font-size:14px;
-
-    color:#d1d5db;
+  position:absolute;
+  display:none;
+  top:18%;
+  left:50%;
+  transform:translateX(-50%);
+  display:inline-block;
+  width:auto;
+  padding:4px 10px;
+  border-radius:999px;
+  background:
+  rgba(0,0,0,.25);
+  border:
+  1px solid rgba(255,255,255,.15);
+  font-size:12px;
+  white-space:nowrap;
 }
 
 
 #question,
 #answer,
+#questionInfo,
 #exp{
   color:#d8fff2;   /* 薄いミントグリーン */
 
@@ -200,20 +208,14 @@ body{
 
 #question,
 #answer,
+#questionInfo,
 #exp{
-
   color:#d8fff2;
-
   border:1px solid rgba(255,255,255,0.2);
-
   background:rgba(0,0,0,0.15);
-
   border-radius:16px;
-
   backdrop-filter:blur(2px);
-
   padding:10px;
-
   box-shadow:  0 0 8px rgba(0,255,255,.12);
 }
 
@@ -226,16 +228,54 @@ body{
 } */
 
 .break{
-  flex-basis:100%;
+  display:absolute;
+  left:50%;
+  /* flex-basis:100%; */
   height:0;
+  font-size:10px;
+  font-weight:900;
+  transform:translateX(-50%);
 }
 
+#datasetArea{
+  display:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  width:100%;
+}
+
+#filterArea{
+  display:flex;
+  left:50%;
+  transform:translateX(-50%);
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  width:100%;
+}
+
+#controlArea{
+  display:flex;
+  left:50%;
+  transform:translateX(-50%);
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  width:100%;
+}
 
 button,select{
   border:none;
   border-radius:999px;
   padding:8px 8px;
-  font-size:11px;
+  font-size:4px;
   font-weight:900;
 }
 
@@ -368,53 +408,81 @@ border-bottom:1px solid #ddd;
 font-size:14px;
 }
 
-/* 設定パネル */
 
+/* 設定パネル */
 #settingPanel{
   position:absolute;
-  bottom:60px;
+  bottom:10px;
   left:50%;
-  transform:translateX(-50%);
+  /* transform:translateX(-50%); */
   width:95%;
   z-index:40;
+  font-size:10px;
+  /* transform:translateX(-50%); */
 }
 
 .panelRow{
   display:flex;
   flex-wrap:wrap;
-  gap:6px;
   justify-content:center;
+  align-items:center;
+  gap:6px;
+  width:100%;
+  margin:4px auto;
+  transform:translateX(-50%);
+  font-size:10px;
 }
 
-.datasetBtn,
-.filterBtn{
-  border:none;
-  border-radius:999px;
-  padding:8px 12px;
-
+.datasetBtn{
+  border:1px solid #d9c19a;
   background:#334155;
   color:white;
-  font-size:13px;
+  font-size:10px;
+  font-weight:900;
+}
+.filterBtn{
+  border:1px solid #000000;
+  background:#f5e6c8;
+  color:#3b2f20;
+  border:1px solid #d8d4ce;
+  font-size:10px;
+  font-weight:900;
+}
+.controlBtn{
+  border:1px solid #e4ddd3;
+  font-size:10px;
+  font-weight:900;
+}
+
+.filterBtn.activeBtn{
+  background:#e3f424;
+  color:black;
+  font-size:10px;
   font-weight:900;
 }
 
 .activeBtn{
   background:#2563eb;
+  font-size:10px;
+  font-weight:900;
 }
 
 /* 条件入力 */
 
 .smallInput{
-  width:70px;
+  width:30px;
   border-radius:10px;
   border:none;
   padding:6px;
   text-align:center;
-  font-size:14px;
+  font-size:6px;
+  font-size:10px;
+  font-weight:900;
 }
 
-/* 選択肢 */
 
+
+/* 選択肢 */
 #choices{
   position:absolute;
 
@@ -507,6 +575,26 @@ font-size:14px;
     </div>
 
     
+
+    <div id="controls">
+        <!-- <select id="dataset"></select>
+        <select id="memoryFilter">
+        <option value="0">全問題</option>
+        <option value="20">定着度20以上</option>
+        <option value="40">定着度40以上</option>
+        <option value="60">定着度60以上</option>
+        <option value="80">定着度80以上</option>
+        <option value="100">定着度100以上</option>
+        <option value="correct">最新状態が正解</option>
+        <option value="wrong">最新状態が不正解</option>
+        <option value="unseen">未出題</option>
+        <option value="old30">最終回答日1ヶ月前以前</option>
+        <option value="old14">最終回答日2週間前以前</option>
+        <option value="old7">最終回答日1週間前以前</option>
+        <option value="fav">お気に入りのみ</option>
+        </select> -->
+
+
     <div id="settingPanel">
         <div id="datasetArea"
             class="panelRow"></div>
@@ -545,56 +633,37 @@ font-size:14px;
             </button>
 
         </div>
+            
+        <div id="controlArea"
+            class="panelRow">
+        
+          <button class="misc controlBtn" id="statsBtn">統計</button>
+          <button class="misc controlBtn" id="skip">スルー</button>
+          <button class="ng controlBtn" id="wrong">被弾</button>
+          <button class="ok controlBtn" id="correct">撃破</button>
+          <button class="show controlBtn" id="show">答え</button>
+          <button class="start controlBtn" id="start">START</button>
 
-    <div id="controls">
-        <!-- <select id="dataset"></select>
-        <select id="memoryFilter">
-        <option value="0">全問題</option>
-        <option value="20">定着度20以上</option>
-        <option value="40">定着度40以上</option>
-        <option value="60">定着度60以上</option>
-        <option value="80">定着度80以上</option>
-        <option value="100">定着度100以上</option>
-        <option value="correct">最新状態が正解</option>
-        <option value="wrong">最新状態が不正解</option>
-        <option value="unseen">未出題</option>
-        <option value="old30">最終回答日1ヶ月前以前</option>
-        <option value="old14">最終回答日2週間前以前</option>
-        <option value="old7">最終回答日1週間前以前</option>
-        <option value="fav">お気に入りのみ</option>
-        </select> -->
-
-
+        </div>
 
         <div class="panelRow">
 
             定着度≥
-
             <input
             id="memoryLimit"
             class="smallInput"
             type="number"
             value="0">
-
             日数≥
-
             <input
             id="oldDays"
             class="smallInput"
             type="number"
             value="0">
 
-          </div>
-
         </div>
-        <div class="break"></div>
-        <button class="misc" id="statsBtn">統計</button>
 
-        <button class="misc" id="skip">スルー</button>
-        <button class="ng" id="wrong">被弾</button>
-        <button class="ok" id="correct">撃破</button>
-        <button class="show" id="show">答え</button>
-        <button class="start" id="start">START</button>
+        <div class="break"></div>
     </div>
 </div>
 
@@ -1122,6 +1191,7 @@ function buildQueue(){
     const ds =
     DATASETS[currentDataset];
 
+
     const memoryLimit =
     Number(
         $("memoryLimit").value || 0
@@ -1144,6 +1214,16 @@ function buildQueue(){
             ds.name,
             x.id
         );
+
+
+        /* スルー期限中なら除外 */
+        if(
+            s.skipUntil &&
+            s.skipUntil >= today
+        ){
+            return false;
+        }
+
 
         if(
             s.memory < memoryLimit
@@ -1288,6 +1368,29 @@ function nextQuestion(){
 
   cur = queue.shift();
 
+  // 漢字パーツ1のときだけ変更
+  if(ds.mode==="kanji_parts1"){
+    $("exp").style.display="none";
+
+    $("question").style.left="20%";
+    $("question").style.width="40%";
+
+    $("answer").style.left="50%";
+    $("answer").style.width="40%";
+
+    $("centerTimer").style.left="90%";
+    $("centerTimer").style.width="10%";
+  }else{
+    $("question").style.left="30%";
+    $("question").style.width="60%";
+
+    $("answer").style.left="50%";
+    $("answer").style.width="92vw";
+
+    $("centerTimer").style.left="90%";
+    $("centerTimer").style.width="100%";
+  }
+
   const stat =
     getStat(
       ds.name,
@@ -1332,6 +1435,17 @@ function nextQuestion(){
 
 /* show */
 function showAnswer(){
+
+    const ds=
+      DATASETS[currentDataset];
+
+    // 漢字パーツ1のときは解説非表示
+    if(ds.mode==="kanji_parts1"){
+        $("exp").style.display="none";
+    }else{
+        $("exp").style.display="block";
+    }
+
     clearInterval(intv);
     if(!cur||gameOver)return;
 
@@ -1536,15 +1650,11 @@ function skipQuestion(){
   const d = new Date();
   d.setDate(d.getDate() + days);
 
-  s.skipUntil =
-    d.getFullYear()+"-"+
-    String(d.getMonth()+1).padStart(2,"0")+"-"+
-    String(d.getDate()).padStart(2,"0");
 
-    s.skipUntil =
-      d.getFullYear() + "-" +
-      String(d.getMonth()+1).padStart(2,"0") + "-" +
-      String(d.getDate()).padStart(2,"0");
+  s.skipUntil =
+    d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
 
   s.last = "skip";
   s.lastDate = todayStr();
@@ -1679,17 +1789,36 @@ function drawStats(){
 
     const s=getStat(ds.name,x.id);
 
-    const now = Date.now();
     let skipText = "なし";
+
     if(s.skipUntil){
-      if(s.skipUntil > now){
-        const remain = s.skipUntil - now;
-        const min = Math.floor(remain / 60000);
-        const sec = Math.floor((remain % 60000) / 1000);
-        skipText = `🕒 ${min}分${sec}秒`;
-      }else{
-        skipText = "スルー中";
-      }
+
+        const today = todayStr();
+
+        if(s.skipUntil >= today){
+
+            const limit =
+            new Date(s.skipUntil);
+
+            const now =
+            new Date();
+
+            const remainDays =
+            Math.ceil(
+                (limit-now)
+                /86400000
+            );
+
+            skipText =
+            `🕒 あと${remainDays}日`;
+
+        }else{
+
+            skipText =
+            "期限切れ";
+
+        }
+
     }
 
     return `
@@ -1702,12 +1831,9 @@ function drawStats(){
       誤:${s.wrong}
       最終:${s.lastDate||"-"}
       スルー回数:${s.skipCount || 0}
-      スルー期限:${s.skipUntil || "-"}
-      定着:${s.memory}
-
-      <br>
-
       スルー:${skipText}
+
+
 
       <br><br>
 
