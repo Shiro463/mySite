@@ -45,7 +45,7 @@ body{
   top:0px;
   z-index:30;
   background:rgba(0,0,0,.25);
-  padding:8px 8px;
+  padding:2px;
   border-radius:14px;
   font-weight:900;
   font-size:8px;
@@ -56,7 +56,7 @@ body{
   top:0px;
   z-index:30;
   background:rgba(0,0,0,.25);
-  padding:8px;
+  padding:2px;
   border-radius:14px;
   font-size:8px;
   text-align:right;
@@ -68,7 +68,7 @@ body{
   position:absolute;
   top:0%;
   height:3%;
-  left:50%;
+  left:20%;
   transform:translateX(-50%);
   z-index:20;
   font-size:12px;
@@ -89,11 +89,11 @@ body{
 
 #question{
   position:absolute;
-  top:7%;
+  top:9%;
   height:20%;
-  left:30%;
+  left:20%;
   transform:translateX(-50%);
-  width:60%;
+  width:40%;
   padding:8px;
   overflow-y:auto;
   display:flex;
@@ -141,7 +141,7 @@ body{
 
 #exp{
   position:absolute;
-  top:44%;
+  top:34%;
   height:20%;
   left:50%;
   transform:translateX(-50%);
@@ -164,7 +164,7 @@ body{
 #questionInfo{
   position:absolute;
   display:none;
-  top:7%;
+  top:9%;
   left:80%;
   transform:translateX(-50%);
   width:auto;
@@ -326,7 +326,7 @@ to{height:72%}
   position:absolute;
   top:3%;
   height:6%;
-  left:50%;
+  left:20%;
   transform:translateX(-50%);
   width:100%;
   text-align:center;
@@ -1395,30 +1395,31 @@ function nextQuestion(){
 
   }else if(DATASETS[currentDataset].name === "四字熟語1"){
 
-    $("question").style.top="7%";
-    $("question").style.left="30%";
-    $("question").style.width="60%";
-    $("question").style.height="15%";
+    $("question").style.top="9%";
+    $("question").style.left="20%";
+    $("question").style.width="40%";
+    $("question").style.height="20%";
 
-    $("answer").style.top="39%";
+    $("answer").style.top="42%";
     $("answer").style.left="50%";
     $("answer").style.width="min(92vw,980px)";
     $("answer").style.height="12%";
 
 
-    $("exp").style.top="52%";
+    $("exp").style.top="54%";
     $("exp").style.left="50%";
     $("exp").style.width="min(92vw,980px)";
-    $("exp").style.height="20%";
+    $("exp").style.height="15%";
 
   }
   else{
     $("exp").style.display="flex";
 
-    $("question").style.top="7%";
-    $("question").style.left="30%";
-    $("question").style.width="60%";
+    $("question").style.top="9%";
+    $("question").style.left="20%";
+    $("question").style.width="40%";
     $("question").style.height="20%";
+
 
     $("answer").style.top="28%";
     $("answer").style.left="50%";
