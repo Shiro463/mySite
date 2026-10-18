@@ -1087,8 +1087,6 @@ function renderChoices(cur){
     ? cur.firstYomi
     : cur.secondYomi;
 
-  const choices =
-    createYojiChoices(cur);
 
   choices.forEach(text=>{
 
@@ -1269,34 +1267,7 @@ function nextQuestion(){
 
   if(gameOver) return;
 
-  const ds =
-    DATASETS[$("dataset").value || 0];
-
   clearInterval(intv);
-
-
-  const stat =
-
-  getStat(
-      ds.name,
-      cur.id
-  );
-
-  $("questionInfo")
-  .innerHTML =
-
-  `
-  定着度:
-  ${stat.memory}
-
-  ｜
-  正:
-  ${stat.correct}
-
-  ｜
-  誤:
-  ${stat.wrong}
-  `;
 
   if(queue.length===0){
 
@@ -1310,32 +1281,33 @@ function nextQuestion(){
     return;
   }
 
+  const ds =
+    DATASETS[currentDataset || 0];
+
   cur = queue.shift();
 
-  $("left").textContent = queue.length + 1;
+  const stat =
+    getStat(
+      ds.name,
+      cur.id
+    );
 
-//   $("enemy").src =
-//     ENEMY_IMAGES[
-//       Math.floor(Math.random()*ENEMY_IMAGES.length)
-//     ];
+  $("questionInfo").innerHTML = `
+    定着度:${stat.memory}
+    ｜正:${stat.correct}
+    ｜誤:${stat.wrong}
+  `;
 
-  // $("question").textContent = cur.q;
-  $("question").innerHTML = nl2br(cur.q);
+  $("left").textContent =
+    queue.length + 1;
 
-
-  
-  // const ds = DATASETS[currentDataset || 0];
+  $("question").innerHTML =
+    nl2br(cur.q);
 
   pendingYojiResult = null;
-  $("choices").style.pointerEvents="auto";
 
-  if(ds.name.startsWith("四字熟語")){
-
-    const choices =
-      createYojiChoices(cur);
-
-
-  }
+  $("choices").style.pointerEvents =
+    "auto";
 
   renderChoices(cur);
 
@@ -1345,61 +1317,16 @@ function nextQuestion(){
 
   setJudgeButtonsEnabled(false);
 
-  setTimeout(resizeAllTexts,10);
   startTimer();
 
-  requestAnimationFrame(()=>{
-    setTimeout(resizeAllTexts,20);
-  });
+  setTimeout(
+    resizeAllTexts,
+    10
+  );
 
-  resizeAllTexts();
-  $("exp").scrollTop=0;
-
+  $("exp").scrollTop = 0;
 }
-// function nextQuestion(){
 
-//     if(gameOver)return;
-
-//     clearInterval(intv);
-
-//     if(queue.length===0){
-//         $("status").textContent="🏆 CLEAR!";
-//         $("question").textContent="MISSION COMPLETE";
-//         $("enemy").style.display="none";
-//         return;
-//     }
-
-//     cur=queue.shift();
-
-//     $("left").textContent=queue.length+1;
-
-//     // $("enemy").style.display="block";
-//     // $("enemy").className="";
-//     // $("enemy").textContent=
-//     // ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
-//     $("enemy").src =
-//     ENEMY_IMAGES[
-//     Math.floor(Math.random()*ENEMY_IMAGES.length)
-//     ];
-
-//     $("question").textContent=cur.q;
-//     $("answer").textContent="";
-//     $("exp").textContent="";
-//     $("status").textContent="THINK!";
-
-//     timer=5;
-//     $("timer").textContent=timer;
-
-//     $("enemy").style.animation="none";
-//     void $("enemy").offsetWidth;
-//     $("enemy").style.animation="enemyDrop 5s linear forwards";
-
-//     intv=setInterval(()=>{
-//         timer--;
-//         $("timer").textContent=timer;
-//         if(timer<=0)showAnswer();
-//     },1000);
-// }
 
 /* show */
 function showAnswer(){
