@@ -89,8 +89,8 @@ body{
 
 #question{
   position:absolute;
-  top:6%;
-  height:12%;
+  top:7%;
+  height:20%;
   left:30%;
   transform:translateX(-50%);
   width:60%;
@@ -108,6 +108,14 @@ body{
 }
 .noWrap{
   white-space:nowrap;
+}
+
+/* 漢字パーツ1・四字熟語1：改行を保持し、行内で折り返さない */
+#question.preserveLines,
+#answer.preserveLines{
+  white-space:pre;
+  overflow-wrap:normal;
+  word-break:normal;
 }
 
 #answer{
@@ -156,10 +164,9 @@ body{
 #questionInfo{
   position:absolute;
   display:none;
-  top:18%;
-  left:50%;
+  top:7%;
+  left:80%;
   transform:translateX(-50%);
-  display:inline-block;
   width:auto;
   padding:4px 10px;
   border-radius:999px;
@@ -317,9 +324,9 @@ to{height:72%}
 
 #centerTimer{
   position:absolute;
-  top:22%;
+  top:3%;
   height:6%;
-  left:90%;
+  left:50%;
   transform:translateX(-50%);
   width:100%;
   text-align:center;
@@ -485,46 +492,35 @@ font-size:14px;
 /* 選択肢 */
 #choices{
   position:absolute;
-
-  top:28%;
+  top:24%;
   left:50%;
-
   transform:translateX(-50%);
-
   width:80%;
-
   display:grid;
-
   grid-template-columns:repeat(2,1fr);
-
-  gap:10px;
-
+  gap:5px;
   z-index:25;
 }
 
+/* 四字熟語の選択肢は3列×3行 */
+#choices.yojiChoices{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
 .choiceBtn{
-
-  min-height:52px;
-
+  min-height:26px;
   border:none;
-
   border-radius:14px;
-
   background:
   linear-gradient(
-  #2563eb,
-  #1d4ed8);
-
-  color:white;
-
-  font-size:18px;
-  font-weight:900;
-
-  padding:8px;
-
+  #ffebfd,
+  #98f3ff);
+  color:black;
+  font-size:10px;
+  font-weight:90px;
+  padding:2px;
   box-shadow:
   0 2px 10px rgba(0,0,0,.35);
-
 }
 
 .choiceBtn:active{
@@ -1004,7 +1000,7 @@ async function loadSheet(){
 
         /* F列問題 (E→Fへ1列ずれる) */
         q=c[5]?.v!=null
-          ? String(c[5].v).trim()
+          ? String(c[5].v).replace(/\\\\n/g,"\n").trim()
           : "";
 
         /* E列答え */
@@ -1126,9 +1122,10 @@ function createYojiChoices(cur){
 
   shuffle(uniquePool);
 
+  // 正解1つ＋不正解8つで、選択肢を合計9つにする
   return shuffle([
     correct,
-    ...uniquePool.slice(0,9)
+    ...uniquePool.slice(0,8)
   ]);
 }
 
@@ -1141,6 +1138,12 @@ function renderChoices(cur){
 
   const ds=
     DATASETS[currentDataset];
+
+  // 四字熟語のときだけ3列表示用クラスを付ける
+  area.classList.toggle(
+    "yojiChoices",
+    ds.name.startsWith("四字熟語")
+  );
 
   if(
     !ds.name.startsWith("四字熟語")
@@ -1175,6 +1178,7 @@ function renderChoices(cur){
       pendingYojiResult =
         (text === correct);
 
+      // 選択肢を押しても一覧は表示したままにする
       showAnswer();
     };
 
@@ -1368,27 +1372,59 @@ function nextQuestion(){
 
   cur = queue.shift();
 
+  // 漢字パーツ1・四字熟語1は改行を保持し、横方向に折り返さない
+  const preserveLines =
+    ds.mode === "kanji_parts1" || ds.name.startsWith("四字熟語");
+  $("question").classList.toggle("preserveLines", preserveLines);
+  $("answer").classList.toggle("preserveLines", preserveLines);
+
   // 漢字パーツ1のときだけ変更
   if(ds.mode==="kanji_parts1"){
+
     $("exp").style.display="none";
 
+    $("question").style.top="15%";
     $("question").style.left="20%";
     $("question").style.width="40%";
+    $("question").style.height="55%";
 
-    $("answer").style.left="50%";
-    $("answer").style.width="40%";
+    $("answer").style.top="15%";
+    $("answer").style.left="70%";
+    $("answer").style.width="60%";
+    $("answer").style.height="55%";
 
-    $("centerTimer").style.left="90%";
-    $("centerTimer").style.width="10%";
-  }else{
+  }else if(DATASETS[currentDataset].name === "四字熟語1"){
+
+    $("question").style.top="7%";
     $("question").style.left="30%";
     $("question").style.width="60%";
+    $("question").style.height="15%";
 
+    $("answer").style.top="39%";
     $("answer").style.left="50%";
-    $("answer").style.width="92vw";
+    $("answer").style.width="min(92vw,980px)";
+    $("answer").style.height="12%";
 
-    $("centerTimer").style.left="90%";
-    $("centerTimer").style.width="100%";
+
+    $("exp").style.top="52%";
+    $("exp").style.left="50%";
+    $("exp").style.width="min(92vw,980px)";
+    $("exp").style.height="20%";
+
+  }
+  else{
+    $("exp").style.display="flex";
+
+    $("question").style.top="7%";
+    $("question").style.left="30%";
+    $("question").style.width="60%";
+    $("question").style.height="20%";
+
+    $("answer").style.top="28%";
+    $("answer").style.left="50%";
+    $("answer").style.width="min(92vw,980px)";
+    $("answer").style.height="12%";
+
   }
 
   const stat =
@@ -1402,17 +1438,19 @@ function nextQuestion(){
     ｜正:${stat.correct}
     ｜誤:${stat.wrong}
   `;
+  $("questionInfo").style.display = "inline-block";
 
   $("left").textContent =
     queue.length + 1;
 
   $("question").innerHTML =
-    nl2br(cur.q);
+    preserveLines ? escapeHtml(cur.q) : nl2br(cur.q);
 
   pendingYojiResult = null;
 
   $("choices").style.pointerEvents =
     "auto";
+  $("choices").style.display = "grid";
 
   renderChoices(cur);
 
@@ -1449,9 +1487,18 @@ function showAnswer(){
     clearInterval(intv);
     if(!cur||gameOver)return;
 
+    // // 四字熟語では「答え」ボタンを押した場合も選択肢を非表示
+    // if(ds.name.startsWith("四字熟語")){
+    //   $("choices").style.display="none";
+    // }
+
     $("answer").style.display="flex";
-    $("answer").innerHTML = nl2br(cur.a);
-    $("exp").style.display="block";
+    const preserveLines =
+      DATASETS[currentDataset].mode === "kanji_parts1" ||
+      DATASETS[currentDataset].name.startsWith("四字熟語");
+    $("answer").innerHTML =
+      preserveLines ? escapeHtml(cur.a) : nl2br(cur.a);
+    // $("exp").style.display="block";
     $("exp").innerHTML = nl2br(cur.e || "解説なし");
     $("status").textContent="JUDGE!";
 
