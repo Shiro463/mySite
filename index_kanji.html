@@ -141,6 +141,7 @@ body{
 
 #exp{
   position:absolute;
+  display:none;
   top:34%;
   height:20%;
   left:50%;
@@ -525,6 +526,52 @@ font-size:14px;
 
 .choiceBtn:active{
   transform:scale(.96);
+}
+/* 選択肢の判定マークをボタンの内側に重ねる */
+.choiceBtn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* 正解を示す青い円 */
+.choiceBtn.markCorrect::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  width: clamp(20px, 5vw, 42px);
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  border-radius: 50%;
+
+  border: 4px solid rgba(19, 27, 138, 0.95);
+
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 不正解を示す赤い× */
+.choiceBtn.markWrong::after {
+  content: "×";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+
+  font-family: Arial, sans-serif;
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: 900;
+  line-height: 1;
+
+  color: rgba(255, 0, 0, 0.72);
+  -webkit-text-stroke: 3px rgba(255, 255, 255, 0.95);
+  paint-order: stroke fill;
+
+  pointer-events: none;
+  z-index: 3;
 }
 
 
@@ -1164,26 +1211,51 @@ function renderChoices(cur){
 
   choices.forEach(text=>{
 
-    const btn=
-      document.createElement("button");
+      const btn=
+        document.createElement("button");
 
-    btn.className=
-      "choiceBtn";
+      btn.className=
+        "choiceBtn";
 
-    btn.textContent=
-      text;
+      btn.textContent=
+        text;
 
-    btn.onclick=()=>{
+      btn.onclick = () => {
 
-      pendingYojiResult =
-        (text === correct);
+        // すでに判定済みなら何もしない
+        if (pendingYojiResult !== null) return;
 
-      // 選択肢を押しても一覧は表示したままにする
-      showAnswer();
-    };
+        pendingYojiResult = (text === correct);
 
-    area.appendChild(btn);
+        // すべての選択肢から、以前の判定マークを消す
+        document.querySelectorAll(".choiceBtn").forEach(button => {
+          button.classList.remove("markCorrect", "markWrong");
+        });
 
+        // 正解の選択肢を探す
+        const correctButton = [...area.querySelectorAll(".choiceBtn")]
+          .find(button => button.textContent === correct);
+
+        if (pendingYojiResult) {
+
+          // 正解：押した選択肢に青い円
+          btn.classList.add("markCorrect");
+
+        } else {
+
+          // 不正解：正解の選択肢に青い円
+          if (correctButton) {
+            correctButton.classList.add("markCorrect");
+          }
+
+          // 押した選択肢に赤い×
+          btn.classList.add("markWrong");
+        }
+
+        // 既存の答え表示・選択肢の無効化を実行
+        showAnswer();
+      };
+      area.appendChild(btn);
   });
 
 }
@@ -1421,13 +1493,13 @@ function nextQuestion(){
     $("question").style.height="20%";
 
 
-    $("answer").style.top="28%";
+    $("answer").style.top="30%";
     $("answer").style.left="50%";
     $("answer").style.width="min(92vw,980px)";
     $("answer").style.height="12%";
 
     
-    $("exp").style.top="38%";
+    $("exp").style.top="42%";
     $("exp").style.left="50%";
     $("exp").style.width="min(92vw,980px)";
     $("exp").style.height="20%";
