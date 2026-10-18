@@ -153,6 +153,17 @@ body{
   font-weight: bold;
 }
 
+#questionInfo{
+
+    margin-top:10px;
+
+    text-align:center;
+
+    font-size:14px;
+
+    color:#d1d5db;
+}
+
 
 #question,
 #answer,
@@ -170,18 +181,19 @@ body{
 
 /* controls */
 #controls{
-  position:absolute;
+  /* position:absolute; */
 
-  left:50%;
-  bottom:10px;
+  /* left:-10%; */
+  bottom:0px;
 
-  transform:translateX(-50%);
+  /* transform:translateX(-50%); */
 
-  width:95%;
+  width:15%;
 
+  font-size:10px;
   display:flex;
   justify-content:center;
-  gap:8px;
+  gap:0px;
 
   z-index:60;
 }
@@ -485,6 +497,7 @@ font-size:14px;
     <div id="question">STARTを押してください</div>
     <div id="choices"></div>
     <div id="answer"></div>
+    <div id="questionInfo"></div>
     <div id="exp"></div>
 
     <div id="hud">
@@ -1101,116 +1114,149 @@ function renderChoices(cur){
 /* queue */
 function buildQueue(){
 
-  const ds = DATASETS[currentDataset || 0];
+    const ds =
+    DATASETS[currentDataset];
 
-  const memoryLimit =
-    Number($("memoryLimit").value || 0);
+    const memoryLimit =
+    Number(
+        $("memoryLimit").value || 0
+    );
 
-  const oldDays =
-    Number($("oldDays").value || 0);
+    const oldDays =
+    Number(
+        $("oldDays").value || 0
+    );
 
-  const mode =
-    currentFilter;
+    const today =
+    todayStr();
 
+    let target =
 
+    data.filter(x=>{
 
+        const s =
+        getStat(
+            ds.name,
+            x.id
+        );
 
-  const today = todayStr();
+        if(
+            s.memory < memoryLimit
+        ){
+            return false;
+        }
 
-  let target = data.filter(x=>{
+        if(
+            oldDays > 0 &&
+            diffDays(
+                s.lastDate
+            ) < oldDays
+        ){
+            return false;
+        }
 
-    const s = getStat(ds.name, x.id);
+        switch(currentFilter){
 
-    if(s.skipUntil && s.skipUntil > today){
-      return false;
-    }
+            case "correct":
+                return s.last==="correct";
 
-    if(s.memory < memoryLimit){
-      return false;
-    }
+            case "wrong":
+                return s.last==="wrong";
 
-    if(oldDays>0 && diffDays(s.lastDate)<oldDays){
-      return false;
-    }
+            case "unseen":
+                return (
+                    s.correct===0 &&
+                    s.wrong===0
+                );
 
-    switch(mode){
+            case "fav":
+                return s.fav===true;
+        }
 
-      case "correct":
-        return s.last==="correct";
+        return true;
 
-      case "wrong":
-        return s.last==="wrong";
-
-      case "unseen":
-        return s.correct===0 && s.wrong===0;
-
-      case "old30":
-        return diffDays(s.lastDate)>=30;
-
-      case "old14":
-        return diffDays(s.lastDate)>=14;
-
-      case "old7":
-        return diffDays(s.lastDate)>=7;
-
-      case "fav":
-        return s.fav===true;
-    }
-
-    return true;
-  });
-
-  if(target.length===0){
-
-    queue=[];
-    $("left").textContent="0";
-    $("question").textContent="";
-    $("answer").textContent="";
-    $("exp").textContent="";
-    $("status").textContent="対象問題なし";
-
-    return;
-  }
-
-  queue=[];
-  let pool=[...target];
-
-  while(pool.length){
-
-    const weights=pool.map(x=>{
-
-      const s=getStat(ds.name,x.id);
-
-      let w=Math.max(1,s.memory);
-
-      // 未出題を少し優遇
-      if(s.correct === 0 && s.wrong === 0){
-          w += 10;
-      }
-
-      if(s.fav) w+=25;
-
-      return w;
     });
 
-    const total=weights.reduce((a,b)=>a+b,0);
+    queue=[];
 
-    let r=Math.random()*total;
-    let pick=0;
+    let pool=[...target];
 
-    for(let i=0;i<weights.length;i++){
-      r-=weights[i];
-      if(r<=0){
-        pick=i;
-        break;
-      }
+    while(pool.length){
+
+        const weights =
+
+        pool.map(q=>{
+
+            const s =
+            getStat(
+                ds.name,
+                q.id
+            );
+
+            let w =
+            Math.max(
+                1,
+                s.memory
+            );
+
+            if(
+                s.correct===0 &&
+                s.wrong===0
+            ){
+                w += 10;
+            }
+
+            if(s.fav){
+                w += 25;
+            }
+
+            return w;
+
+        });
+
+        const total =
+        weights.reduce(
+            (a,b)=>a+b,
+            0
+        );
+
+        let r =
+        Math.random()
+        *
+        total;
+
+        let pick = 0;
+
+        for(
+            let i=0;
+            i<weights.length;
+            i++
+        ){
+
+            r -= weights[i];
+
+            if(r<=0){
+
+                pick=i;
+
+                break;
+            }
+
+        }
+
+        queue.push(
+            pool[pick]
+        );
+
+        pool.splice(
+            pick,
+            1
+        );
+
     }
 
-    queue.push(pool[pick]);
-    pool.splice(pick,1);
-  }
-
-  $("left").textContent=queue.length;
+    $("left").textContent =
+    queue.length;
 }
 
 /* next */
@@ -1222,6 +1268,30 @@ function nextQuestion(){
   $("choices").style.pointerEvents="auto";
 
   clearInterval(intv);
+
+
+  const stat =
+
+  getStat(
+      ds.name,
+      cur.id
+  );
+
+  $("questionInfo")
+  .innerHTML =
+
+  `
+  定着度:
+  ${stat.memory}
+
+  ｜
+  正:
+  ${stat.correct}
+
+  ｜
+  誤:
+  ${stat.wrong}
+  `;
 
   if(queue.length===0){
 
@@ -1402,27 +1472,39 @@ function hit(ok){
         score++;
 
         /* 初回正解か？ */
-        const firstClear =
-          s.correct === 0 &&
-          s.wrong === 0;
+        // const firstClear =
+        //   s.correct === 0 &&
+        //   s.wrong === 0;
 
         s.correct++;
 
+        const firstClear =
+
+        s.correct===1
+        &&
+        s.wrong===0;
+
         if(firstClear){
 
-          /* 未出題→初回正解なら0 */
-          s.memory = 0;
+            s.memory = 0;
 
         }else{
 
-          /* 残り時間が多いほど定着している */
-          const bonus = Math.floor(remain * 4);
+            const bonus =
 
-          /* 早答えほど大きく下げる */
-          s.memory = Math.max(
-              0,
-              s.memory - (8 + bonus)
-          );
+            Math.floor(
+                remain * 4
+            );
+
+            s.memory =
+
+            Math.max(
+                0,
+                s.memory -
+                (
+                    8 + bonus
+                )
+            );
         }
 
         s.last="correct";
@@ -1687,6 +1769,7 @@ function drawStats(){
       最終:${s.lastDate||"-"}
       スルー回数:${s.skipCount || 0}
       スルー期限:${s.skipUntil || "-"}
+      定着:${s.memory}
 
       <br>
 
