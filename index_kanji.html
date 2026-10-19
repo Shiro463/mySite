@@ -574,6 +574,20 @@ font-size:14px;
   z-index: 3;
 }
 
+/* 文字サイズの調整が終わるまでテキストを隠す */
+#question,
+#answer,
+#exp {
+  visibility: hidden;
+}
+
+/* 調整完了後に表示 */
+#question.textReady,
+#answer.textReady,
+#exp.textReady {
+  visibility: visible;
+}
+
 
 </style>
 </head>
@@ -767,7 +781,8 @@ const DATASETS=[
   id:"1RDOTC8POyzmq4WztOa4PrI8lXa6R04GkNqovCfHEd_M",
   sheet:"シート1",
   bg:"https://i.imgur.com/v2I3HO2.png",
-  mode:"normal",
+  layoutMode:"normal",
+  questionCreateMode:"normal",
   time:5
 },
 {
@@ -775,7 +790,8 @@ const DATASETS=[
   id:"1TMmiQ2GNG1gBTYttZvfCt3bSH10gcv3aivElEdvCJiY",
   sheet:"シート1",
   bg:"https://i.imgur.com/kusuHsL.png",
-  mode:"normal",
+  layoutMode:"normal",
+  questionCreateMode:"normal",
   time:5
 },
 {
@@ -783,7 +799,8 @@ const DATASETS=[
   id:"1AJ-WAqJi4pw1dnXNVFOi8lDXlmeXjkjCKlPWzhDN91Y",
   sheet:"シート1",
   bg:"https://i.imgur.com/5iRsBf1.png",
-  mode:"normal",
+  layoutMode:"Yoji1",
+  questionCreateMode:"normal",
   time:8
 },
 {
@@ -791,7 +808,8 @@ const DATASETS=[
   id:"1IKzCk457_iKDtTI9A9KH5BhhP5oitlDugwKUvTOonC8",
   sheet:"シート1",
   bg:"https://i.imgur.com/je95sRs.png",
-  mode:"kanji_parts1",
+  layoutMode:"kanji_parts1",
+  questionCreateMode:"kanji_parts1",
   time:5
 },
 {
@@ -799,7 +817,8 @@ const DATASETS=[
   id:"1-Uf6bSTODEHUVV5VfhPYfoVHhpq6v3NY67SrIhyAvi0",
   sheet:"シート1",
   bg:"https://i.imgur.com/EibCVRv.png",
-  mode:"normal",
+  layoutMode:"Minhaya",
+  questionCreateMode:"normal",
   time:10
 },
 {
@@ -807,7 +826,8 @@ const DATASETS=[
   id:"1AhOpVwDyI-Z1iy8_mXpQVV67RGCZ37C8f8RHP0db84w",
   sheet:"シート1",
   bg:"https://i.imgur.com/bfFHhfo.png",
-  mode:"fullAnswer",
+  layoutMode:"divideHalfVertically",
+  questionCreateMode:"fullAnswer",
   time:10
 },
 {
@@ -815,7 +835,8 @@ const DATASETS=[
   id:"1dI707hCw7dCo4CaBrNR4Z23y_c1fBu4hImpRLNuq_rA",
   sheet:"シート1",
   bg:"https://i.imgur.com/oXnDY4b.png",
-  mode:"fullAnswer",
+  layoutMode:"divideHalfVertically",
+  questionCreateMode:"fullAnswer",
   time:5
 },
 {
@@ -823,7 +844,8 @@ const DATASETS=[
   id:"1VKkK9FkiyHhDFigBF_pA52UoNO0O6gPdw6fhJN0Al3U",
   sheet:"シート1",
   bg:"https://i.imgur.com/YGx6VPH.png",
-  mode:"normal",
+  layoutMode:"normal",
+  questionCreateMode:"normal",
   time:5
 }
 ];
@@ -1043,7 +1065,7 @@ async function loadSheet(){
       let a="";
       let e="";
 
-      if(ds.mode==="kanji_parts1"){
+      if(ds.questionCreateMode==="kanji_parts1"){
 
         /* F列問題 (E→Fへ1列ずれる) */
         q=c[5]?.v!=null
@@ -1063,7 +1085,7 @@ async function loadSheet(){
 
         let qRaw="";
 
-        if(ds.mode==="fullAnswer"){
+        if(ds.questionCreateMode==="fullAnswer"){
 
           /* C列 */
           qRaw=c[2]?.v!=null
@@ -1087,7 +1109,7 @@ async function loadSheet(){
         const normalized=
           raw.replace(/\\n/g,"\n");
 
-        if(ds.mode==="fullAnswer"){
+        if(ds.questionCreateMode==="fullAnswer"){
 
           q=qRaw;
           a=normalized.trim();
@@ -1446,26 +1468,26 @@ function nextQuestion(){
 
   // 漢字パーツ1・四字熟語1は改行を保持し、横方向に折り返さない
   const preserveLines =
-    ds.mode === "kanji_parts1" || ds.name.startsWith("四字熟語");
+    (ds.layoutMode === "kanji_parts1" || ds.layoutMode === "Yoji1");
   $("question").classList.toggle("preserveLines", preserveLines);
   $("answer").classList.toggle("preserveLines", preserveLines);
 
   // 漢字パーツ1のときだけ変更
-  if(ds.mode==="kanji_parts1"){
+  if(ds.layoutMode==="kanji_parts1"){
 
     $("exp").style.display="none";
 
     $("question").style.top="15%";
     $("question").style.left="20%";
     $("question").style.width="40%";
-    $("question").style.height="55%";
+    $("question").style.height="52%";
 
     $("answer").style.top="15%";
     $("answer").style.left="70%";
     $("answer").style.width="60%";
-    $("answer").style.height="55%";
+    $("answer").style.height="52%";
 
-  }else if(DATASETS[currentDataset].name === "四字熟語1"){
+  }else if(ds.layoutMode==="Yoji1"){
 
     $("question").style.top="9%";
     $("question").style.left="20%";
@@ -1483,8 +1505,35 @@ function nextQuestion(){
     $("exp").style.width="min(92vw,980px)";
     $("exp").style.height="13%";
 
-  }
-  else{
+  }else if(ds.layoutMode==="divideHalfVertically"){
+
+    $("exp").style.display="none";
+
+    $("question").style.top="30%";
+    $("question").style.left="50%";
+    $("question").style.width="min(92vw,980px)";
+    $("question").style.height="17%";
+
+    $("answer").style.top="47%";
+    $("answer").style.left="50%";
+    $("answer").style.width="min(92vw,980px)";
+    $("answer").style.height="17%";
+
+  }else if(ds.layoutMode==="Minhaya"){
+
+    $("exp").style.display="none";
+
+    $("question").style.top="30%";
+    $("question").style.left="50%";
+    $("question").style.width="min(92vw,980px)";
+    $("question").style.height="21%";
+
+    $("answer").style.top="51%";
+    $("answer").style.left="50%";
+    $("answer").style.width="min(92vw,980px)";
+    $("answer").style.height="13%";
+
+  }else{
     $("exp").style.display="flex";
 
     $("question").style.top="9%";
@@ -1541,10 +1590,9 @@ function nextQuestion(){
 
   startTimer();
 
-  setTimeout(
-    resizeAllTexts,
-    10
-  );
+  requestAnimationFrame(() => {
+    resizeAllTexts();
+  });
 
   $("exp").scrollTop = 0;
 }
@@ -1557,7 +1605,7 @@ function showAnswer(){
       DATASETS[currentDataset];
 
     // 漢字パーツ1のときは解説非表示
-    if(ds.mode==="kanji_parts1"){
+    if(ds.layoutMode==="kanji_parts1" || ds.layoutMode==="divideHalfVertically" || ds.layoutMode==="Minhaya"){
         $("exp").style.display="none";
     }else{
         $("exp").style.display="block";
@@ -1573,8 +1621,8 @@ function showAnswer(){
 
     $("answer").style.display="flex";
     const preserveLines =
-      DATASETS[currentDataset].mode === "kanji_parts1" ||
-      DATASETS[currentDataset].name.startsWith("四字熟語");
+      DATASETS[currentDataset].layoutMode === "kanji_parts1" ||
+      DATASETS[currentDataset].layoutMode === "Yoji1";
     $("answer").innerHTML =
       preserveLines ? escapeHtml(cur.a) : nl2br(cur.a);
     // $("exp").style.display="block";
@@ -1583,8 +1631,8 @@ function showAnswer(){
 
     setJudgeButtonsEnabled(true);
     
-    requestAnimationFrame(()=>{
-        setTimeout(resizeAllTexts,20);
+    requestAnimationFrame(() => {
+      resizeAllTexts();
     });
 
     resizeAllTexts();
@@ -2033,35 +2081,12 @@ $("start").onclick=async()=>{
 };
 
 $("show").onclick=showAnswer;
-$("correct").onclick=()=>{
-
-  const ds =
-    DATASETS[currentDataset];
-
-  if(
-    ds.name.startsWith("四字熟語") &&
-    pendingYojiResult !== null
-  ){
-    hit(pendingYojiResult);
-  }else{
-    hit(true);
-  }
-
+$("correct").onclick = () => {
+  hit(true);
 };
-$("wrong").onclick=()=>{
 
-  const ds =
-    DATASETS[currentDataset];
-
-  if(
-    ds.name.startsWith("四字熟語") &&
-    pendingYojiResult !== null
-  ){
-    hit(!pendingYojiResult);
-  }else{
-    hit(false);
-  }
-
+$("wrong").onclick = () => {
+  hit(false);
 };
 $("skip").onclick=skipQuestion;
 
@@ -2439,17 +2464,27 @@ function fitText(el,maxSize=60,minSize=8){
 
 function resizeAllTexts(){
 
-  /* 問題文は極限まで縮小許可 */
-  fitText($("question"),72,2);
+  const question = $("question");
+  const answer = $("answer");
+  const exp = $("exp");
 
-  /* 答え */
-  fitText($("answer"),56,4);
+  // 文字サイズを調整する要素をいったん非表示にする
+  question.classList.remove("textReady");
+  answer.classList.remove("textReady");
+  exp.classList.remove("textReady");
 
-  /* タイマー */
-  // fitText($("centerTimer"),40,20);
+  // ブラウザに非表示状態とレイアウトを反映させる
+  void question.offsetHeight;
 
-  /* 解説 */
-  fitText($("exp"),32,6);
+  // 文字サイズを調整
+  fitText(question, 72, 2);
+  fitText(answer, 56, 4);
+  fitText(exp, 32, 6);
+
+  // 調整が終わったら表示
+  question.classList.add("textReady");
+  answer.classList.add("textReady");
+  exp.classList.add("textReady");
 }
 
 
