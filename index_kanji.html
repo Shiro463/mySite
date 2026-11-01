@@ -756,8 +756,8 @@ font-size:14px;
 
       <canvas id="chart" width="420" height="320"></canvas>
       <select id="sortMode">
-        <option value="stablility_desc">定着度▼</option>
-        <option value="stablility_asc">定着度▲</option>
+        <option value="stability_desc">定着度▼</option>
+        <option value="stability_asc">定着度▲</option>
         <option value="correct_desc">正解数▼</option>
         <option value="correct_asc">正解数▲</option>
         <option value="wrong_desc">不正解数▼</option>
@@ -926,7 +926,26 @@ function getStat(dataset,q){
   try{
     return JSON.parse(
       localStorage.getItem(keyName(dataset,q)) ||
-      '{"correct":0,"wrong":0,"memory":0,"last":"","lastDate":"","fav":false,"skipUntil":0,"skipCount":0}'
+      JSON.stringify({
+        correct:0,
+        wrong:0,
+
+        stability:0,
+        difficulty:5,
+
+        reps:0,
+        lapses:0,
+
+        due:"",
+        lastReview:"",
+
+        last:"",
+        lastDate:"",
+
+        fav:false,
+        skipUntil:0,
+        skipCount:0
+      })
     );
   }catch(e){
     return{
@@ -1418,104 +1437,94 @@ function renderChoices(cur){
 /* queue */
 function buildQueue(){
 
-    const ds =
+  const ds =
     DATASETS[currentDataset];
 
-    const s =
-    getStat(
-        ds.name,
-        q.id
+  const stabilityLimit =
+    Number(
+      $("stabilityLimit").value || 0
     );
 
+  const oldDays =
+    Number(
+      $("oldDays").value || 0
+    );
+
+  const now = new Date();
+
+  let target = data.filter(q=>{
+
+    const s =
+      getStat(
+        ds.name,
+        q.id
+      );
+
+    /* スルー期間中 */
     if(
-      s.stability <
-      stabilityLimit
-    )
-    return false;
+      s.skipUntil &&
+      s.skipUntil >= todayStr()
+    ){
+      return false;
+    }
 
-    shuffle(target);
+    /* 安定性フィルタ */
+    if(
+      (s.stability || 0)
+      < stabilityLimit
+    ){
+      return false;
+    }
 
-    queue=target;
+    /* 日数フィルタ */
+    if(
+      oldDays > 0 &&
+      diffDays(s.lastDate)
+      < oldDays
+    ){
+      return false;
+    }
 
-    // queue=[];
+    /* FSRS期限 */
+    const due =
+      s.due
+      ? new Date(s.due)
+      : null;
 
-    // let pool=[...target];
+    if(
+      due &&
+      due > now
+    ){
+      return false;
+    }
 
-    // while(pool.length){
+    switch(currentFilter){
 
-    //     const weights =
+      case "correct":
+        return s.last==="correct";
 
-    //     pool.map(q=>{
+      case "wrong":
+        return s.last==="wrong";
 
-    //         const s =
-    //         getStat(
-    //             ds.name,
-    //             q.id
-    //         );
+      case "unseen":
+        return (
+          s.correct===0 &&
+          s.wrong===0
+        );
 
-    //         let w =
-    //         Math.max(
-    //             1,
-    //             s.memory
-    //         );
+      case "fav":
+        return s.fav===true;
+    }
 
-    //         if(
-    //             s.correct===0 &&
-    //             s.wrong===0
-    //         ){
-    //             w += 10;
-    //         }
+    return true;
 
-    //         if(s.fav){
-    //             w += 25;
-    //         }
+  });
 
-    //         return w;
+  shuffle(target);
 
-    //     });
+  queue = target;
 
-    //     const total =
-    //     weights.reduce(
-    //         (a,b)=>a+b,
-    //         0
-    //     );
-
-    //     let r =
-    //     Math.random()
-    //     *
-    //     total;
-
-    //     let pick = 0;
-
-    //     for(
-    //         let i=0;
-    //         i<weights.length;
-    //         i++
-    //     ){
-
-    //         r -= weights[i];
-
-    //         if(r<=0){
-
-    //             pick=i;
-
-    //             break;
-    //         }
-
-    //     }
-
-    //     queue.push(
-    //         pool[pick]
-    //     );
-
-    //     pool.splice(
-    //         pick,
-    //         1
-    //     );
-
-    // }
-
-    $("left").textContent =
+  $("left").textContent =
     queue.length;
 }
 
@@ -1996,11 +2005,11 @@ function drawStats(){
         case "wrong_asc":
         return sa.wrong - sb.wrong;
 
-        case "stablility_desc":
-        return sb.memory - sa.memory;
+        case "stability_desc":
+        return sb.stability - sa.stability;
 
-        case "stablility_asc":
-        return sa.memory - sb.memory;
+        case "stability_asc":
+        return sa.stability - sb.stability;
 
         /* ▼ 修正版：日付文字列比較ではなく Date比較 */
         case "date_desc":
@@ -2058,7 +2067,7 @@ function drawStats(){
 
       <b>${escapeHtmlWithBr(x.q)}</b><br>
 
-      定着:${s.memory}
+      安定性:${(s.stability || 0).toFixed(1)}
       正:${s.correct}
       誤:${s.wrong}
       最終:${s.lastDate||"-"}
@@ -2214,7 +2223,12 @@ $("delMemory").onclick=()=>{
   if(!confirm("定着度を全問題分削除しますか？")) return;
 
   eachStatUpdate(s=>{
-    s.memory=0;
+    s.stability = 0;
+    s.difficulty = 5;
+    s.reps = 0;
+    s.lapses = 0;
+    s.due = "";
+    s.lastReview = "";
   });
 };
 
