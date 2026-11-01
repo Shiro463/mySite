@@ -717,10 +717,10 @@ font-size:14px;
         
           <button class="misc controlBtn" id="statsBtn">統計</button>
           <button class="misc controlBtn" id="skip">スルー</button>
-          <button id="again">Again</button>
-          <button id="hard">Hard</button>
-          <button id="good">Good</button>
-          <button id="easy">Easy</button>
+          <button id="again">間違い</button>
+          <button id="hard">難</button>
+          <button id="good">普</button>
+          <button id="easy">易</button>
           <button class="show controlBtn" id="show">答え</button>
           <button class="start controlBtn" id="start">START</button>
 
@@ -1909,7 +1909,7 @@ function hit(ok){
 
     setTimeout(nextQuestion,550);
 
-    setJudgeButtonsEnabled(false);
+    setJudgeButtonsEnabled(true);
 
     // /* 正解時 */
     // addDailyCorrect();
@@ -1962,7 +1962,7 @@ function skipQuestion(){
 
   $("status").textContent = "スルー";
 
-  setJudgeButtonsEnabled(false);
+  setJudgeButtonsEnabled(true);
 
   setTimeout(nextQuestion,350);
 };
