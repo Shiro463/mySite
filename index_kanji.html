@@ -63,6 +63,26 @@ body{
   font-weight:900;
 }
 
+#retrHUD{
+  position:absolute;
+  right:0;
+  top:42px;
+  z-index:30;
+  background:rgba(0,0,0,.25);
+  padding:4px 8px;
+  border-radius:14px;
+  font-size:8px;
+  font-weight:900;
+  color:#d8fff2;
+  border:1px solid rgba(255,255,255,.15);
+  text-align:right;
+  min-width:85px;
+  line-height:1.4;
+}
+
+
+
+
 /* 中央 */
 #status{
   position:absolute;
@@ -958,12 +978,14 @@ function getStat(dataset,q){
 
       stability:0,
       difficulty:5,
+      retrievability:1,
+
+      lastReview:"",
 
       reps:0,
       lapses:0,
 
       due:"",
-
       last:"",
       lastDate:"",
 
@@ -1774,22 +1796,22 @@ function showAnswer(){
 
 function setJudgeButtonsEnabled(enabled){
 
-  $("correct").disabled = !enabled;
-  $("wrong").disabled = !enabled;
-  $("skip").disabled = !enabled;
+  ["again","hard","good","easy","skip"]
+    .forEach(id=>{
 
-  if(enabled){
+      const btn=$(id);
 
-    $("correct").style.opacity = "1";
-    $("wrong").style.opacity = "1";
-    $("skip").style.opacity = "1";
+      if(!btn) return;
 
-  }else{
+      btn.disabled=!enabled;
 
-    $("correct").style.opacity = "0.45";
-    $("wrong").style.opacity = "0.45";
-    $("skip").style.opacity = "0.45";
-  }
+      btn.style.opacity=
+        enabled
+        ? "1"
+        : "0.45";
+
+    });
+
 }
 
 
@@ -2223,6 +2245,7 @@ $("start").onclick=async()=>{
 
     await loadSheet();
     buildQueue();
+    updateRetrStats();
     nextQuestion();
 
     }catch(e){
@@ -2263,10 +2286,15 @@ function reviewFSRS(rating){
     s
   );
 
+  updateRetrStats();
+
   setTimeout(
     nextQuestion,
     500
   );
+
+
+  
 };
 
 
@@ -2285,13 +2313,7 @@ $("easy").onclick=
 
 
 $("show").onclick=showAnswer;
-$("correct").onclick = () => {
-  hit(true);
-};
 
-$("wrong").onclick = () => {
-  hit(false);
-};
 $("skip").onclick=skipQuestion;
 
 $("statsBtn").onclick = async () => {
