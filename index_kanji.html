@@ -2053,8 +2053,6 @@ function drawStats(){
 
     const ds=DATASETS[currentDataset||0];
 
-    let correct=0,wrong=0,unseen=0;
-
 
     const cvs=$("chart");
     const ctx=cvs.getContext("2d");
@@ -2113,27 +2111,43 @@ function drawStats(){
       );
     });
 
-    const total=Math.max(correct+wrong+unseen,1);
+    const total =
+      Math.max(
+        bins.reduce((a,b)=>a+b,0),
+        1
+      );
 
     let start=-Math.PI/2;
 
-    vals.forEach((v,i)=>{
-    const ang=v/total*Math.PI*2;
+    bins.forEach((v,i)=>{
 
-    ctx.beginPath();
-    ctx.moveTo(120,120);
-    ctx.fillStyle=cols[i];
-    ctx.arc(120,120,90,start,start+ang);
-    ctx.fill();
+      const ang=
+        v/total*Math.PI*2;
 
-    start+=ang;
+      ctx.beginPath();
+
+      ctx.moveTo(120,120);
+
+      ctx.fillStyle=
+        cols[i];
+
+      ctx.arc(
+        120,
+        120,
+        90,
+        start,
+        start+ang
+      );
+
+      ctx.fill();
+
+      start+=ang;
+
     });
+
 
     ctx.fillStyle="#111";
     ctx.font="16px sans-serif";
-    ctx.fillText("正解 "+correct,250,70);
-    ctx.fillText("不正解 "+wrong,250,100);
-    ctx.fillText("未出題 "+unseen,250,130);
 
     const mode=$("sortMode").value;
 
@@ -2192,15 +2206,16 @@ function drawStats(){
     return 0;
     });
 
-    const dueText =
-      s.due
-      ? s.due.slice(0,10)
-      : "-";
 
 
     $("list").innerHTML = rows.map(x=>{
 
     const s=getStat(ds.name,x.id);
+
+    const dueText =
+      s.due
+      ? s.due.slice(0,10)
+      : "-";
 
     let skipText = "なし";
 
@@ -2239,11 +2254,10 @@ function drawStats(){
 
       <b>${escapeHtmlWithBr(x.q)}</b><br>
 
-      安定性:${s.stability?.toFixed(1) || 0}
+      安定性:${s.stability?.toFixed(1) || 0}日
       難易度:${s.difficulty?.toFixed(1) || 0}
-      R:${(calcRetrievability(s)*100).toFixed(0)}%
-      正:${s.correct}
-      誤:${s.wrong}
+      想起率:${(calcRetrievability(s)*100).toFixed(0)}%
+      次回:${dueText}
       最終:${s.lastDate||"-"}
       スルー回数:${s.skipCount || 0}
       スルー:${skipText}
