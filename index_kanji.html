@@ -630,6 +630,7 @@ font-size:14px;
     🏆 WR <span id="wr">0</span><br>
     📚 LEFT <span id="left">0</span>
     </div>
+    <div id="retrHUD"></div>
 
     
 
@@ -696,8 +697,10 @@ font-size:14px;
         
           <button class="misc controlBtn" id="statsBtn">統計</button>
           <button class="misc controlBtn" id="skip">スルー</button>
-          <button class="ng controlBtn" id="wrong">被弾</button>
-          <button class="ok controlBtn" id="correct">撃破</button>
+          <button id="again">Again</button>
+          <button id="hard">Hard</button>
+          <button id="good">Good</button>
+          <button id="easy">Easy</button>
           <button class="show controlBtn" id="show">答え</button>
           <button class="start controlBtn" id="start">START</button>
 
@@ -932,12 +935,13 @@ function getStat(dataset,q){
 
         stability:0,
         difficulty:5,
+        retrievability:1,
+        lastReview:"",
 
         reps:0,
         lapses:0,
 
         due:"",
-        lastReview:"",
 
         last:"",
         lastDate:"",
@@ -1095,7 +1099,39 @@ function fsrsReview(stat, rating){
     due.toISOString();
 
   return stat;
-}
+};
+
+function calcRetrievability(stat){
+
+  if(!stat.lastReview)
+    return 1;
+
+  const elapsed =
+    (
+      Date.now()
+      -
+      new Date(
+        stat.lastReview
+      )
+    )/86400000;
+
+  const S =
+    Math.max(
+      0.1,
+      stat.stability
+    );
+
+  return Math.pow(
+    1 + elapsed/(9*S),
+    -1
+  );
+};
+
+
+
+
+
+
 
 function renderDatasetButtons(){
 
@@ -1466,37 +1502,37 @@ function buildQueue(){
       s.skipUntil >= todayStr()
     ){
       return false;
-    }
+    };
 
     /* 安定性フィルタ */
     if(
-      (s.stability || 0)
-      < stabilityLimit
+      (s.stability || 0) < stabilityLimit
     ){
       return false;
-    }
+    };
 
     /* 日数フィルタ */
     if(
-      oldDays > 0 &&
-      diffDays(s.lastDate)
-      < oldDays
+      oldDays > 0 && diffDays(s.lastDate) < oldDays
     ){
       return false;
-    }
+    };
 
     /* FSRS期限 */
-    const due =
-      s.due
-      ? new Date(s.due)
-      : null;
+    // const due =
+    //   s.due
+    //   ? new Date(s.due)
+    //   : null;
 
-    if(
-      due &&
-      due > now
-    ){
-      return false;
-    }
+    // if(
+    //   due &&
+    //   due > now
+    // ){
+    //   return false;
+    // };
+
+    const desiredRetention =
+      0.9;
 
     switch(currentFilter){
 
@@ -1526,9 +1562,9 @@ function buildQueue(){
 
   $("left").textContent =
     queue.length;
-}
+};
 
-/* next */
+
 function nextQuestion(){
 
   if(gameOver) return;
@@ -1907,17 +1943,63 @@ function skipQuestion(){
   setJudgeButtonsEnabled(false);
 
   setTimeout(nextQuestion,350);
-}
+};
+
+
+
+function updateRetrStats(){
+
+  const ds=
+    DATASETS[currentDataset];
+
+  let r90=0;
+  let r70=0;
+  let rLow=0;
+
+  data.forEach(q=>{
+
+    const s=
+      getStat(
+        ds.name,
+        q.id
+      );
+
+    const r=
+      calcRetrievability(s);
+
+    if(r>=0.9){
+
+      r90++;
+
+    }else
+    if(r>=0.7){
+
+      r70++;
+
+    }else{
+
+      rLow++;
+    }
+
+  });
+
+  $("retrHUD").innerHTML=
+    `
+    R≥90%:${r90}<br>
+    70-90%:${r70}<br>
+    R&lt;70%:${rLow}
+    `;
+};
 
 
 
 function getCurrentDataset(){
   return DATASETS[currentDataset || 0];
-}
+};
 
 function dailyKey(ds, date=todayStr()){
   return `daily_visit_${ds.id}_${date}`;
-}
+};
 
 
 function initDailyRecord(){
@@ -2067,7 +2149,9 @@ function drawStats(){
 
       <b>${escapeHtmlWithBr(x.q)}</b><br>
 
-      安定性:${(s.stability || 0).toFixed(1)}
+      安定性:${s.stability?.toFixed(1) || 0}
+      難易度:${s.difficulty?.toFixed(1) || 0}
+      R:${(calcRetrievability(s)*100).toFixed(0)}%
       正:${s.correct}
       誤:${s.wrong}
       最終:${s.lastDate||"-"}
@@ -2146,6 +2230,59 @@ $("start").onclick=async()=>{
     console.error(e);
     }
 };
+
+
+function reviewFSRS(rating){
+
+  const ds=
+    DATASETS[currentDataset];
+
+  let s=
+    getStat(
+      ds.name,
+      cur.id
+    );
+
+  s.correct++;
+
+  s=
+    fsrsReview(
+      s,
+      rating
+    );
+
+  s.retrievability=
+    calcRetrievability(s);
+
+  s.lastDate=
+    todayStr();
+
+  setStat(
+    ds.name,
+    cur.id,
+    s
+  );
+
+  setTimeout(
+    nextQuestion,
+    500
+  );
+};
+
+
+$("again").onclick=
+ ()=>reviewFSRS(1);
+
+$("hard").onclick=
+ ()=>reviewFSRS(2);
+
+$("good").onclick=
+ ()=>reviewFSRS(3);
+
+$("easy").onclick=
+ ()=>reviewFSRS(4);
+
+
 
 $("show").onclick=showAnswer;
 $("correct").onclick = () => {
