@@ -705,9 +705,9 @@ font-size:14px;
 
         <div class="panelRow">
 
-            定着度≥
+            安定性≥
             <input
-            id="memoryLimit"
+            id="stabilityLimit"
             class="smallInput"
             type="number"
             value="0">
@@ -756,8 +756,8 @@ font-size:14px;
 
       <canvas id="chart" width="420" height="320"></canvas>
       <select id="sortMode">
-        <option value="memory_desc">定着度▼</option>
-        <option value="memory_asc">定着度▲</option>
+        <option value="stablility_desc">定着度▼</option>
+        <option value="stablility_asc">定着度▲</option>
         <option value="correct_desc">正解数▼</option>
         <option value="correct_asc">正解数▲</option>
         <option value="wrong_desc">不正解数▼</option>
@@ -932,18 +932,150 @@ function getStat(dataset,q){
     return{
       correct:0,
       wrong:0,
-      memory:0,
+
+      stability:0,
+      difficulty:5,
+
+      reps:0,
+      lapses:0,
+
+      due:"",
+
       last:"",
       lastDate:"",
+
       fav:false,
       skipUntil:0,
       skipCount:0
-    };
+    }
   }
 }
 
 function setStat(dataset,id,obj){
     localStorage.setItem(keyName(dataset,id),JSON.stringify(obj));
+}
+
+
+function fsrsReview(stat, rating){
+
+  const now = new Date();
+
+  const last =
+    stat.lastReview
+      ? new Date(stat.lastReview)
+      : now;
+
+  const elapsed =
+    Math.max(
+      1,
+      (now-last)/(1000*60*60*24)
+    );
+
+  let s =
+    stat.stability || 0;
+
+  let d =
+    stat.difficulty || 5;
+
+  if(stat.reps===0){
+
+    switch(rating){
+
+      case 1: // Again
+        s=0.5;
+        d=8;
+        break;
+
+      case 2: // Hard
+        s=1;
+        d=7;
+        break;
+
+      case 3: // Good
+        s=3;
+        d=5;
+        break;
+
+      case 4: // Easy
+        s=7;
+        d=3;
+        break;
+    }
+
+  }else{
+
+    if(rating===1){
+
+      stat.lapses++;
+
+      s=
+        Math.max(
+          0.5,
+          s*0.4
+        );
+
+      d=
+        Math.min(
+          10,
+          d+1
+        );
+
+    }else{
+
+      let factor=1;
+
+      if(rating===2)
+        factor=1.2;
+
+      if(rating===3)
+        factor=2.0;
+
+      if(rating===4)
+        factor=3.0;
+
+      s=
+        s*
+        (
+          1+
+          factor*
+          (
+            11-d
+          )/10
+        );
+
+      d=
+        Math.max(
+          1,
+          d-
+          (
+            rating-2
+          )*0.3
+        );
+    }
+  }
+
+  let interval =
+    Math.round(s);
+
+  stat.stability=s;
+  stat.difficulty=d;
+  stat.reps++;
+
+  stat.lastReview=
+    now.toISOString();
+
+  const due=
+    new Date(now);
+
+  due.setDate(
+    due.getDate()
+    + interval
+  );
+
+  stat.due=
+    due.toISOString();
+
+  return stat;
 }
 
 function renderDatasetButtons(){
@@ -1290,153 +1422,93 @@ function buildQueue(){
     DATASETS[currentDataset];
 
 
-    const memoryLimit =
-    Number(
-        $("memoryLimit").value || 0
-    );
+    if(
+      s.stability <
+      stabilityLimit
+    )
+    return false;
 
-    const oldDays =
-    Number(
-        $("oldDays").value || 0
-    );
+    shuffle(target);
 
-    const today =
-    todayStr();
+    queue=target;
 
-    let target =
+    // queue=[];
 
-    data.filter(x=>{
+    // let pool=[...target];
 
-        const s =
-        getStat(
-            ds.name,
-            x.id
-        );
+    // while(pool.length){
 
+    //     const weights =
 
-        /* スルー期限中なら除外 */
-        if(
-            s.skipUntil &&
-            s.skipUntil >= today
-        ){
-            return false;
-        }
+    //     pool.map(q=>{
 
+    //         const s =
+    //         getStat(
+    //             ds.name,
+    //             q.id
+    //         );
 
-        if(
-            s.memory < memoryLimit
-        ){
-            return false;
-        }
+    //         let w =
+    //         Math.max(
+    //             1,
+    //             s.memory
+    //         );
 
-        if(
-            oldDays > 0 &&
-            diffDays(
-                s.lastDate
-            ) < oldDays
-        ){
-            return false;
-        }
+    //         if(
+    //             s.correct===0 &&
+    //             s.wrong===0
+    //         ){
+    //             w += 10;
+    //         }
 
-        switch(currentFilter){
+    //         if(s.fav){
+    //             w += 25;
+    //         }
 
-            case "correct":
-                return s.last==="correct";
+    //         return w;
 
-            case "wrong":
-                return s.last==="wrong";
+    //     });
 
-            case "unseen":
-                return (
-                    s.correct===0 &&
-                    s.wrong===0
-                );
+    //     const total =
+    //     weights.reduce(
+    //         (a,b)=>a+b,
+    //         0
+    //     );
 
-            case "fav":
-                return s.fav===true;
-        }
+    //     let r =
+    //     Math.random()
+    //     *
+    //     total;
 
-        return true;
+    //     let pick = 0;
 
-    });
+    //     for(
+    //         let i=0;
+    //         i<weights.length;
+    //         i++
+    //     ){
 
-    queue=[];
+    //         r -= weights[i];
 
-    let pool=[...target];
+    //         if(r<=0){
 
-    while(pool.length){
+    //             pick=i;
 
-        const weights =
+    //             break;
+    //         }
 
-        pool.map(q=>{
+    //     }
 
-            const s =
-            getStat(
-                ds.name,
-                q.id
-            );
+    //     queue.push(
+    //         pool[pick]
+    //     );
 
-            let w =
-            Math.max(
-                1,
-                s.memory
-            );
+    //     pool.splice(
+    //         pick,
+    //         1
+    //     );
 
-            if(
-                s.correct===0 &&
-                s.wrong===0
-            ){
-                w += 10;
-            }
-
-            if(s.fav){
-                w += 25;
-            }
-
-            return w;
-
-        });
-
-        const total =
-        weights.reduce(
-            (a,b)=>a+b,
-            0
-        );
-
-        let r =
-        Math.random()
-        *
-        total;
-
-        let pick = 0;
-
-        for(
-            let i=0;
-            i<weights.length;
-            i++
-        ){
-
-            r -= weights[i];
-
-            if(r<=0){
-
-                pick=i;
-
-                break;
-            }
-
-        }
-
-        queue.push(
-            pool[pick]
-        );
-
-        pool.splice(
-            pick,
-            1
-        );
-
-    }
+    // }
 
     $("left").textContent =
     queue.length;
@@ -1562,7 +1634,7 @@ function nextQuestion(){
     );
 
   $("questionInfo").innerHTML = `
-    定着度:${stat.memory}
+    安定性:${stat.stability.toFixed(1)}
     ｜正:${stat.correct}
     ｜誤:${stat.wrong}
   `;
@@ -1700,34 +1772,12 @@ function hit(ok){
 
         s.correct++;
 
-        const firstClear =
-
-        s.correct===1
-        &&
-        s.wrong===0;
-
-        if(firstClear){
-
-            s.memory = 0;
-
-        }else{
-
-            const bonus =
-
-            Math.floor(
-                remain * 4
-            );
-
-            s.memory =
-
-            Math.max(
-                0,
-                s.memory -
-                (
-                    8 + bonus
-                )
-            );
-        }
+        s = fsrsReview(
+          s,
+          remain > LIMIT_TIME*0.7
+            ? 4     // Easy
+            : 3     // Good
+        );
 
         s.last="correct";
 
@@ -1742,8 +1792,11 @@ function hit(ok){
 
         s.wrong++;
 
-        /* 不正解で大幅増加 */
-        s.memory += 18;
+        s = fsrsReview(
+          s,
+          1         // Again
+        );
+
 
         s.last="wrong";
 
@@ -1938,10 +1991,10 @@ function drawStats(){
         case "wrong_asc":
         return sa.wrong - sb.wrong;
 
-        case "memory_desc":
+        case "stablility_desc":
         return sb.memory - sa.memory;
 
-        case "memory_asc":
+        case "stablility_asc":
         return sa.memory - sb.memory;
 
         /* ▼ 修正版：日付文字列比較ではなく Date比較 */
