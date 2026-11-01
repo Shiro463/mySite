@@ -778,6 +778,18 @@ font-size:14px;
 
       <h3>日別学習グラフ</h3>
       <canvas id="dailyChart" width="860" height="320"></canvas>
+      <h3>安定性分布</h3>
+      <canvas
+        id="stabilityChart"
+        width="420"
+        height="320">
+      </canvas>
+      <h3>平均安定性推移</h3>
+      <canvas
+        id="stabilityDailyChart"
+        width="860"
+        height="320">
+      </canvas>
 
       <canvas id="chart" width="420" height="320"></canvas>
       <select id="sortMode">
@@ -1975,47 +1987,51 @@ function skipQuestion(){
 
 function updateRetrStats(){
 
-  const ds=
-    DATASETS[currentDataset];
+  const ds=DATASETS[currentDataset];
 
-  let r90=0;
-  let r70=0;
-  let rLow=0;
+  const rBins=[0,0,0,0,0];
+  const sBins=[0,0,0,0];
 
   data.forEach(q=>{
 
-    const s=
-      getStat(
-        ds.name,
-        q.id
-      );
+    const s=getStat(ds.name,q.id);
 
-    const r=
-      calcRetrievability(s);
+    const r=calcRetrievability(s);
 
-    if(r>=0.9){
+    if(r<0.2) rBins[0]++;
+    else if(r<0.4) rBins[1]++;
+    else if(r<0.6) rBins[2]++;
+    else if(r<0.8) rBins[3]++;
+    else rBins[4]++;
 
-      r90++;
+    const st=s.stability||0;
 
-    }else
-    if(r>=0.7){
-
-      r70++;
-
-    }else{
-
-      rLow++;
-    }
+    if(st===0)
+      sBins[0]++;
+    else if(st<5)
+      sBins[1]++;
+    else if(st<10)
+      sBins[2]++;
+    else
+      sBins[3]++;
 
   });
 
-  $("retrHUD").innerHTML=
-    `
-    R≥90%:${r90}<br>
-    70-90%:${r70}<br>
-    R&lt;70%:${rLow}
-    `;
-};
+  $("retrHUD").innerHTML=`
+  <b>想起率</b><br>
+  0-20%:${rBins[0]}<br>
+  20-40%:${rBins[1]}<br>
+  40-60%:${rBins[2]}<br>
+  60-80%:${rBins[3]}<br>
+  80-100%:${rBins[4]}<br>
+  <br>
+  <b>安定性</b><br>
+  0日:${sBins[0]}<br>
+  0.1-5日:${sBins[1]}<br>
+  5-10日:${sBins[2]}<br>
+  10日以上:${sBins[3]}
+  `;
+}
 
 
 
@@ -2088,7 +2104,7 @@ function drawStats(){
         else if(r<0.8) bins[4]++;
         else bins[5]++;
 
-}
+      }
 
     });
 
@@ -2295,8 +2311,102 @@ function drawStats(){
 
 
     drawDailyChart();
-}
+    drawDailyStabilityChart();
 
+};
+
+
+function drawStabilityChart(){
+
+  const cvs=$("stabilityChart");
+  const ctx=cvs.getContext("2d");
+
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+
+  const ds=DATASETS[currentDataset];
+
+  const bins=[0,0,0,0];
+
+  data.forEach(q=>{
+
+    const s=
+      getStat(ds.name,q.id).stability||0;
+
+    if(s===0) bins[0]++;
+    else if(s<5) bins[1]++;
+    else if(s<10) bins[2]++;
+    else bins[3]++;
+
+  });
+
+  const labels=[
+    "0日",
+    "0.1-5日",
+    "5-10日",
+    "10日以上"
+  ];
+
+  const cols=[
+    "#9ca3af",
+    "#f97316",
+    "#22c55e",
+    "#2563eb"
+  ];
+
+  const total=
+    Math.max(
+      bins.reduce((a,b)=>a+b,0),
+      1
+    );
+
+  let start=-Math.PI/2;
+
+  bins.forEach((v,i)=>{
+
+    const ang=
+      v/total*Math.PI*2;
+
+    ctx.beginPath();
+    ctx.moveTo(120,120);
+
+    ctx.fillStyle=cols[i];
+
+    ctx.arc(
+      120,
+      120,
+      90,
+      start,
+      start+ang
+    );
+
+    ctx.fill();
+
+    start+=ang;
+
+  });
+
+  labels.forEach((txt,i)=>{
+
+    ctx.fillStyle=cols[i];
+
+    ctx.fillRect(
+      240,
+      60+i*30,
+      18,
+      18
+    );
+
+    ctx.fillStyle="#111";
+
+    ctx.fillText(
+      txt+" "+bins[i]+"問",
+      270,
+      74+i*30
+    );
+
+  });
+
+};
 
 function saveRetrSnapshot(){
 
@@ -2435,6 +2545,8 @@ function reviewFSRS(rating){
 
   updateRetrStats();
 
+  saveDailyStability();
+
   setTimeout(
     nextQuestion,
     500
@@ -2443,6 +2555,126 @@ function reviewFSRS(rating){
 
   
 };
+
+function saveDailyStability(){
+
+  const ds=
+    getCurrentDataset();
+
+  let total=0;
+  let count=0;
+
+  data.forEach(q=>{
+
+    const s=
+      getStat(ds.name,q.id);
+
+    total+=s.stability||0;
+
+    count++;
+
+  });
+
+  const avg=
+    count
+    ? total/count
+    : 0;
+
+  localStorage.setItem(
+    `daily_stability_${ds.id}_${todayStr()}`,
+    avg
+  );
+
+};
+
+
+function drawDailyStabilityChart(){
+
+  const cvs=
+    $("stabilityDailyChart");
+
+  const ctx=
+    cvs.getContext("2d");
+
+  ctx.clearRect(
+    0,0,
+    cvs.width,
+    cvs.height
+  );
+
+  const ds=
+    getCurrentDataset();
+
+  const prefix=
+    `daily_stability_${ds.id}_`;
+
+  const keys=
+    Object.keys(localStorage)
+      .filter(k=>
+        k.startsWith(prefix)
+      )
+      .sort();
+
+  const rows=
+    keys.map(k=>({
+
+      date:
+        k.replace(prefix,""),
+
+      value:
+        Number(
+          localStorage.getItem(k)
+        )
+
+    }));
+
+  if(rows.length===0)
+    return;
+
+  const max=
+    Math.max(
+      ...rows.map(x=>x.value),
+      1
+    );
+
+  const W=760;
+  const H=220;
+
+  const sx=60;
+  const sy=260;
+
+  ctx.beginPath();
+
+  rows.forEach((r,i)=>{
+
+    const x=
+      sx+
+      i*
+      (
+        W/
+        Math.max(
+          rows.length-1,
+          1
+        )
+      );
+
+    const y=
+      sy-
+      (r.value/max)*H;
+
+    if(i===0)
+      ctx.moveTo(x,y);
+    else
+      ctx.lineTo(x,y);
+
+  });
+
+  ctx.strokeStyle="#2563eb";
+  ctx.lineWidth=3;
+  ctx.stroke();
+
+};
+
 
 
 $("again").onclick=
