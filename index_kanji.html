@@ -2311,6 +2311,7 @@ function drawStats(){
 
 
     drawDailyChart();
+    drawStabilityChart();
     drawDailyStabilityChart();
 
 };
@@ -2491,6 +2492,7 @@ $("start").onclick=async()=>{
     refreshWR();   // ←追加
 
     await loadSheet();
+    saveDailyStability();
     buildQueue();
     updateRetrStats();
     nextQuestion();
@@ -2630,6 +2632,22 @@ function drawDailyStabilityChart(){
 
   if(rows.length===0)
     return;
+
+  if(rows.length===1){
+    ctx.beginPath();
+    ctx.arc(
+      120,
+      120,
+      6,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle="#2563eb";
+    ctx.fill();
+
+    return;
+  }
 
   const max=
     Math.max(
