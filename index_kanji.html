@@ -309,12 +309,17 @@ button,select{
 
 button{color:#fff}
 
+/* ページ読み込み完了までボタンを非表示 */
+button{
+  visibility:hidden;
+}
+
 .start{background:#2563eb}
 .show{background:#64748b}
 .again{background:#dc2626}
-.hard{background:#b0c419}
+.hard{background:#f6ff00}
 .good{background:#00ff2f}
-.easy{background:#18d4d4}
+.easy{background:#00ffff}
 .misc{background:#7c3aed}
 
 /* 演出 */
@@ -928,25 +933,49 @@ let pendingYojiResult= null;
 // renderDatasetButtons();
 
 
-document
-.querySelectorAll(".filterBtn")
-.forEach(btn=>{
+// document
+// .querySelectorAll(".filterBtn")
+// .forEach(btn=>{
 
-  btn.onclick=()=>{
+//   btn.onclick=()=>{
 
-    document
-    .querySelectorAll(".filterBtn")
-    .forEach(x=>
-      x.classList.remove("activeBtn")
-    );
+//     document
+//     .querySelectorAll(".filterBtn")
+//     .forEach(x=>
+//       x.classList.remove("activeBtn")
+//     );
 
-    btn.classList.add("activeBtn");
+//     btn.classList.add("activeBtn");
 
-    currentFilter=
-      btn.dataset.mode;
-  };
+//     currentFilter=
+//       btn.dataset.mode;
+//   };
 
-});
+// });
+
+function initFilterButtons(){
+
+  document
+  .querySelectorAll(".filterBtn")
+  .forEach(btn=>{
+
+    btn.addEventListener("click",()=>{
+
+      document
+      .querySelectorAll(".filterBtn")
+      .forEach(x=>{
+        x.classList.remove("activeBtn");
+      });
+
+      btn.classList.add("activeBtn");
+
+      currentFilter = btn.dataset.mode;
+
+    });
+
+  });
+
+}
 
 function keyName(dataset,id){
     return "ms_"+dataset+"_"+id;
@@ -3177,15 +3206,39 @@ function updateWR(){
 //   }
 // });
 
+
+
+function showAllButtons(){
+
+  document
+    .querySelectorAll("button")
+    .forEach(btn=>{
+      btn.style.visibility="visible";
+    });
+
+}
+
+
+
+
 window.addEventListener("load",()=>{
 
   renderDatasetButtons();
 
+
   applyBackground();
+
+  
 
   refreshWR();
 
   setJudgeButtonsEnabled(false);
+
+  
+  initFilterButtons()
+
+
+  showAllButtons();
 
 });
 
