@@ -781,18 +781,31 @@ font-size:14px;
 
       <h2>学習統計</h2>
 
-      <h3>日別学習グラフ</h3>
-      <canvas id="dailyChart" width="860" height="320"></canvas>
+      <h3>安定性レンジ別推移（問題数）</h3>
+      <canvas
+        id="stabilityDailyChart"
+        width="860"
+        height="320">
+      </canvas>
+      
       <h3>安定性分布</h3>
       <canvas
         id="stabilityChart"
         width="420"
         height="320">
       </canvas>
-      <h3>平均安定性推移</h3>
+
+      <h3>想起可能性レンジ別推移（問題数）</h3>
       <canvas
-        id="stabilityDailyChart"
+        id="retrievabilityDailyChart"
         width="860"
+        height="320">
+      </canvas>
+
+      <h3>想起可能性分布</h3>
+      <canvas
+        id="retrievabilityChart"
+        width="420"
         height="320">
       </canvas>
 
@@ -2356,11 +2369,11 @@ function drawStats(){
     `;
     }).join("");
 
-
     drawDailyChart();
     drawStabilityChart();
+    drawRetrievabilityChart();
     drawDailyStabilityChart();
-
+    
 };
 
 
@@ -2456,6 +2469,111 @@ function drawStabilityChart(){
 
 };
 
+function drawRetrievabilityChart(){
+
+  const cvs = $("retrievabilityChart");
+  const ctx = cvs.getContext("2d");
+
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+  const ds = DATASETS[currentDataset];
+
+  // 未学習、0〜20%、20〜40%、40〜60%、60〜80%、80〜100%
+  const bins = [0, 0, 0, 0, 0, 0];
+
+  data.forEach(q => {
+
+    const s = getStat(ds.name, q.id);
+
+    if(!s.lastReview){
+      bins[0]++;
+      return;
+    }
+
+    const r = calcRetrievability(s);
+
+    if(r < 0.2) bins[1]++;
+    else if(r < 0.4) bins[2]++;
+    else if(r < 0.6) bins[3]++;
+    else if(r < 0.8) bins[4]++;
+    else bins[5]++;
+
+  });
+
+  const labels = [
+    "未学習",
+    "0〜20%",
+    "20〜40%",
+    "40〜60%",
+    "60〜80%",
+    "80〜100%"
+  ];
+
+  const cols = [
+    "#9ca3af",
+    "#dc2626",
+    "#f97316",
+    "#eab308",
+    "#22c55e",
+    "#2563eb"
+  ];
+
+  const total = Math.max(
+    bins.reduce((a, b) => a + b, 0),
+    1
+  );
+
+  let start = -Math.PI / 2;
+
+  bins.forEach((v, i) => {
+
+    const angle = v / total * Math.PI * 2;
+
+    ctx.beginPath();
+    ctx.moveTo(120, 120);
+
+    ctx.fillStyle = cols[i];
+
+    ctx.arc(
+      120,
+      120,
+      90,
+      start,
+      start + angle
+    );
+
+    ctx.fill();
+
+    start += angle;
+
+  });
+
+  // 凡例と問題数
+  labels.forEach((label, i) => {
+
+    ctx.fillStyle = cols[i];
+
+    ctx.fillRect(
+      240,
+      45 + i * 35,
+      18,
+      18
+    );
+
+    ctx.fillStyle = "#111";
+    ctx.font = "14px sans-serif";
+
+    ctx.fillText(
+      label + "  " + bins[i] + "問",
+      270,
+      60 + i * 35
+    );
+
+  });
+
+}
+
+
 function saveRetrSnapshot(){
 
   const ds=
@@ -2539,7 +2657,8 @@ $("start").onclick=async()=>{
     refreshWR();   // ←追加
 
     await loadSheet();
-    saveDailyStability();
+    saveDailyRangeSnapshot();
+
     buildQueue();
     updateRetrStats();
     nextQuestion();
@@ -2594,7 +2713,7 @@ function reviewFSRS(rating){
 
   updateRetrStats();
 
-  saveDailyStability();
+  saveDailyRangeSnapshot();
 
   setTimeout(
     nextQuestion,
@@ -2605,37 +2724,424 @@ function reviewFSRS(rating){
   
 };
 
-function saveDailyStability(){
+// function saveDailyStability(){
 
-  const ds=
-    getCurrentDataset();
+//   const ds=
+//     getCurrentDataset();
 
-  let total=0;
-  let count=0;
+//   let total=0;
+//   let count=0;
+
+//   data.forEach(q=>{
+
+//     const s=
+//       getStat(ds.name,q.id);
+
+//     total+=s.stability||0;
+
+//     count++;
+
+//   });
+
+//   const avg=
+//     count
+//     ? total/count
+//     : 0;
+
+//   localStorage.setItem(
+//     `daily_stability_${ds.id}_${todayStr()}`,
+//     avg
+//   );
+
+  
+
+// };
+
+
+// function saveDailyRetrievability(){
+
+//   const ds = getCurrentDataset();
+
+//   let total = 0;
+//   let count = 0;
+
+//   data.forEach(q=>{
+
+//     const s = getStat(ds.name,q.id);
+
+//     total += calcRetrievability(s);
+
+//     count++;
+
+//   });
+
+//   const avg = count
+//     ? total / count
+//     : 0;
+
+//   localStorage.setItem(
+//     `daily_retrievability_${ds.id}_${todayStr()}`,
+//     avg
+//   );
+
+// }
+
+/* 日別レンジ別問題数を保存 */
+function saveDailyRangeSnapshot(){
+
+  const ds = getCurrentDataset();
+
+  // 安定性
+  const stabilityBins = [
+    0, // 0日
+    0, // 0〜5日
+    0, // 5〜10日
+    0  // 10日以上
+  ];
+
+  // 想起可能性
+  const retrievabilityBins = [
+    0, // 未学習
+    0, // 0〜20%
+    0, // 20〜40%
+    0, // 40〜60%
+    0, // 60〜80%
+    0  // 80〜100%
+  ];
 
   data.forEach(q=>{
 
-    const s=
-      getStat(ds.name,q.id);
+    const s = getStat(ds.name,q.id);
 
-    total+=s.stability||0;
+    /* 安定性の分類 */
+    const stability = s.stability || 0;
 
-    count++;
+    if(stability === 0){
+      stabilityBins[0]++;
+    }else if(stability < 5){
+      stabilityBins[1]++;
+    }else if(stability < 10){
+      stabilityBins[2]++;
+    }else{
+      stabilityBins[3]++;
+    }
+
+    /* 想起可能性の分類 */
+    if(!s.lastReview){
+
+      retrievabilityBins[0]++;
+
+    }else{
+
+      const r = calcRetrievability(s);
+
+      if(r < 0.2){
+        retrievabilityBins[1]++;
+      }else if(r < 0.4){
+        retrievabilityBins[2]++;
+      }else if(r < 0.6){
+        retrievabilityBins[3]++;
+      }else if(r < 0.8){
+        retrievabilityBins[4]++;
+      }else{
+        retrievabilityBins[5]++;
+      }
+
+    }
 
   });
 
-  const avg=
-    count
-    ? total/count
-    : 0;
+  const snapshot = {
+    stability: stabilityBins,
+    retrievability: retrievabilityBins
+  };
 
   localStorage.setItem(
-    `daily_stability_${ds.id}_${todayStr()}`,
-    avg
+    `daily_ranges_${ds.id}_${todayStr()}`,
+    JSON.stringify(snapshot)
   );
 
 };
 
+
+/* 2種類のレンジ別グラフを描画 */
+function drawDailyRangeCharts(){
+
+  drawDailyRangeChart(
+    "stabilityDailyChart",
+    "stability",
+    [
+      "0日",
+      "0.1〜5日",
+      "5〜10日",
+      "10日以上"
+    ],
+    [
+      "#9ca3af",
+      "#f97316",
+      "#22c55e",
+      "#2563eb"
+    ]
+  );
+
+  drawDailyRangeChart(
+    "retrievabilityDailyChart",
+    "retrievability",
+    [
+      "未学習",
+      "0〜20%",
+      "20〜40%",
+      "40〜60%",
+      "60〜80%",
+      "80〜100%"
+    ],
+    [
+      "#9ca3af",
+      "#dc2626",
+      "#f97316",
+      "#eab308",
+      "#22c55e",
+      "#2563eb"
+    ]
+  );
+
+};
+
+
+/* レンジ別折れ線グラフ */
+function drawDailyRangeChart(
+  canvasId,
+  type,
+  labels,
+  colors
+){
+
+  const cvs = $(canvasId);
+  const ctx = cvs.getContext("2d");
+
+  ctx.clearRect(
+    0,0,
+    cvs.width,
+    cvs.height
+  );
+
+  const ds = getCurrentDataset();
+
+  const prefix = `daily_ranges_${ds.id}_`;
+
+  const keys = Object.keys(localStorage)
+    .filter(k=>k.startsWith(prefix))
+    .sort();
+
+  const rows = keys.map(k=>{
+
+    let snapshot;
+
+    try{
+      snapshot = JSON.parse(
+        localStorage.getItem(k)
+      );
+    }catch(e){
+      return null;
+    }
+
+    if(!snapshot || !snapshot[type]){
+      return null;
+    }
+
+    return {
+      date: k.replace(prefix,""),
+      values: snapshot[type]
+    };
+
+  }).filter(Boolean);
+
+  if(rows.length === 0) return;
+
+
+  /* グラフの範囲 */
+  const sx = 65;
+  const sy = 235;
+
+  const W = 750;
+  const H = 200;
+
+  const maxValue = Math.max(
+    1,
+    ...rows.flatMap(r=>r.values)
+  );
+
+  const step = Math.max(
+    1,
+    Math.ceil(maxValue / 5)
+  );
+
+  const maxY = step * 5;
+
+
+  /* 横線・目盛り */
+  ctx.font = "12px sans-serif";
+  ctx.fillStyle = "#333";
+  ctx.strokeStyle = "#ddd";
+  ctx.lineWidth = 1;
+
+  for(let i=0;i<=5;i++){
+
+    const y = sy - (H / 5) * i;
+    const value = step * i;
+
+    ctx.beginPath();
+    ctx.moveTo(sx,y);
+    ctx.lineTo(sx+W,y);
+    ctx.stroke();
+
+    ctx.fillText(
+      value,
+      sx-35,
+      y+4
+    );
+
+  }
+
+
+  /* 縦軸・横軸 */
+  ctx.strokeStyle = "#333";
+
+  ctx.beginPath();
+  ctx.moveTo(sx,sy-H);
+  ctx.lineTo(sx,sy);
+  ctx.lineTo(sx+W,sy);
+  ctx.stroke();
+
+  ctx.fillText("問題数",10,20);
+
+
+  /* 各レンジの折れ線 */
+  labels.forEach((label,rangeIndex)=>{
+
+    const color = colors[rangeIndex];
+
+    ctx.beginPath();
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+
+    rows.forEach((r,i)=>{
+
+      const x =
+        sx +
+        i *
+        (
+          W /
+          Math.max(rows.length-1,1)
+        );
+
+      const y =
+        sy -
+        (
+          r.values[rangeIndex] / maxY
+        ) * H;
+
+      if(i===0){
+        ctx.moveTo(x,y);
+      }else{
+        ctx.lineTo(x,y);
+      }
+
+    });
+
+    ctx.stroke();
+
+
+    /* 各日付の点 */
+    rows.forEach((r,i)=>{
+
+      const x =
+        sx +
+        i *
+        (
+          W /
+          Math.max(rows.length-1,1)
+        );
+
+      const y =
+        sy -
+        (
+          r.values[rangeIndex] / maxY
+        ) * H;
+
+      ctx.beginPath();
+
+      ctx.fillStyle = color;
+
+      ctx.arc(
+        x,y,
+        4,
+        0,
+        Math.PI*2
+      );
+
+      ctx.fill();
+
+    });
+
+  });
+
+
+  /* 日付 */
+  ctx.fillStyle = "#333";
+  ctx.font = "11px sans-serif";
+
+  rows.forEach((r,i)=>{
+
+    const x =
+      sx +
+      i *
+      (
+        W /
+        Math.max(rows.length-1,1)
+      );
+
+    ctx.fillText(
+      r.date.slice(5),
+      x-18,
+      255
+    );
+
+  });
+
+
+  /* 凡例 */
+  ctx.font = "11px sans-serif";
+
+  labels.forEach((label,i)=>{
+
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+
+    const x = 65 + col * 250;
+    const y = 280 + row * 18;
+
+    ctx.fillStyle = colors[i];
+
+    ctx.fillRect(
+      x,
+      y-9,
+      12,
+      12
+    );
+
+    ctx.fillStyle = "#111";
+
+    ctx.fillText(
+      label,
+      x+18,
+      y
+    );
+
+  });
+
+};
 
 function drawDailyStabilityChart(){
 
@@ -2741,6 +3247,128 @@ function drawDailyStabilityChart(){
 };
 
 
+function drawDailyRetrievabilityChart(){
+
+  const cvs = $("retrievabilityDailyChart");
+  const ctx = cvs.getContext("2d");
+
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+
+  const ds = getCurrentDataset();
+
+  const prefix =
+    `daily_retrievability_${ds.id}_`;
+
+  const keys = Object.keys(localStorage)
+    .filter(k=>k.startsWith(prefix))
+    .sort();
+
+  const rows = keys.map(k=>({
+
+    date:k.replace(prefix,""),
+
+    value:Number(localStorage.getItem(k))
+
+  }));
+
+  if(rows.length===0) return;
+
+  const W = 760;
+  const H = 220;
+
+  const sx = 60;
+  const sy = 260;
+
+  const max = 1;
+
+  // 軸
+  ctx.strokeStyle="#333";
+  ctx.lineWidth=1;
+
+  ctx.beginPath();
+  ctx.moveTo(sx,20);
+  ctx.lineTo(sx,sy);
+  ctx.lineTo(sx+W,sy);
+  ctx.stroke();
+
+  // 横線と目盛り
+  ctx.font="12px sans-serif";
+  ctx.fillStyle="#333";
+  ctx.strokeStyle="#ddd";
+
+  for(let i=0;i<=5;i++){
+
+    const y = sy-(H/5)*i;
+
+    ctx.beginPath();
+    ctx.moveTo(sx,y);
+    ctx.lineTo(sx+W,y);
+    ctx.stroke();
+
+    ctx.fillText(
+      `${i*20}%`,
+      15,
+      y+4
+    );
+
+  }
+
+  // 折れ線
+  ctx.beginPath();
+
+  rows.forEach((r,i)=>{
+
+    const x =
+      sx+i*(W/Math.max(rows.length-1,1));
+
+    const y =
+      sy-r.value*H;
+
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+
+  });
+
+  ctx.strokeStyle="#2563eb";
+  ctx.lineWidth=3;
+  ctx.stroke();
+
+  // 点
+  rows.forEach((r,i)=>{
+
+    const x =
+      sx+i*(W/Math.max(rows.length-1,1));
+
+    const y =
+      sy-r.value*H;
+
+    ctx.beginPath();
+    ctx.arc(x,y,5,0,Math.PI*2);
+
+    ctx.fillStyle="#2563eb";
+    ctx.fill();
+
+  });
+
+  // 日付
+  ctx.fillStyle="#111";
+
+  rows.forEach((r,i)=>{
+
+    const x =
+      sx+i*(W/Math.max(rows.length-1,1));
+
+    ctx.fillText(
+      r.date.slice(5),
+      x-18,
+      282
+    );
+
+  });
+
+}
+
+
 
 $("again").onclick=
  ()=>reviewFSRS(1);
@@ -2776,6 +3404,7 @@ $("statsBtn").onclick = async () => {
     }
   }
 
+  saveDailyRangeSnapshot();
   drawStats();
 };
 $("closeStats").onclick=()=>{
