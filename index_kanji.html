@@ -424,18 +424,17 @@ padding:12px;
   font-weight:700;
 }
 /* 円グラフ */
-#chart{
-  display:block;
-  margin:0 auto 18px auto;
-  max-width:100%;
-  background:#fff;
-}
+
 
 /* 日別グラフも余白 */
-#dailyChart{
+/* 日別折れ線グラフ */
+#stabilityDailyChart,
+#retrievabilityDailyChart{
   display:block;
+  width:100%;
+  max-width:420px;
+  height:auto;
   margin:0 auto 20px auto;
-  max-width:100%;
 }
 .row{
 padding:7px 0;
@@ -2134,114 +2133,115 @@ function drawStats(){
     const ds=DATASETS[currentDataset||0];
 
 
-    const ctx=cvs.getContext("2d");
-    ctx.clearRect(0,0,cvs.width,cvs.height);
+    // const cvs=$("chart");
+    // const ctx=cvs.getContext("2d");
+    // ctx.clearRect(0,0,cvs.width,cvs.height);
 
-    const bins=[
-      0, // 未学習
-      0, // 0-20
-      0, // 20-40
-      0, // 40-60
-      0, // 60-80
-      0  // 80-100
-    ];
+    // const bins=[
+    //   0, // 未学習
+    //   0, // 0-20
+    //   0, // 20-40
+    //   0, // 40-60
+    //   0, // 60-80
+    //   0  // 80-100
+    // ];
 
-    // const cols=["#22c55e","#ef4444","#3b82f6"];
+    // // const cols=["#22c55e","#ef4444","#3b82f6"];
     
-    data.forEach(x=>{
+    // data.forEach(x=>{
 
-      const s=
-        getStat(ds.name,x.id);
+    //   const s=
+    //     getStat(ds.name,x.id);
 
-      if(!s.lastReview){
+    //   if(!s.lastReview){
 
-        bins[0]++;
+    //     bins[0]++;
 
-      }else{
+    //   }else{
 
-        const r=calcRetrievability(s);
+    //     const r=calcRetrievability(s);
 
-        if(r<0.2) bins[1]++;
-        else if(r<0.4) bins[2]++;
-        else if(r<0.6) bins[3]++;
-        else if(r<0.8) bins[4]++;
-        else bins[5]++;
+    //     if(r<0.2) bins[1]++;
+    //     else if(r<0.4) bins[2]++;
+    //     else if(r<0.6) bins[3]++;
+    //     else if(r<0.8) bins[4]++;
+    //     else bins[5]++;
 
-      }
+    //   }
 
-    });
+    // });
 
-    const cols=[
-      "#9ca3af", //未学習
-      "#dc2626",
-      "#f97316",
-      "#eab308",
-      "#22c55e",
-      "#2563eb"
-    ];
+    // const cols=[
+    //   "#9ca3af", //未学習
+    //   "#dc2626",
+    //   "#f97316",
+    //   "#eab308",
+    //   "#22c55e",
+    //   "#2563eb"
+    // ];
 
-    const labels=[
-      "未学習",
-      "0-20%",
-      "20-40%",
-      "40-60%",
-      "60-80%",
-      "80-100%"
-    ];
+    // const labels=[
+    //   "未学習",
+    //   "0-20%",
+    //   "20-40%",
+    //   "40-60%",
+    //   "60-80%",
+    //   "80-100%"
+    // ];
 
-    labels.forEach((txt,i)=>{
-      ctx.fillStyle=cols[i];
-      ctx.fillRect(
-        240,
-        60+i*30,
-        18,
-        18
-      );
-      ctx.fillStyle="#111";
-      ctx.fillText(
-        txt+" "+bins[i]+"問",
-        270,
-        74+i*30
-      );
-    });
+    // labels.forEach((txt,i)=>{
+    //   ctx.fillStyle=cols[i];
+    //   ctx.fillRect(
+    //     240,
+    //     60+i*30,
+    //     18,
+    //     18
+    //   );
+    //   ctx.fillStyle="#111";
+    //   ctx.fillText(
+    //     txt+" "+bins[i]+"問",
+    //     270,
+    //     74+i*30
+    //   );
+    // });
 
-    const total =
-      Math.max(
-        bins.reduce((a,b)=>a+b,0),
-        1
-      );
+    // const total =
+    //   Math.max(
+    //     bins.reduce((a,b)=>a+b,0),
+    //     1
+    //   );
 
-    let start=-Math.PI/2;
+    // let start=-Math.PI/2;
 
-    bins.forEach((v,i)=>{
+    // bins.forEach((v,i)=>{
 
-      const ang=
-        v/total*Math.PI*2;
+    //   const ang=
+    //     v/total*Math.PI*2;
 
-      ctx.beginPath();
+    //   ctx.beginPath();
 
-      ctx.moveTo(120,120);
+    //   ctx.moveTo(120,120);
 
-      ctx.fillStyle=
-        cols[i];
+    //   ctx.fillStyle=
+    //     cols[i];
 
-      ctx.arc(
-        120,
-        120,
-        90,
-        start,
-        start+ang
-      );
+    //   ctx.arc(
+    //     120,
+    //     120,
+    //     90,
+    //     start,
+    //     start+ang
+    //   );
 
-      ctx.fill();
+    //   ctx.fill();
 
-      start+=ang;
+    //   start+=ang;
 
-    });
+    // });
 
 
-    ctx.fillStyle="#111";
-    ctx.font="16px sans-serif";
+    // ctx.fillStyle="#111";
+    // ctx.font="16px sans-serif";
 
     const mode=$("sortMode").value;
 
@@ -2951,9 +2951,9 @@ function drawDailyRangeChart(
 
   if(rows.length === 0) return;
 
-  const sx = 65;
+  const sx = 45;
   const sy = 235;
-  const W = 750;
+  const W = 630;
   const H = 200;
 
   const maxValue = Math.max(
