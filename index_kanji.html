@@ -536,6 +536,7 @@ font-size:14px;
 }
 
 .choiceBtn{
+  visibility:visible; /* 動的に生成する四字熟語の選択肢を表示 */
   min-height:26px;
   border:none;
   border-radius:14px;
@@ -849,7 +850,7 @@ const DATASETS=[
   bg:"https://i.imgur.com/mroyOIl.png",
   layoutMode:"normal",
   questionCreateMode:"normal",
-  time:5
+  time:8
 },
 {
   name:"熟字・一字訓",
@@ -876,7 +877,7 @@ const DATASETS=[
   bg:"https://i.imgur.com/UUnBv15.png",
   layoutMode:"normal",
   questionCreateMode:"normal",
-  time:5
+  time:8
 },
 {
   name:"漢字パーツ1",
@@ -1485,84 +1486,88 @@ function createYojiChoices(cur){
 
 function renderChoices(cur){
 
-  const area=
-    $("choices");
+  const area = $("choices");
 
-  area.innerHTML="";
+  area.innerHTML = "";
 
-  const ds=
-    DATASETS[currentDataset];
+  const ds = DATASETS[currentDataset];
 
-  // 四字熟語のときだけ3列表示用クラスを付ける
-  area.classList.toggle(
-    "yojiChoices",
-    ds.name.startsWith("四字熟語")
-  );
+  // 四字熟語かどうかを判定
+  const isYoji =
+    ds.layoutMode === "Yoji1" ||
+    String(ds.name || "").startsWith("四字熟語");
 
-  if(
-    !ds.name.startsWith("四字熟語")
-  ){
+  // 3列表示
+  area.classList.toggle("yojiChoices", isYoji);
+
+  // 四字熟語以外は選択肢を作らない
+  if(!isYoji){
     return;
   }
 
+  // 問題の先頭が空欄かどうか
   const frontBlank =
-    cur.q.startsWith("____");
+    cur.q.trim().startsWith("____");
 
   const correct =
     frontBlank
-    ? cur.firstYomi
-    : cur.secondYomi;
+      ? cur.firstYomi
+      : cur.secondYomi;
 
-  const choices =
-    createYojiChoices(cur);
+  // 正解の読みが取得できない場合
+  if(!correct){
+    console.error("四字熟語の正解読みを取得できません", cur);
+    $("status").textContent = "選択肢データを取得できません";
+    return;
+  }
 
-  choices.forEach(text=>{
+  const choices = createYojiChoices(cur);
 
-      const btn=
-        document.createElement("button");
+  choices.forEach(text => {
 
-      btn.className=
-        "choiceBtn";
+    const btn = document.createElement("button");
 
-      btn.textContent=
-        text;
+    btn.className = "choiceBtn";
+    btn.textContent = text;
 
-      btn.onclick = () => {
+    btn.onclick = () => {
 
-        // すでに判定済みなら何もしない
-        if (pendingYojiResult !== null) return;
+      // すでに判定済みなら何もしない
+      if(pendingYojiResult !== null) return;
 
-        pendingYojiResult = (text === correct);
+      pendingYojiResult = (text === correct);
 
-        // すべての選択肢から、以前の判定マークを消す
-        document.querySelectorAll(".choiceBtn").forEach(button => {
-          button.classList.remove("markCorrect", "markWrong");
-        });
+      // 以前の判定マークを消す
+      document.querySelectorAll(".choiceBtn").forEach(button => {
+        button.classList.remove("markCorrect", "markWrong");
+      });
 
-        // 正解の選択肢を探す
-        const correctButton = [...area.querySelectorAll(".choiceBtn")]
-          .find(button => button.textContent === correct);
+      // 正解の選択肢を探す
+      const correctButton = [...area.querySelectorAll(".choiceBtn")]
+        .find(button => button.textContent === correct);
 
-        if (pendingYojiResult) {
+      if(pendingYojiResult){
 
-          // 正解：押した選択肢に青い円
-          btn.classList.add("markCorrect");
+        // 正解：押した選択肢に青い円
+        btn.classList.add("markCorrect");
 
-        } else {
+      }else{
 
-          // 不正解：正解の選択肢に青い円
-          if (correctButton) {
-            correctButton.classList.add("markCorrect");
-          }
-
-          // 押した選択肢に赤い×
-          btn.classList.add("markWrong");
+        // 不正解：正解の選択肢に青い円
+        if(correctButton){
+          correctButton.classList.add("markCorrect");
         }
 
-        // 既存の答え表示・選択肢の無効化を実行
-        showAnswer();
-      };
-      area.appendChild(btn);
+        // 押した選択肢に赤い×
+        btn.classList.add("markWrong");
+      }
+
+      // 答えを表示
+      showAnswer();
+    };
+
+    area.appendChild(btn);
+
   });
 
 }
@@ -2369,11 +2374,10 @@ function drawStats(){
     `;
     }).join("");
 
-    drawDailyChart();
     drawStabilityChart();
     drawRetrievabilityChart();
-    drawDailyStabilityChart();
-    
+    drawDailyRangeCharts();
+
 };
 
 
@@ -2919,226 +2923,140 @@ function drawDailyRangeChart(
   const cvs = $(canvasId);
   const ctx = cvs.getContext("2d");
 
-  ctx.clearRect(
-    0,0,
-    cvs.width,
-    cvs.height
-  );
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
 
   const ds = getCurrentDataset();
-
   const prefix = `daily_ranges_${ds.id}_`;
 
   const keys = Object.keys(localStorage)
-    .filter(k=>k.startsWith(prefix))
+    .filter(k => k.startsWith(prefix))
     .sort();
 
-  const rows = keys.map(k=>{
-
+  const rows = keys.map(k => {
     let snapshot;
 
     try{
-      snapshot = JSON.parse(
-        localStorage.getItem(k)
-      );
+      snapshot = JSON.parse(localStorage.getItem(k));
     }catch(e){
       return null;
     }
 
-    if(!snapshot || !snapshot[type]){
+    if(!snapshot || !Array.isArray(snapshot[type])){
       return null;
     }
 
     return {
-      date: k.replace(prefix,""),
+      date: k.replace(prefix, ""),
       values: snapshot[type]
     };
-
   }).filter(Boolean);
 
   if(rows.length === 0) return;
 
-
-  /* グラフの範囲 */
   const sx = 65;
   const sy = 235;
-
   const W = 750;
   const H = 200;
 
   const maxValue = Math.max(
     1,
-    ...rows.flatMap(r=>r.values)
+    ...rows.flatMap(r => r.values)
   );
 
-  const step = Math.max(
-    1,
-    Math.ceil(maxValue / 5)
-  );
-
+  const step = Math.max(1, Math.ceil(maxValue / 5));
   const maxY = step * 5;
 
+  // 1日分だけの場合は、グラフ中央に点を表示する
+  const getX = i => {
+    if(rows.length === 1) return sx + W / 2;
+    return sx + i * (W / (rows.length - 1));
+  };
 
-  /* 横線・目盛り */
+  // 横線・目盛り
   ctx.font = "12px sans-serif";
   ctx.fillStyle = "#333";
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 1;
 
-  for(let i=0;i<=5;i++){
-
+  for(let i = 0; i <= 5; i++){
     const y = sy - (H / 5) * i;
     const value = step * i;
 
     ctx.beginPath();
-    ctx.moveTo(sx,y);
-    ctx.lineTo(sx+W,y);
+    ctx.moveTo(sx, y);
+    ctx.lineTo(sx + W, y);
     ctx.stroke();
 
-    ctx.fillText(
-      value,
-      sx-35,
-      y+4
-    );
-
+    ctx.fillText(value, sx - 35, y + 4);
   }
 
-
-  /* 縦軸・横軸 */
+  // 縦軸・横軸
   ctx.strokeStyle = "#333";
-
   ctx.beginPath();
-  ctx.moveTo(sx,sy-H);
-  ctx.lineTo(sx,sy);
-  ctx.lineTo(sx+W,sy);
+  ctx.moveTo(sx, sy - H);
+  ctx.lineTo(sx, sy);
+  ctx.lineTo(sx + W, sy);
   ctx.stroke();
 
-  ctx.fillText("問題数",10,20);
+  ctx.fillStyle = "#333";
+  ctx.fillText("問題数", 10, 20);
 
-
-  /* 各レンジの折れ線 */
-  labels.forEach((label,rangeIndex)=>{
-
+  // 各レンジの折れ線と点
+  labels.forEach((label, rangeIndex) => {
     const color = colors[rangeIndex];
 
-    ctx.beginPath();
+    // 2日分以上ある場合だけ折れ線を引く
+    if(rows.length >= 2){
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
 
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2.5;
+      rows.forEach((r, i) => {
+        const x = getX(i);
+        const y = sy - (r.values[rangeIndex] / maxY) * H;
 
-    rows.forEach((r,i)=>{
+        if(i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
 
-      const x =
-        sx +
-        i *
-        (
-          W /
-          Math.max(rows.length-1,1)
-        );
+      ctx.stroke();
+    }
 
-      const y =
-        sy -
-        (
-          r.values[rangeIndex] / maxY
-        ) * H;
-
-      if(i===0){
-        ctx.moveTo(x,y);
-      }else{
-        ctx.lineTo(x,y);
-      }
-
-    });
-
-    ctx.stroke();
-
-
-    /* 各日付の点 */
-    rows.forEach((r,i)=>{
-
-      const x =
-        sx +
-        i *
-        (
-          W /
-          Math.max(rows.length-1,1)
-        );
-
-      const y =
-        sy -
-        (
-          r.values[rangeIndex] / maxY
-        ) * H;
+    // 1日目を含め、各日のデータを点で表示
+    rows.forEach((r, i) => {
+      const x = getX(i);
+      const y = sy - (r.values[rangeIndex] / maxY) * H;
 
       ctx.beginPath();
-
       ctx.fillStyle = color;
-
-      ctx.arc(
-        x,y,
-        4,
-        0,
-        Math.PI*2
-      );
-
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
       ctx.fill();
-
     });
-
   });
 
-
-  /* 日付 */
+  // 日付
   ctx.fillStyle = "#333";
   ctx.font = "11px sans-serif";
 
-  rows.forEach((r,i)=>{
-
-    const x =
-      sx +
-      i *
-      (
-        W /
-        Math.max(rows.length-1,1)
-      );
-
-    ctx.fillText(
-      r.date.slice(5),
-      x-18,
-      255
-    );
-
+  rows.forEach((r, i) => {
+    const x = getX(i);
+    ctx.fillText(r.date.slice(5), x - 18, 255);
   });
 
-
-  /* 凡例 */
+  // 凡例
   ctx.font = "11px sans-serif";
 
-  labels.forEach((label,i)=>{
-
+  labels.forEach((label, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-
     const x = 65 + col * 250;
     const y = 280 + row * 18;
 
     ctx.fillStyle = colors[i];
-
-    ctx.fillRect(
-      x,
-      y-9,
-      12,
-      12
-    );
+    ctx.fillRect(x, y - 9, 12, 12);
 
     ctx.fillStyle = "#111";
-
-    ctx.fillText(
-      label,
-      x+18,
-      y
-    );
-
+    ctx.fillText(label, x + 18, y);
   });
 
 };
