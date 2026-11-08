@@ -810,7 +810,6 @@ font-size:14px;
         height="320">
       </canvas>
 
-      <canvas id="chart" width="420" height="320"></canvas>
       <select id="sortMode">
         <option value="retr_desc">想起可能性▼</option>
         <option value="retr_asc">想起可能性▲</option>
@@ -850,7 +849,7 @@ const DATASETS=[
   bg:"https://i.imgur.com/mroyOIl.png",
   layoutMode:"normal",
   questionCreateMode:"normal",
-  time:8
+  time:5
 },
 {
   name:"熟字・一字訓",
@@ -877,7 +876,7 @@ const DATASETS=[
   bg:"https://i.imgur.com/UUnBv15.png",
   layoutMode:"normal",
   questionCreateMode:"normal",
-  time:8
+  time:5
 },
 {
   name:"漢字パーツ1",
@@ -2135,7 +2134,6 @@ function drawStats(){
     const ds=DATASETS[currentDataset||0];
 
 
-    const cvs=$("chart");
     const ctx=cvs.getContext("2d");
     ctx.clearRect(0,0,cvs.width,cvs.height);
 
