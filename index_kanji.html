@@ -773,7 +773,6 @@ font-size:14px;
         <button class="ng" id="delWrong">不正解数だけ削除</button>
         <button class="ng" id="delMemory">定着度だけ削除</button>
         <button class="ng" id="delDate">最終回答日だけ削除</button>
-        <button class="ng" id="delDaily">日別データ削除</button>
         <button class="ng" id="delFav">お気に入り削除</button>
         <button class="ng" id="delSkip">スルー解除</button>
         <button class="ng" id="delAll">全項目削除</button>
@@ -951,6 +950,8 @@ let LIMIT_TIME = 5;
 let currentDataset=0;
 let currentFilter="all";
 let pendingYojiResult= null;
+// 現在読み込んでいる問題セットの番号
+let loadedDatasetIndex = -1;
 
 // /* 初期化 */
 // DATASETS.forEach((d,i)=>{
@@ -1260,7 +1261,11 @@ function renderDatasetButtons(){
 
       b.classList.add("activeBtn");
 
-      currentDataset=i;
+      currentDataset = i;
+
+      // 前の問題セットのデータを破棄
+      data = [];
+      loadedDatasetIndex = -1;
 
       applyBackground();
       refreshWR();
@@ -1440,8 +1445,11 @@ async function loadSheet(){
         firstYomi,
         secondYomi
       };
+  }).filter(x=>x.id&&x.q&&x.a);
 
-    }).filter(x=>x.id&&x.q&&x.a);
+  // 読み込みが完了した問題セットを記録
+  loadedDatasetIndex = currentDataset;
+
 }
 
 // 四字熟語用　選択肢生成
@@ -2791,6 +2799,15 @@ function reviewFSRS(rating){
 /* 日別レンジ別問題数を保存 */
 function saveDailyRangeSnapshot(){
 
+  // 読み込まれている問題セットが異なる場合は保存しない
+  if(loadedDatasetIndex !== currentDataset){
+    return;
+  }
+
+  if(data.length === 0){
+    return;
+  }
+
   const ds = getCurrentDataset();
 
   // 安定性
@@ -3306,23 +3323,37 @@ $("skip").onclick=skipQuestion;
 
 $("statsBtn").onclick = async () => {
 
-  const ds = DATASETS[currentDataset || 0];
+  // 現在選択されている問題セットと
+  // 読み込み済みの問題セットが異なる場合は再読込
+  if(
+    loadedDatasetIndex !== currentDataset ||
+    data.length === 0
+  ){
 
-  // まだデータ未ロードならロード
-  if(data.length === 0){
     $("status").textContent = "統計読込中...";
+
     try{
+
       await loadSheet();
+
     }catch(e){
+
       $("status").textContent = "統計読込失敗";
       console.error(e);
       return;
+
     }
+
   }
 
+  // 現在の問題セットの日別データを保存
   saveDailyRangeSnapshot();
+
+  // 統計を描画
   drawStats();
+
 };
+
 $("closeStats").onclick=()=>{
 $("statsWrap").style.display="none";
 };
@@ -3390,19 +3421,7 @@ $("delDate").onclick=()=>{
   });
 };
 
-$("delDaily").onclick=()=>{
 
- if(!confirm("日別データを削除しますか？"))
-   return;
-
- Object.keys(localStorage).forEach(k=>{
-   if(k.startsWith("daily_visit_")){
-     localStorage.removeItem(k);
-   }
- });
-
- drawStats();
-};
 
 
 $("delFav").onclick=()=>{
@@ -3433,26 +3452,45 @@ $("delSkip").onclick=()=>{
 
 
 /* 全削除 */
-$("delAll").onclick=()=>{
+$("delAll").onclick = () => {
 
-  if(!confirm("全学習データを削除しますか？"))
+  if(!confirm("この問題セットの全学習データと日別統計を削除しますか？")){
     return;
+  }
 
-  const ds = DATASETS[currentDataset||0];
+  const ds = DATASETS[currentDataset];
 
-  data.forEach(x=>{
+  // 問題ごとの学習データを削除
+  data.forEach(x => {
+
     localStorage.removeItem(
-      keyName(ds.name,x.id)
+      keyName(ds.name, x.id)
     );
+
   });
 
-  Object.keys(localStorage).forEach(k=>{
-    if(k.startsWith("daily_visit_")){
-      localStorage.removeItem(k);
+  // 現在の問題セットに関係する日別データを削除
+  const prefixes = [
+    `daily_ranges_${ds.id}_`,
+    `daily_visit_${ds.id}_`,
+    `retr_snapshot_${ds.id}_`,
+    `daily_stability_${ds.id}_`,
+    `daily_retrievability_${ds.id}_`
+  ];
+
+  Object.keys(localStorage).forEach(key => {
+
+    if(prefixes.some(prefix => key.startsWith(prefix))){
+
+      localStorage.removeItem(key);
+
     }
+
   });
 
+  // 統計を再描画
   drawStats();
+
 };
 
 
