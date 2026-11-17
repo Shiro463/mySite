@@ -769,9 +769,7 @@ font-size:14px;
       <div style="margin:12px 0;padding:12px;border:1px solid #ddd;border-radius:12px">
         <b>学習データ削除</b><br><br>
 
-        <button class="ng" id="delCorrect">正解数だけ削除</button>
-        <button class="ng" id="delWrong">不正解数だけ削除</button>
-        <button class="ng" id="delMemory">定着度だけ削除</button>
+        <button class="ng" id="delMemory">FSRS学習データ削除</button>
         <button class="ng" id="delDate">最終回答日だけ削除</button>
         <button class="ng" id="delFav">お気に入り削除</button>
         <button class="ng" id="delSkip">スルー解除</button>
@@ -3396,10 +3394,10 @@ $("delWrong").onclick=()=>{
   });
 };
 
-/* 定着度削除 */
+/* FSRS学習データ削除 */
 $("delMemory").onclick=()=>{
 
-  if(!confirm("定着度を全問題分削除しますか？")) return;
+  if(!confirm("FSRS学習データを全問題分リセットしますか？")) return;
 
   eachStatUpdate(s=>{
     s.stability = 0;
